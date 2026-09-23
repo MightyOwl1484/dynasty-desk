@@ -95,7 +95,17 @@
 
   <dialog id="resultDialog" aria-labelledby="resultHeadline" aria-describedby="commentary">
     <button class="dialog-close" aria-label="Close">×</button>
-    <p class="eyebrow">Full time</p><div id="resultScore" class="result-score" aria-live="polite"></div><h2 id="resultHeadline"></h2><div id="commentary" class="commentary" role="log" aria-live="polite"></div><button id="continueBtn" class="primary">Continue</button>
+    <p class="eyebrow">Full time</p><div id="resultScore" class="result-score" aria-live="polite"></div><h2 id="resultHeadline"></h2><div id="commentary" class="commentary" role="log" aria-live="polite"></div><div class="dialog-actions"><button id="replayBtn" class="secondary" type="button">Watch short replay</button><button id="continueBtn" class="primary">Continue</button></div>
+  </dialog>
+  <dialog id="replayDialog" aria-labelledby="replayTitle" aria-describedby="replayStatus">
+    <button id="replayClose" class="dialog-close" aria-label="Close replay">×</button>
+    <p class="eyebrow">Match replay</p><h2 id="replayTitle"></h2>
+    <div class="replay-layout">
+      <div id="replayPitch" class="replay-pitch" aria-hidden="true"></div>
+      <div id="replayStatus" class="replay-status" role="status" aria-live="polite">Ready to replay the match events.</div>
+      <div id="replayEvents" class="commentary" role="log" aria-live="polite"></div>
+    </div>
+    <div class="dialog-actions"><button id="replayPlay" class="primary" type="button">Play replay</button><button id="replaySkip" class="secondary" type="button">Skip to full time</button></div>
   </dialog>
   <script type="module" src="app.js"></script>
 </body>

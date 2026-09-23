@@ -13,6 +13,7 @@ import { resolveFixture } from './domain/simulation.js';
   const LAST=['Mercer','Vale','Okoro','Sato','Doyle','Khan','Bennett','Silva','Price','Hughes','Foster','Ibarra','Nolan','Costa','Wright','Patel','Morris','Reid','Clarke','Young','Bishop','Perry','Hayes','Stone'];
   const POSITIONS=['GK','GK','DEF','DEF','DEF','DEF','DEF','DEF','MID','MID','MID','MID','MID','MID','FWD','FWD','FWD','FWD'];
   const SAVE_KEY='dynasty-desk-save-v1';
+  let replayState={events:[],index:0,timer:null,result:null};
   let game = load(); let selectedClub = null;
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
   const ordinal=n=>n+(n%10===1&&n%100!==11?'st':n%10===2&&n%100!==12?'nd':n%10===3&&n%100!==13?'rd':'th');
@@ -71,9 +72,15 @@ import { resolveFixture } from './domain/simulation.js';
   }
   function showResult(r,us,them,opp,tone){
     const usHome=r.home.id===game.userClub;$('#resultScore').textContent=`${us} — ${them}`;$('#resultHeadline').textContent=`${tone} against ${opp.name}`;
-    const events=r.events.map(event=>[event.minute,event.teamId===club().id?club().short:event.teamId===opp.id?opp.short:'MATCH',event.text]);
-    $('#commentary').innerHTML=events.map(e=>`<p><b>${e[0]}′ ${e[1]}</b> <span>${e[2]}</span></p>`).join('');$('#resultDialog').showModal();
+    const events=r.events.map(event=>[event.minute,String(event.teamId)===String(club().id)?club().short:String(event.teamId)===String(opp.id)?opp.short:'MATCH',event.text]);
+    $('#commentary').innerHTML=events.map(e=>`<p><b>${e[0]}′ ${e[1]}</b> <span>${e[2]}</span></p>`).join('');
+    replayState={events:r.events,index:0,timer:null,result:{home:r.home,away:r.away,score:`${us} — ${them}`}};
+    $('#replayTitle').textContent=`${r.home.name} ${usHome?us:them} — ${usHome?them:us} ${r.away.name}`;renderReplay();$('#resultDialog').showModal();
   }
+  function renderReplay(){const r=replayState.result;const home=r?.home,away=r?.away;if(!home||!away)return;$('#replayPitch').innerHTML=`<span class="replay-team replay-home" style="--team:${home.color}">${home.short}</span><span class="replay-team replay-away" style="--team:${away.color}">${away.short}</span><span class="replay-ball">●</span>`;$('#replayEvents').innerHTML=replayState.events.slice(0,replayState.index).map(e=>`<p><b>${e.minute}′</b> <span>${e.text}</span></p>`).join('');const current=replayState.events[replayState.index-1];$('#replayStatus').textContent=replayState.index>=replayState.events.length?'Replay complete. The final result is unchanged.':current?`${current.minute}′ — ${current.text}`:'Ready to replay the match events.'}
+  function advanceReplay(){if(replayState.index>=replayState.events.length){replayState.timer=null;renderReplay();return}const event=replayState.events[replayState.index++];$('#replayStatus').textContent=`${event.minute}′ — ${event.text}`;renderReplay();if(replayState.index<replayState.events.length)replayState.timer=setTimeout(advanceReplay,900);else replayState.timer=null}
+  function startReplay(){if(replayState.timer)return;const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(replayState.index>=replayState.events.length){replayState.index=0;renderReplay()}if(reduced){replayState.index=replayState.events.length;renderReplay();return}advanceReplay()}
+  function skipReplay(){if(replayState.timer)clearTimeout(replayState.timer);replayState.timer=null;replayState.index=replayState.events.length;renderReplay()}
   function render(){if(!game){$('#setup').hidden=false;$('#game').hidden=true;renderPicker();return}$('#setup').hidden=true;$('#game').hidden=false;const c=club();
     $('#clubName').textContent=$('#mobileClub').textContent=c.name;$('#clubMeta').textContent=`${c.ground} · Season ${game.season}`;setBadge($('#clubCrest'),c);setBadge($('#mobileCrest'),c);$('#weekNumber').textContent=Math.min(game.week+1,game.fixtures.length);$('#greeting').textContent=game.week>=game.fixtures.length?'Season review':'Your match desk.';
     $('#record').textContent=`${c.stats.w}W  ${c.stats.d}D  ${c.stats.l}L`;$('#newsBadge').textContent=game.news.filter(n=>!n.read).length||'';renderDesk();renderSquad();renderTable();renderNews();
@@ -95,6 +102,6 @@ import { resolveFixture } from './domain/simulation.js';
   function renderPicker(){const root=$('#clubPicker');root.innerHTML=CLUBS.map(c=>`<button class="club-option" data-club="${c.id}" aria-pressed="${c.id===selectedClub}"><b style="color:${c.color}">${c.short}</b><span>${c.name}</span></button>`).join('');$$('[data-club]').forEach(b=>b.onclick=()=>{selectedClub=+b.dataset.club;$$('[data-club]').forEach(x=>{const selected=x===b;x.classList.toggle('selected',selected);x.setAttribute('aria-pressed',String(selected))});$('#startGame').disabled=false})}
   function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active-view',v.id===`${name}View`));$$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===name));$('.sidebar').classList.remove('open');if(name==='news')renderNews()}
   $('#startGame').onclick=()=>{makeGame(selectedClub);render()};$('#playMatch').onclick=playWeek;$('#resetGame').onclick=()=>{if(confirm('Start over? Your current career will be removed from this device.')){localStorage.removeItem(SAVE_KEY);game=null;selectedClub=null;render()}};
-  $$('.nav-item').forEach(n=>n.onclick=()=>switchView(n.dataset.view));$$('[data-go]').forEach(n=>n.onclick=()=>switchView(n.dataset.go));$('#mobileMenu').onclick=()=>$('.sidebar').classList.toggle('open');$('.dialog-close').onclick=$('#continueBtn').onclick=()=>$('#resultDialog').close();
+  $$('.nav-item').forEach(n=>n.onclick=()=>switchView(n.dataset.view));$$('[data-go]').forEach(n=>n.onclick=()=>switchView(n.dataset.go));$('#mobileMenu').onclick=()=>$('.sidebar').classList.toggle('open');$('#continueBtn').onclick=()=>$('#resultDialog').close();$('#replayBtn').onclick=()=>{$('#resultDialog').close();$('#replayDialog').showModal()};$('#replayClose').onclick=()=>{$('#replayDialog').close();if(replayState.timer)clearTimeout(replayState.timer);replayState.timer=null};$('#replayPlay').onclick=startReplay;$('#replaySkip').onclick=skipReplay;
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});render();
 })();
