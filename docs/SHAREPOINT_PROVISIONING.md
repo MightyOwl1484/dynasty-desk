@@ -23,6 +23,8 @@ Use a dedicated SharePoint group for commissioners and another for managers. Kee
 
 The web part must still enforce the product policy in `src/domain/permissions.js`; SharePoint permissions are defense in depth, not a substitute for application checks.
 
+The commissioner view should consume `src/application/admin-summary.js`. That keeps the visible status table, deadline, resolver version, allowed controls, and audit history consistent across SharePoint and a local demo host.
+
 ## Scheduled match-week runbook
 
 1. Commissioner confirms the league is in `OPEN` and checks the deadline.

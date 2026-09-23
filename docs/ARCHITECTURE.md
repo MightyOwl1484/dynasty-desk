@@ -47,6 +47,8 @@ Coordinates user actions and domain operations:
 
 The first scheduled-week orchestration lives in `src/application/league-workflow.js`. It turns submitted actions into locked snapshots, applies deterministic fallback actions for missed deadlines, and requires explicit resolving and publishing phases.
 
+`src/application/admin-summary.js` is the first commissioner-shell view model. It exposes phase, deadline, resolver version, per-club submission status, role-aware actions, and audit history without leaking SharePoint response shapes into a React/SPFx component.
+
 This layer owns validation and permissions at the product level, but it should not assume that the client is trusted in shared play.
 
 ### Persistence layer
