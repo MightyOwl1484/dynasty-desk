@@ -26,6 +26,9 @@ jobs:
       - name: Check JavaScript syntax
         run: node --check dist/app.js
 
+      - name: Run domain tests
+        run: node --test
+
       - name: Check required prototype files
         shell: bash
         run: |
