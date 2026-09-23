@@ -40,7 +40,17 @@ Read the project plan and architecture documents before making substantial chang
 
 Use an issue for a meaningful change, create a focused branch, and open a pull request into `main`. GitHub Actions validates the prototype on pushes and pull requests.
 
-The first implementation branch is `feature/domain-model`, which will extract the game state and simulation rules from the current static build.
+The first implementation branch is `feature/domain-model`, which extracts the game state and simulation rules from the current static build.
+
+The validation loop is intentionally small and reproducible:
+
+```powershell
+node scripts/build.mjs
+node --test
+node --check dist/app.js
+```
+
+The solo prototype saves through a versioned local-store adapter. That keeps browser persistence replaceable when the SharePoint-backed organization adapter is introduced.
 
 ## Design principles
 

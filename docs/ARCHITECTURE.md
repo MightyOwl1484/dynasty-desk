@@ -47,7 +47,7 @@ This layer owns validation and permissions at the product level, but it should n
 
 ### Persistence layer
 
-Use an adapter interface rather than calling `localStorage` or SharePoint directly from UI components.
+Use an adapter interface rather than calling `localStorage` or SharePoint directly from UI components. The current browser build uses `src/stores/local.js`, which wraps browser storage behind the contract and version-tags saved envelopes so future migrations have an explicit home. `src/stores/game-store.js` documents the contract while the JavaScript prototype remains lightweight.
 
 ```ts
 interface GameStore {
@@ -60,7 +60,7 @@ interface GameStore {
 
 Initial adapters:
 
-- `LocalGameStore` for solo mode
+- `LocalGameStore` for solo mode (implemented first)
 - `SharePointGameStore` for organization mode
 
 Possible later adapter:

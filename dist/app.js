@@ -1,5 +1,6 @@
 import { createFixture } from './domain/models.js';
 import { resolveFixture } from './domain/simulation.js';
+import { createLocalGameStore } from './stores/local.js';
 
 (() => {
   'use strict';
@@ -13,6 +14,7 @@ import { resolveFixture } from './domain/simulation.js';
   const LAST=['Mercer','Vale','Okoro','Sato','Doyle','Khan','Bennett','Silva','Price','Hughes','Foster','Ibarra','Nolan','Costa','Wright','Patel','Morris','Reid','Clarke','Young','Bishop','Perry','Hayes','Stone'];
   const POSITIONS=['GK','GK','DEF','DEF','DEF','DEF','DEF','DEF','MID','MID','MID','MID','MID','MID','FWD','FWD','FWD','FWD'];
   const SAVE_KEY='dynasty-desk-save-v1';
+  const store=createLocalGameStore(globalThis.localStorage,SAVE_KEY);
   let replayState={events:[],index:0,timer:null,result:null};
   let game = load(); let selectedClub = null;
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -39,8 +41,8 @@ import { resolveFixture } from './domain/simulation.js';
     for(let r=0;r<a.length-1;r++){const week=[];for(let i=0;i<a.length/2;i++){let home=a[i],away=a[a.length-1-i];if(r%2){[home,away]=[away,home]}week.push({home,away,played:false,score:null})}rounds.push(week);a.splice(1,0,a.pop())}
     const reverse=rounds.map(w=>w.map(f=>({home:f.away,away:f.home,played:false,score:null})));return [...rounds,...reverse];
   }
-  function save(){localStorage.setItem(SAVE_KEY,JSON.stringify(game))}
-  function load(){try{return JSON.parse(localStorage.getItem(SAVE_KEY))}catch{return null}}
+  function save(){store.save(game)}
+  function load(){return store.load()}
   function club(id=game.userClub){return game.clubs[id]}
   function fixtureFor(id,week=game.week){return game.fixtures[week]?.find(f=>f.home===id||f.away===id)}
   function table(){return [...game.clubs].sort((a,b)=>b.stats.pts-a.stats.pts||(b.stats.gf-b.stats.ga)-(a.stats.gf-a.stats.ga)||b.stats.gf-a.stats.gf)}
@@ -101,7 +103,7 @@ import { resolveFixture } from './domain/simulation.js';
   function renderNews(){game.news.forEach(n=>n.read=true);save();$('#newsBadge').textContent='';$('#newsList').innerHTML=game.news.map(n=>`<article class="news-item"><time>WEEK ${n.week+1}</time><div><h3>${n.title}</h3><p>${n.text}</p></div></article>`).join('')}
   function renderPicker(){const root=$('#clubPicker');root.innerHTML=CLUBS.map(c=>`<button class="club-option" data-club="${c.id}" aria-pressed="${c.id===selectedClub}"><b style="color:${c.color}">${c.short}</b><span>${c.name}</span></button>`).join('');$$('[data-club]').forEach(b=>b.onclick=()=>{selectedClub=+b.dataset.club;$$('[data-club]').forEach(x=>{const selected=x===b;x.classList.toggle('selected',selected);x.setAttribute('aria-pressed',String(selected))});$('#startGame').disabled=false})}
   function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active-view',v.id===`${name}View`));$$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===name));$('.sidebar').classList.remove('open');if(name==='news')renderNews()}
-  $('#startGame').onclick=()=>{makeGame(selectedClub);render()};$('#playMatch').onclick=playWeek;$('#resetGame').onclick=()=>{if(confirm('Start over? Your current career will be removed from this device.')){localStorage.removeItem(SAVE_KEY);game=null;selectedClub=null;render()}};
+  $('#startGame').onclick=()=>{makeGame(selectedClub);render()};$('#playMatch').onclick=playWeek;$('#resetGame').onclick=()=>{if(confirm('Start over? Your current career will be removed from this device.')){store.clear();game=null;selectedClub=null;render()}};
   $$('.nav-item').forEach(n=>n.onclick=()=>switchView(n.dataset.view));$$('[data-go]').forEach(n=>n.onclick=()=>switchView(n.dataset.go));$('#mobileMenu').onclick=()=>$('.sidebar').classList.toggle('open');$('#continueBtn').onclick=()=>$('#resultDialog').close();$('#replayBtn').onclick=()=>{$('#resultDialog').close();$('#replayDialog').showModal()};$('#replayClose').onclick=()=>{$('#replayDialog').close();if(replayState.timer)clearTimeout(replayState.timer);replayState.timer=null};$('#replayPlay').onclick=startReplay;$('#replaySkip').onclick=skipReplay;
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});render();
 })();
