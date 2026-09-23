@@ -46,6 +46,9 @@ jobs:
           test -f dist/app.js
           test -f dist/styles.css
           test -f dist/manifest.webmanifest
+          test -f dist/commissioner.html
+          test -f dist/commissioner.js
+          test -f dist/admin.css
           test -f LICENSE
           test -f NOTICE
 

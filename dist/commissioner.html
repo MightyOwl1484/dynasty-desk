@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dynasty Desk — Commissioner console</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header class="admin-header"><a href="./index.html">← Solo game</a><div><strong>Dynasty Desk</strong><span>Commissioner console preview</span></div><span class="tenant-badge">Demo league · no tenant writes</span></header>
+  <main id="commissionerApp" aria-labelledby="pageTitle">
+    <div class="heading"><div><p class="eyebrow">Organization play</p><h1 id="pageTitle">Harbor League control room</h1><p class="helper">A calm, accessible place to see what needs attention before the next scheduled match week.</p></div><div id="phaseStatus" class="phase" role="status" aria-live="polite"></div></div>
+    <section class="summary-grid" aria-label="League summary"><article><span>Match week</span><strong id="matchWeek"></strong></article><article><span>Deadline</span><strong id="deadline"></strong></article><article><span>Submissions</span><strong id="submissions"></strong></article><article><span>Resolver</span><strong id="resolver"></strong></article></section>
+    <section class="admin-grid">
+      <article class="panel"><div class="panel-heading"><div><p class="eyebrow">Manager readiness</p><h2>Club actions</h2></div><span id="readinessHelp" class="helper"></span></div><div class="table-wrap"><table><caption class="sr-only">Manager action status for this match week</caption><thead><tr><th scope="col">Club</th><th scope="col">Manager</th><th scope="col">Status</th><th scope="col">Submitted</th></tr></thead><tbody id="clubRows"></tbody></table></div></article>
+      <article class="panel"><p class="eyebrow">Commissioner actions</p><h2>Advance the week</h2><p id="actionHelp">Controls are shown according to the current league phase and your role.</p><div class="actions"><button id="lockButton" class="primary">Lock submissions</button><button id="resolveButton" class="secondary">Resolve fixtures</button><button id="publishButton" class="secondary">Publish results</button></div><div id="actionStatus" class="action-status" role="status" aria-live="polite"></div></article>
+      <article class="panel audit-panel"><div class="panel-heading"><div><p class="eyebrow">Support trail</p><h2>Recent events</h2></div></div><ol id="auditEvents" class="audit-list"></ol></article>
+    </section>
+  </main>
+  <script type="module" src="commissioner.js"></script>
+</body>
+</html>

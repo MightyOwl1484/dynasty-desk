@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
 const html = await readFile('dist/index.html', 'utf8');
+const adminHtml = await readFile('dist/commissioner.html', 'utf8');
 const required = [
   ['document language', /<html lang="[a-z-]+"/],
   ['responsive viewport', /name="viewport"/],
@@ -15,6 +16,17 @@ const required = [
   ['replay speed label', /id="replaySpeed"[^>]*aria-label="Replay speed"/]
 ];
 
+const adminRequired = [
+  ['commissioner language', /<html lang="[a-z-]+"/],
+  ['commissioner main landmark', /<main id="commissionerApp"[^>]*aria-labelledby=/],
+  ['commissioner status region', /id="phaseStatus"[^>]*role="status"[^>]*aria-live="polite"/],
+  ['manager status table', /<table><caption class="sr-only">Manager action status/],
+  ['commissioner action status', /id="actionStatus"[^>]*role="status"[^>]*aria-live="polite"/],
+  ['audit list', /<ol id="auditEvents"/]
+];
+
 const missing = required.filter(([, pattern]) => !pattern.test(html)).map(([name]) => name);
 if (missing.length) throw new Error(`Accessibility checks failed: ${missing.join(', ')}`);
-console.log(`Accessibility structure checks passed (${required.length}).`);
+const missingAdmin = adminRequired.filter(([, pattern]) => !pattern.test(adminHtml)).map(([name]) => name);
+if (missingAdmin.length) throw new Error(`Commissioner accessibility checks failed: ${missingAdmin.join(', ')}`);
+console.log(`Accessibility structure checks passed (${required.length + adminRequired.length}).`);

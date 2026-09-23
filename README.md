@@ -58,6 +58,8 @@ The first SPFx integration seam is also present: `src/stores/spfx-client.js` acc
 
 The commissioner-facing data contract is `src/application/admin-summary.js`; it is ready for a React/SPFx shell without coupling the UI to SharePoint response objects.
 
+For an immediately reviewable organization-admin prototype, open [`dist/commissioner.html`](dist/commissioner.html). It uses demo data, clearly labels that it does not write to a tenant, and exercises the same phase-aware summary shape the SPFx shell will consume.
+
 ## Design principles
 
 1. Fictional data first. The game should be enjoyable without requiring licensed real-world data.

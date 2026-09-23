@@ -128,6 +128,8 @@ The organization mode needs its own accessible experience rather than exposing r
 - Announcements
 - Export and backup status
 
+The first reviewable commissioner console is available at `dist/commissioner.html`. It is intentionally a no-tenant demo, but it exercises the intended hierarchy: league phase and deadline first, manager readiness second, explicit phase actions third, and an audit trail alongside the controls.
+
 Administrative controls should use explicit labels, confirmation for irreversible transitions, clear error recovery, and a visible audit trail.
 
 ## Priority order
