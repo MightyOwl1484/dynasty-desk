@@ -32,6 +32,9 @@ jobs:
       - name: Check accessibility structure
         run: node scripts/check-a11y.mjs
 
+      - name: Check offline asset cache
+        run: node scripts/check-pwa.mjs
+
       - name: Build browser domain modules
         run: node scripts/build.mjs
 
