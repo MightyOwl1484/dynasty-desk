@@ -51,6 +51,8 @@ The first scheduled-week orchestration lives in `src/application/league-workflow
 
 The first React/SPFx host source is under `spfx/src/webparts/dynastyDesk`. It consumes that view model through props; it is intentionally scaffolded separately from the offline HTML build until a generated SPFx solution supplies the Microsoft dependencies and packaging configuration.
 
+`src/application/admin-service.js` is the host handoff: it loads the four SharePoint read surfaces, normalizes list column casing, and returns `admin-summary.js` output. This is the seam the generated web part should call when replacing its current `summaryJson` preview property.
+
 This layer owns validation and permissions at the product level, but it should not assume that the client is trusted in shared play.
 
 ### Persistence layer

@@ -30,3 +30,19 @@ test('SharePoint store rejects unsafe action writes without an ETag', async () =
   const store = createSharePointGameStore({ query: async () => [], update: async () => ({}) }, 'league-7');
   await assert.rejects(() => store.saveClubActions({ tactic: 'balanced' }, { itemId: 14 }), /etag/);
 });
+
+test('SharePoint store exposes the reads required by the commissioner service', async () => {
+  const calls = [];
+  const store = createSharePointGameStore({
+    query: async (...args) => { calls.push(args); return []; },
+    update: async () => ({})
+  }, 'league-7');
+  await store.getMembers();
+  await store.getClubActions(4);
+  await store.getLeagueEvents();
+  assert.deepEqual(calls, [
+    ['LeagueMembers', { LeagueId: 'league-7' }],
+    ['ClubActions', { LeagueId: 'league-7', MatchWeek: 4 }],
+    ['LeagueEvents', { LeagueId: 'league-7' }]
+  ]);
+});

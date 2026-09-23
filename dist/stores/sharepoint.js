@@ -21,6 +21,17 @@ export function createSharePointGameStore(client, leagueId) {
       if (matchWeek !== undefined) filter.MatchWeek = matchWeek;
       return client.query('Fixtures', filter);
     },
+    async getMembers() {
+      return client.query('LeagueMembers', { LeagueId: leagueId });
+    },
+    async getClubActions(matchWeek) {
+      const filter = { LeagueId: leagueId };
+      if (matchWeek !== undefined) filter.MatchWeek = matchWeek;
+      return client.query('ClubActions', filter);
+    },
+    async getLeagueEvents() {
+      return client.query('LeagueEvents', { LeagueId: leagueId });
+    },
     async saveClubActions(actions, { itemId, etag } = {}) {
       if (!itemId || !etag) throw new TypeError('itemId and etag are required for optimistic updates.');
       return client.update('ClubActions', itemId, actions, { etag });
