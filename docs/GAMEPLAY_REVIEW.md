@@ -75,6 +75,12 @@ Show players improving, recovering, losing form, gaining confidence, and earning
 
 The resolver should determine the result first. The live match view then presents that result as a short, optional replay.
 
+## Verified browser playtest
+
+The current HTML build was exercised in the in-app browser on the match desk. Selecting a club and starting a career exposes the next fixture, tactical choice, squad briefing, and starting-XI pitch. `Play match` opens a focused full-time result dialog with score, explanation, and commentary. `Watch short replay` opens a focused replay dialog; Play updates the live replay status and event log, while the speed and skip controls remain available. Starting a career now moves keyboard focus into the active match desk instead of leaving focus on the hidden setup control.
+
+The next design questions are intentionally still open: whether the two-minute presentation should show more tactical context during play, how much replay detail is useful on narrow screens, and whether a team-building league needs a shared “watch party” view in addition to the commissioner workflow.
+
 ### Current implementation status
 
 The first presentation slice is now available in the browser prototype. A result dialog offers an optional short replay driven by the resolver's event stream. The replay includes team markers, an event log, play, pause, speed, and skip controls, a live status message, and a reduced-motion path that completes the event list without animation. The match desk also explains the tradeoff behind each tactical approach, and the result dialog explains the chosen approach after full time. These are presentation layers; they do not change the stored result.
