@@ -64,7 +64,7 @@ PUBLISHED
 NEXT_WEEK or COMPLETE
 ```
 
-The first host-independent implementation of these transitions lives in `src/domain/league.js`. It also defines submit/lock behavior and a deterministic balanced fallback for a missed deadline. The initial injected persistence boundary now lives in `src/stores/sharepoint.js`: it scopes reads by league and requires an ETag for club-action updates. The future SPFx adapter should provide that client and call these rules rather than reimplementing them in web-part event handlers.
+The first host-independent implementation of these transitions lives in `src/domain/league.js`. It also defines submit/lock behavior and a deterministic balanced fallback for a missed deadline. The initial injected persistence boundary lives in `src/stores/sharepoint.js`, while `src/stores/spfx-client.js` adapts the SPFx `SPHttpClient` surface to that boundary. Reads are scoped by league and club-action updates require an ETag. The future web part should provide the configured client and call these rules rather than reimplementing them in event handlers.
 
 Rules:
 

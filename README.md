@@ -54,6 +54,8 @@ node scripts/check-a11y.mjs
 
 The solo prototype saves through a versioned local-store adapter. That keeps browser persistence replaceable when the SharePoint-backed organization adapter is introduced.
 
+The first SPFx integration seam is also present: `src/stores/spfx-client.js` accepts an injected `SPHttpClient` and translates scoped list queries plus ETag-protected updates into the host-neutral SharePoint store. It does not require an M365 tenant for local tests.
+
 ## Design principles
 
 1. Fictional data first. The game should be enjoyable without requiring licensed real-world data.
