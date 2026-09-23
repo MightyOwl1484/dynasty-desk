@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "lists": [
+    { "title": "Leagues", "fields": ["LeagueId", "Title", "Season", "Phase", "MatchWeek", "Deadline", "ResolverVersion", "Commissioner"], "indexed": ["LeagueId"] },
+    { "title": "LeagueMembers", "fields": ["LeagueId", "UserId", "DisplayName", "ClubId", "Role", "Status"], "indexed": ["LeagueId", "UserId"] },
+    { "title": "Clubs", "fields": ["LeagueId", "ClubId", "Title", "ManagerId", "Reputation", "Version"], "indexed": ["LeagueId", "ClubId"] },
+    { "title": "Players", "fields": ["LeagueId", "ClubId", "PlayerId", "Title", "Position", "Rating", "Potential", "Fitness", "Morale", "Version"], "indexed": ["LeagueId", "ClubId"] },
+    { "title": "Fixtures", "fields": ["LeagueId", "FixtureId", "MatchWeek", "HomeClubId", "AwayClubId", "Deadline", "Status", "ResultId"], "indexed": ["LeagueId", "MatchWeek", "Status"] },
+    { "title": "ClubActions", "fields": ["LeagueId", "MatchWeek", "ClubId", "ManagerId", "Lineup", "Formation", "Tactic", "TrainingFocus", "Status", "SubmittedAt", "LockedAt"], "indexed": ["LeagueId", "MatchWeek", "Status"] },
+    { "title": "MatchResults", "fields": ["LeagueId", "FixtureId", "HomeGoals", "AwayGoals", "Events", "Seed", "ResolverVersion", "PublishedAt"], "indexed": ["LeagueId", "FixtureId"] },
+    { "title": "LeagueEvents", "fields": ["LeagueId", "EventId", "Type", "ActorId", "Message", "RelatedId", "Timestamp"], "indexed": ["LeagueId", "Timestamp"] }
+  ],
+  "roles": { "commissioner": "manage league setup and resolution", "manager": "edit assigned ClubActions", "viewer": "read published league state" }
+}

@@ -4,7 +4,7 @@ This is the pilot checklist for a company team-building league. It keeps tenant 
 
 ## Site and lists
 
-Create the game on a dedicated modern SharePoint site, then create these lists with the columns in [`SHAREPOINT_MULTIPLAYER.md`](SHAREPOINT_MULTIPLAYER.md):
+Create the game on a dedicated modern SharePoint site, then apply [`spfx/sharepoint-schema.json`](../spfx/sharepoint-schema.json). It is the machine-readable version of the lists and columns described in [`SHAREPOINT_MULTIPLAYER.md`](SHAREPOINT_MULTIPLAYER.md):
 
 - `Leagues`
 - `LeagueMembers`
