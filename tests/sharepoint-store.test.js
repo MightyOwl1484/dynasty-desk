@@ -47,6 +47,20 @@ test('SharePoint store exposes the reads required by the commissioner service', 
   ]);
 });
 
+test('SharePoint store exposes clubs and players for resolution', async () => {
+  const calls = [];
+  const store = createSharePointGameStore({
+    query: async (...args) => { calls.push(args); return []; },
+    update: async () => ({})
+  }, 'league-7');
+  await store.getClubs();
+  await store.getPlayers();
+  assert.deepEqual(calls, [
+    ['Clubs', { LeagueId: 'league-7' }],
+    ['Players', { LeagueId: 'league-7' }]
+  ]);
+});
+
 test('SharePoint store exposes ETag league updates and append-only events', async () => {
   const calls = [];
   const store = createSharePointGameStore({

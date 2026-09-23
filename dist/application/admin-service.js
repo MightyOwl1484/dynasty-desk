@@ -13,6 +13,11 @@ export async function loadAdminContext(store, viewerRole) {
     store.getClubActions(league.MatchWeek ?? league.matchWeek),
     store.getLeagueEvents()
   ]);
+  const [fixtures, clubs, players] = await Promise.all([
+    typeof store.getFixtures === 'function' ? store.getFixtures(league.MatchWeek ?? league.matchWeek) : [],
+    typeof store.getClubs === 'function' ? store.getClubs() : [],
+    typeof store.getPlayers === 'function' ? store.getPlayers() : []
+  ]);
   const normalizedLeague = {
     ...league,
     id: league.id ?? league.LeagueId,
@@ -44,6 +49,43 @@ export async function loadAdminContext(store, viewerRole) {
     relatedId: event.relatedId ?? event.RelatedId,
     timestamp: event.timestamp ?? event.Timestamp
   }));
+  const normalizedFixtures = fixtures.map((fixture) => ({
+    ...fixture,
+    id: fixture.id ?? fixture.FixtureId,
+    matchWeek: fixture.matchWeek ?? fixture.MatchWeek,
+    homeClubId: fixture.homeClubId ?? fixture.HomeClubId,
+    awayClubId: fixture.awayClubId ?? fixture.AwayClubId,
+    status: fixture.status ?? fixture.Status ?? 'scheduled'
+  }));
+  const playersByClubId = players.reduce((result, player) => {
+    const clubId = player.clubId ?? player.ClubId;
+    if (!clubId) return result;
+    result[clubId] ??= [];
+    result[clubId].push({
+      id: player.id ?? player.PlayerId,
+      name: player.name ?? player.Title,
+      position: player.position ?? player.Position,
+      age: player.age ?? player.Age ?? 18,
+      rating: player.rating ?? player.Rating ?? 50,
+      potential: player.potential ?? player.Potential ?? player.Rating ?? 50,
+      fitness: player.fitness ?? player.Fitness ?? 100,
+      morale: player.morale ?? player.Morale ?? 70,
+      starting: Boolean(player.starting ?? player.Starting)
+    });
+    return result;
+  }, {});
+  const clubsById = clubs.reduce((result, club) => {
+    const id = club.id ?? club.ClubId;
+    if (!id) return result;
+    result[id] = {
+      id,
+      name: club.name ?? club.Title ?? id,
+      reputation: club.reputation ?? club.Reputation ?? 60,
+      players: playersByClubId[id] ?? [],
+      stats: club.stats ?? { played: 0, wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0, points: 0 }
+    };
+    return result;
+  }, {});
   return {
     summary: createAdminSummary({
     league: normalizedLeague,
@@ -51,6 +93,8 @@ export async function loadAdminContext(store, viewerRole) {
     }),
     league: normalizedLeague,
     actions: normalizedActions,
+    fixtures: normalizedFixtures,
+    clubsById,
     leagueRecord: { itemId: league.Id ?? league.id, etag: league['@odata.etag'] ?? league.ETag },
     actionRecords: actions.map((action) => ({ itemId: action.Id ?? action.id, etag: action['@odata.etag'] ?? action.ETag, clubId: action.ClubId ?? action.clubId }))
   };

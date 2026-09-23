@@ -21,6 +21,12 @@ export function createSharePointGameStore(client, leagueId) {
       if (matchWeek !== undefined) filter.MatchWeek = matchWeek;
       return client.query('Fixtures', filter);
     },
+    async getClubs() {
+      return client.query('Clubs', { LeagueId: leagueId });
+    },
+    async getPlayers() {
+      return client.query('Players', { LeagueId: leagueId });
+    },
     async getMembers() {
       return client.query('LeagueMembers', { LeagueId: leagueId });
     },

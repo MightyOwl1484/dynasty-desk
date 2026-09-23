@@ -32,3 +32,18 @@ test('admin context preserves SharePoint item identity for commands', async () =
   assert.deepEqual(context.leagueRecord, { itemId: 12, etag: '"3"' });
   assert.deepEqual(context.actionRecords, [{ itemId: 13, etag: '"8"', clubId: 'npa' }]);
 });
+
+test('admin context loads normalized resolution data when the host provides it', async () => {
+  const context = await loadAdminContext({
+    loadLeague: async () => ({ Id: 12, LeagueId: 'league-1', Phase: 'locked', MatchWeek: 4, '@odata.etag': '"3"' }),
+    getMembers: async () => [],
+    getClubActions: async () => [],
+    getLeagueEvents: async () => [],
+    getFixtures: async () => [{ FixtureId: 'f1', MatchWeek: 4, HomeClubId: 'npa', AwayClubId: 'ivr', Status: 'scheduled' }],
+    getClubs: async () => [{ ClubId: 'npa', Title: 'North' }, { ClubId: 'ivr', Title: 'Ivory' }],
+    getPlayers: async () => [{ PlayerId: 'p1', ClubId: 'npa', Title: 'Keeper', Position: 'GK', Rating: 72 }]
+  }, ROLES.COMMISSIONER);
+  assert.equal(context.fixtures[0].homeClubId, 'npa');
+  assert.equal(context.clubsById.npa.name, 'North');
+  assert.equal(context.clubsById.npa.players[0].rating, 72);
+});
