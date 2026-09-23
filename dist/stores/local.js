@@ -7,6 +7,12 @@
 
 export const SAVE_SCHEMA_VERSION = 1;
 
+export function parseSaveText(text) {
+  const parsed = JSON.parse(text);
+  if (parsed?.schemaVersion === SAVE_SCHEMA_VERSION && parsed.data) return parsed.data;
+  return parsed && typeof parsed === 'object' ? parsed : null;
+}
+
 export function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
   if (!storage || typeof storage.getItem !== 'function' || typeof storage.setItem !== 'function') {
     throw new Error('A storage object with getItem and setItem is required.');
@@ -17,10 +23,7 @@ export function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
       const raw = storage.getItem(key);
       if (!raw) return null;
       try {
-        const parsed = JSON.parse(raw);
-        if (parsed?.schemaVersion === SAVE_SCHEMA_VERSION && parsed.data) return parsed.data;
-        // Accept the prototype's original raw save format during migration.
-        return parsed && typeof parsed === 'object' ? parsed : null;
+        return parseSaveText(raw);
       } catch {
         return null;
       }
@@ -33,6 +36,13 @@ export function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
         savedAt: new Date().toISOString(),
         data: state
       }));
+    },
+
+    importText(text) {
+      const state = parseSaveText(text);
+      if (!state) throw new Error('The selected file does not contain a game state.');
+      this.save(state);
+      return state;
     },
 
     clear() {

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createLocalGameStore, SAVE_SCHEMA_VERSION } from '../src/stores/local.js';
+import { createLocalGameStore, parseSaveText, SAVE_SCHEMA_VERSION } from '../src/stores/local.js';
 
 function memoryStorage(initial = {}) {
   const values = new Map(Object.entries(initial));
@@ -35,4 +35,13 @@ test('local store treats corrupt data as an empty save and can clear it', () => 
   store.save({ week: 1 });
   store.clear();
   assert.equal(store.load(), null);
+});
+
+test('local store imports exported envelopes and rejects empty JSON values', () => {
+  const store = createLocalGameStore(memoryStorage(), 'save');
+  const state = { week: 7, season: 1 };
+  assert.deepEqual(parseSaveText(JSON.stringify({ schemaVersion: 1, data: state })), state);
+  assert.deepEqual(store.importText(JSON.stringify({ schemaVersion: 1, data: state })), state);
+  assert.deepEqual(store.load(), state);
+  assert.throws(() => store.importText('null'), /game state/);
 });
