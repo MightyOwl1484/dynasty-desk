@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadAdminSummary } from '../src/application/admin-service.js';
+import { loadAdminContext, loadAdminSummary } from '../src/application/admin-service.js';
 import { ROLES } from '../src/domain/permissions.js';
 
 test('admin service composes store reads into the commissioner view model', async () => {
@@ -20,4 +20,15 @@ test('admin service composes store reads into the commissioner view model', asyn
 test('admin service returns null for a missing league', async () => {
   const empty = { loadLeague: async () => null };
   await assert.rejects(() => loadAdminSummary(empty, ROLES.VIEWER), /requires league/);
+});
+
+test('admin context preserves SharePoint item identity for commands', async () => {
+  const context = await loadAdminContext({
+    loadLeague: async () => ({ Id: 12, LeagueId: 'league-1', Phase: 'open', MatchWeek: 4, '@odata.etag': '"3"' }),
+    getMembers: async () => [],
+    getClubActions: async () => [{ Id: 13, ClubId: 'npa', Status: 'submitted', ETag: '"8"' }],
+    getLeagueEvents: async () => []
+  }, ROLES.COMMISSIONER);
+  assert.deepEqual(context.leagueRecord, { itemId: 12, etag: '"3"' });
+  assert.deepEqual(context.actionRecords, [{ itemId: 13, etag: '"8"', clubId: 'npa' }]);
 });

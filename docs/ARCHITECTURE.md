@@ -55,6 +55,8 @@ The first React/SPFx host source is under `spfx/src/webparts/dynastyDesk`. It co
 
 `src/application/admin-commands.js` owns the first write path. It creates a lock plan, persists the league and club-action snapshots with ETags, then appends audit events. This ordering is explicit so a future retry/conflict UI can report which stage failed without hiding a partial tenant write.
 
+The SPFx scaffold now calls that lock path and reloads the admin context after success. Resolve and publish remain guarded until the result-payload service is connected; the UI reports that boundary explicitly rather than pretending those buttons perform tenant writes.
+
 This layer owns validation and permissions at the product level, but it should not assume that the client is trusted in shared play.
 
 ### Persistence layer
