@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createLocalGameStore, parseSaveText, SAVE_SCHEMA_VERSION } from '../src/stores/local.js';
+import { createLocalGameStore, isGameState, parseSaveText, SAVE_SCHEMA_VERSION } from '../src/stores/local.js';
 
 function memoryStorage(initial = {}) {
   const values = new Map(Object.entries(initial));
@@ -15,7 +15,7 @@ function memoryStorage(initial = {}) {
 test('local store saves versioned state and loads a separate object', () => {
   const storage = memoryStorage();
   const store = createLocalGameStore(storage, 'save');
-  const state = { week: 2, clubs: [{ id: 'northport' }] };
+  const state = { week: 2, season: 1, userClub: 0, clubs: [{ id: 'northport' }], fixtures: [] };
   store.save(state);
   const envelope = JSON.parse(storage.raw('save'));
   assert.equal(envelope.schemaVersion, SAVE_SCHEMA_VERSION);
@@ -23,7 +23,7 @@ test('local store saves versioned state and loads a separate object', () => {
 });
 
 test('local store migrates the prototype raw save format', () => {
-  const state = { week: 4, seed: 12 };
+  const state = { week: 4, season: 1, userClub: 0, seed: 12, clubs: [], fixtures: [] };
   const storage = memoryStorage({ save: JSON.stringify(state) });
   assert.deepEqual(createLocalGameStore(storage, 'save').load(), state);
 });
@@ -32,16 +32,17 @@ test('local store treats corrupt data as an empty save and can clear it', () => 
   const storage = memoryStorage({ save: '{not-json' });
   const store = createLocalGameStore(storage, 'save');
   assert.equal(store.load(), null);
-  store.save({ week: 1 });
+  store.save({ week: 1, season: 1, userClub: 0, clubs: [], fixtures: [] });
   store.clear();
   assert.equal(store.load(), null);
 });
 
 test('local store imports exported envelopes and rejects empty JSON values', () => {
   const store = createLocalGameStore(memoryStorage(), 'save');
-  const state = { week: 7, season: 1 };
+  const state = { week: 7, season: 1, userClub: 0, clubs: [], fixtures: [] };
   assert.deepEqual(parseSaveText(JSON.stringify({ schemaVersion: 1, data: state })), state);
   assert.deepEqual(store.importText(JSON.stringify({ schemaVersion: 1, data: state })), state);
   assert.deepEqual(store.load(), state);
   assert.throws(() => store.importText('null'), /game state/);
+  assert.equal(isGameState({ week: 1 }), false);
 });

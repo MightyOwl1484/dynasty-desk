@@ -7,6 +7,11 @@
 
 export const SAVE_SCHEMA_VERSION = 1;
 
+export function isGameState(value) {
+  return Boolean(value && typeof value === 'object' && Number.isInteger(value.week) && Number.isInteger(value.season)
+    && Number.isInteger(value.userClub) && Array.isArray(value.clubs) && Array.isArray(value.fixtures));
+}
+
 export function parseSaveText(text) {
   const parsed = JSON.parse(text);
   if (parsed?.schemaVersion === SAVE_SCHEMA_VERSION && parsed.data) return parsed.data;
@@ -23,14 +28,15 @@ export function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
       const raw = storage.getItem(key);
       if (!raw) return null;
       try {
-        return parseSaveText(raw);
+        const state = parseSaveText(raw);
+        return isGameState(state) ? state : null;
       } catch {
         return null;
       }
     },
 
     save(state) {
-      if (!state || typeof state !== 'object') throw new Error('Cannot save an empty game state.');
+      if (!isGameState(state)) throw new Error('Cannot save an invalid game state.');
       storage.setItem(key, JSON.stringify({
         schemaVersion: SAVE_SCHEMA_VERSION,
         savedAt: new Date().toISOString(),
@@ -40,7 +46,7 @@ export function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
 
     importText(text) {
       const state = parseSaveText(text);
-      if (!state) throw new Error('The selected file does not contain a game state.');
+      if (!isGameState(state)) throw new Error('The selected file does not contain a valid game state.');
       this.save(state);
       return state;
     },
