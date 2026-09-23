@@ -98,6 +98,7 @@ The current prototype is a static build. The target layout is:
 src/
   domain/
     models/
+    league.js
     simulation/
     standings/
     schedule/

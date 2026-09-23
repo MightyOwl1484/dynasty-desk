@@ -64,6 +64,8 @@ PUBLISHED
 NEXT_WEEK or COMPLETE
 ```
 
+The first host-independent implementation of these transitions lives in `src/domain/league.js`. It also defines submit/lock behavior and a deterministic balanced fallback for a missed deadline. The future SharePoint adapter should call these rules rather than reimplementing them in web-part event handlers.
+
 Rules:
 
 - Managers can edit actions during `OPEN`.
