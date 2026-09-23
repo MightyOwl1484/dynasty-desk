@@ -9,6 +9,7 @@
     "test": "node --test",
     "test:a11y": "node scripts/check-a11y.mjs",
     "test:pwa": "node scripts/check-pwa.mjs",
+    "test:spfx": "node scripts/check-spfx.mjs",
     "check": "node --check dist/app.js"
   },
   "license": "Apache-2.0",
