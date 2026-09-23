@@ -10,6 +10,7 @@
     "test:a11y": "node scripts/check-a11y.mjs",
     "test:pwa": "node scripts/check-pwa.mjs",
     "test:spfx": "node scripts/check-spfx.mjs",
+    "check:spfx-deployment": "node scripts/check-spfx-deployment.mjs",
     "test:sharepoint-schema": "node scripts/check-sharepoint-schema.mjs",
     "check": "node --check dist/app.js"
   },

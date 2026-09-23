@@ -38,6 +38,9 @@ jobs:
       - name: Check SPFx source scaffold
         run: node scripts/check-spfx.mjs
 
+      - name: Check SPFx deployment readiness
+        run: node scripts/check-spfx-deployment.mjs
+
       - name: Check SharePoint schema
         run: node scripts/check-sharepoint-schema.mjs
 
