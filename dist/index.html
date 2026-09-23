@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1714" />
+  <meta name="description" content="An offline-first fictional football management simulation." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Dynasty Desk</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true">DD</div>
+    <div class="brand-copy"><strong>Dynasty Desk</strong><span id="seasonLabel">Fictional Football Association</span></div>
+    <div class="save-state"><i></i><span>Saved locally</span></div>
+  </header>
+
+  <div id="setup" class="setup-shell">
+    <section class="setup-card">
+      <p class="eyebrow">New career</p>
+      <h1>Choose your club.</h1>
+      <p>Fourteen matchweeks. One cup. No accounts, timers, adverts, or purchases.</p>
+      <div id="clubPicker" class="club-picker"></div>
+      <button id="startGame" class="primary" disabled>Take the job</button>
+    </section>
+  </div>
+
+  <main id="game" class="game-shell" hidden>
+    <aside class="sidebar">
+      <section class="club-identity">
+        <div id="clubCrest" class="club-crest"></div>
+        <div><p class="eyebrow">Club office</p><h2 id="clubName"></h2><span id="clubMeta"></span></div>
+      </section>
+      <nav aria-label="Game sections">
+        <button class="nav-item active" data-view="desk"><span>⌂</span>Match desk</button>
+        <button class="nav-item" data-view="squad"><span>◎</span>Squad</button>
+        <button class="nav-item" data-view="table"><span>▤</span>League table</button>
+        <button class="nav-item" data-view="news"><span>◇</span>Inbox <b id="newsBadge"></b></button>
+      </nav>
+      <button id="resetGame" class="text-button">Start a new career</button>
+    </aside>
+
+    <section class="workspace">
+      <div class="mobile-clubbar">
+        <div id="mobileCrest" class="mini-crest"></div><strong id="mobileClub"></strong>
+        <button id="mobileMenu" aria-label="Open navigation">Menu</button>
+      </div>
+
+      <section id="deskView" class="view active-view">
+        <div class="page-heading"><div><p class="eyebrow">Matchweek <span id="weekNumber"></span></p><h1 id="greeting"></h1></div><div class="record" id="record"></div></div>
+        <div class="desk-grid">
+          <article class="match-card">
+            <div class="card-kicker"><span>Next fixture</span><span id="fixtureVenue"></span></div>
+            <div class="fixture">
+              <div class="fixture-team"><div id="homeBadge" class="fixture-badge"></div><strong id="homeTeam"></strong></div>
+              <div class="versus"><small id="fixtureRound"></small><b>VS</b><span id="formGuide"></span></div>
+              <div class="fixture-team"><div id="awayBadge" class="fixture-badge"></div><strong id="awayTeam"></strong></div>
+            </div>
+            <div class="match-actions">
+              <label>Tactical approach<select id="tacticSelect"><option value="balanced">Balanced</option><option value="press">High press</option><option value="counter">Counter</option><option value="control">Control</option></select></label>
+              <button id="playMatch" class="primary">Play match</button>
+            </div>
+          </article>
+
+          <article class="position-card"><div class="card-kicker"><span>League position</span><span id="positionDelta">Live</span></div><div class="position-main"><strong id="leaguePosition"></strong><span>of 8</span></div><div id="miniTable" class="mini-table"></div></article>
+
+          <article class="pitch-card">
+            <div class="card-kicker"><span>Starting XI</span><button data-go="squad">Edit team</button></div>
+            <div id="miniPitch" class="pitch"></div>
+          </article>
+
+          <article class="briefing-card">
+            <div class="card-kicker"><span>Manager briefing</span><span id="briefingDate"></span></div>
+            <div id="briefing"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="squadView" class="view">
+        <div class="page-heading"><div><p class="eyebrow">First team</p><h1>Squad room</h1></div><p class="helper">Tap a player to move them in or out of the XI.</p></div>
+        <div class="squad-layout"><div><h3>Starting XI <span id="xiCount"></span></h3><div id="startingList" class="player-list"></div></div><div><h3>Bench & reserves</h3><div id="benchList" class="player-list"></div></div></div>
+      </section>
+
+      <section id="tableView" class="view">
+        <div class="page-heading"><div><p class="eyebrow">Season overview</p><h1>League table</h1></div></div>
+        <div class="table-wrap"><table><thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody id="fullTable"></tbody></table></div>
+      </section>
+
+      <section id="newsView" class="view">
+        <div class="page-heading"><div><p class="eyebrow">Club communications</p><h1>Inbox</h1></div></div><div id="newsList" class="news-list"></div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="resultDialog">
+    <button class="dialog-close" aria-label="Close">×</button>
+    <p class="eyebrow">Full time</p><div id="resultScore" class="result-score"></div><h2 id="resultHeadline"></h2><div id="commentary" class="commentary"></div><button id="continueBtn" class="primary">Continue</button>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>

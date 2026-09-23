@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose an improvement to Dynasty Desk
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Player or contributor problem
+      description: What problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the experience or technical change.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Simulation
+        - UI
+        - Synthetic data
+        - SharePoint/SPFx
+        - Documentation
+    validations:
+      required: true
