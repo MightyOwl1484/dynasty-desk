@@ -44,6 +44,8 @@ Coordinates user actions and domain operations:
 - Publish results
 - Create news and audit events
 
+The first scheduled-week orchestration lives in `src/application/league-workflow.js`. It turns submitted actions into locked snapshots, applies deterministic fallback actions for missed deadlines, and requires explicit resolving and publishing phases.
+
 This layer owns validation and permissions at the product level, but it should not assume that the client is trusted in shared play.
 
 ### Persistence layer
