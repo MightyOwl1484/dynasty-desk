@@ -1,7 +1,10 @@
 import * as React from 'react';
 import { IDynastyDeskProps } from './IDynastyDeskProps';
 
-export const DynastyDesk: React.FC<IDynastyDeskProps> = ({ summary, onPhaseAction }) => (
+export const DynastyDesk: React.FC<IDynastyDeskProps> = ({ summary, loadingError, onPhaseAction }) => {
+  if (loadingError) return <main aria-labelledby="dynasty-desk-title"><h1 id="dynasty-desk-title">Commissioner console</h1><p role="alert">The league could not be loaded. {loadingError}</p></main>;
+  if (!summary) return <main aria-labelledby="dynasty-desk-title"><h1 id="dynasty-desk-title">Commissioner console</h1><p role="status" aria-live="polite">Loading league status…</p></main>;
+  return (
   <main aria-labelledby="dynasty-desk-title">
     <p>Organization play</p><h1 id="dynasty-desk-title">Commissioner console</h1>
     <p role="status" aria-live="polite">League phase: {summary.phase}</p>
@@ -10,4 +13,5 @@ export const DynastyDesk: React.FC<IDynastyDeskProps> = ({ summary, onPhaseActio
     <section aria-labelledby="phase-actions-title"><h2 id="phase-actions-title">Advance the week</h2><button disabled={!summary.canManage || summary.phase !== 'open'} onClick={() => onPhaseAction('lock')}>Lock submissions</button><button disabled={!summary.canResolve} onClick={() => onPhaseAction('resolve')}>Resolve fixtures</button><button disabled={!summary.canManage || summary.phase !== 'resolving'} onClick={() => onPhaseAction('publish')}>Publish results</button></section>
     <section aria-labelledby="audit-title"><h2 id="audit-title">Recent events</h2><ol>{summary.auditEvents.map((event) => <li key={event.id}><strong>{event.type}</strong> — {event.message}</li>)}</ol></section>
   </main>
-);
+  );
+};

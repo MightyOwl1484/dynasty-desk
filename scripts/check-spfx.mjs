@@ -9,6 +9,6 @@ const required = [
 for (const [label, path] of required) { try { await readFile(path, 'utf8'); } catch { throw new Error(`Missing ${label}: ${path}`); } }
 const entry = await readFile(required[1][1], 'utf8');
 const component = await readFile(required[2][1], 'utf8');
-if (!entry.includes('BaseClientSideWebPart') || !entry.includes('ReactDom.render')) throw new Error('SPFx entrypoint is missing the standard render boundary.');
+if (!entry.includes('BaseClientSideWebPart') || !entry.includes('ReactDom.render') || !entry.includes('this.context.spHttpClient') || !entry.includes('loadAdminSummary')) throw new Error('SPFx entrypoint is missing the SharePoint data-service boundary.');
 if (!component.includes('aria-labelledby') || !component.includes('scope="col"') || !component.includes('onPhaseAction')) throw new Error('SPFx component is missing accessible controls or the host action boundary.');
 console.log('SPFx source scaffold checks passed (4 files).');
