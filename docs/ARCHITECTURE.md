@@ -30,8 +30,9 @@ Contains rules that should work in any host:
 - Standings and statistics
 - League phase transitions
 - Role-based action permissions
+- Append-only audit events
 
-The domain layer should be deterministic and free of browser, SharePoint, React, Graph, and date-time UI dependencies. `src/domain/permissions.js` defines the shared commissioner, manager, and viewer policy; host permissions must reinforce it rather than replace it.
+The domain layer should be deterministic and free of browser, SharePoint, React, Graph, and date-time UI dependencies. `src/domain/permissions.js` defines the shared commissioner, manager, and viewer policy; `src/domain/audit.js` defines immutable support-friendly events. Host permissions must reinforce these rules rather than replace them.
 
 ### Application layer
 
