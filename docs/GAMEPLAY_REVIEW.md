@@ -75,6 +75,10 @@ Show players improving, recovering, losing form, gaining confidence, and earning
 
 The resolver should determine the result first. The live match view then presents that result as a short, optional replay.
 
+### Current implementation status
+
+The first presentation slice is now available in the browser prototype. A result dialog offers an optional short replay driven by the resolver's event stream. The replay includes team markers, an event log, play and skip controls, a live status message, and a reduced-motion path that completes the event list without animation. It is intentionally a presentation layer; it does not change the stored result.
+
 ### Version 1 scope
 
 - 90 simulated seconds compressed into about two minutes
