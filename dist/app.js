@@ -73,10 +73,11 @@ import { createLocalGameStore } from './stores/local.js';
     pushNews(tone,`${club().name} ${us}–${them} ${opp.name}. ${us>them?'The board noted the impact of your selection and approach.':us===them?'The analysts see useful lessons in a balanced contest.':'The staff will review the tactical matchups before the next fixture.'}`);
     game.week++;
     if(game.week===game.fixtures.length){const pos=table().findIndex(t=>t.id===game.userClub)+1;pushNews('Season complete',`${club().name} finish ${ordinal(pos)} with ${club().stats.pts} points. Your career record has been saved on this device.`)}
-    save();showResult(result,us,them,opp,tone);render();
+    save();showResult(result,us,them,opp,tone,tactic);render();
   }
-  function showResult(r,us,them,opp,tone){
+  function showResult(r,us,them,opp,tone,tactic){
     const usHome=r.home.id===game.userClub;$('#resultScore').textContent=`${us} — ${them}`;$('#resultHeadline').textContent=`${tone} against ${opp.name}`;
+    const explanations={balanced:'Balanced kept the team adaptable across both phases.',press:'High press created more pressure, but the extra running will affect recovery.',counter:'Counter-attacking protected the shape and looked for space after turnovers.',control:'Control prioritized possession and reduced the match\'s volatility.'};$('#resultExplanation').textContent=explanations[tactic]||explanations.balanced;
     const events=r.events.map(event=>[event.minute,String(event.teamId)===String(club().id)?club().short:String(event.teamId)===String(opp.id)?opp.short:'MATCH',event.text]);
     $('#commentary').innerHTML=events.map(e=>`<p><b>${e[0]}′ ${e[1]}</b> <span>${e[2]}</span></p>`).join('');
     replayState={events:r.events,index:0,timer:null,result:{home:r.home,away:r.away,score:`${us} — ${them}`}};
