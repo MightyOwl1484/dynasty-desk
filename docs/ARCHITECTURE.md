@@ -47,6 +47,8 @@ Coordinates user actions and domain operations:
 
 The first scheduled-week orchestration lives in `src/application/league-workflow.js`. It turns submitted actions into locked snapshots, applies deterministic fallback actions for missed deadlines, and requires explicit resolving and publishing phases.
 
+`src/application/match-week-resolver.js` provides the host-neutral bridge from a locked league snapshot to replay-ready `MatchResults`. It selects the current week's fixtures, applies locked tactics, derives deterministic seeds, validates club references, and emits a `week_resolving` audit event. It does not write storage; `persistResolutionPlan` owns the SharePoint-facing transition to `resolving`.
+
 `src/application/admin-summary.js` is the first commissioner-shell view model. It exposes phase, deadline, resolver version, per-club submission status, role-aware actions, and audit history without leaking SharePoint response shapes into a React/SPFx component.
 
 The first React/SPFx host source is under `spfx/src/webparts/dynastyDesk`. It consumes that view model through props; it is intentionally scaffolded separately from the offline HTML build until a generated SPFx solution supplies the Microsoft dependencies and packaging configuration.
@@ -57,7 +59,7 @@ The first React/SPFx host source is under `spfx/src/webparts/dynastyDesk`. It co
 
 The SPFx scaffold now calls that lock path and reloads the admin context after success. Resolve and publish remain guarded until the result-payload service is connected; the UI reports that boundary explicitly rather than pretending those buttons perform tenant writes.
 
-The command layer now also supports publishing an injected result payload: immutable `MatchResults` are appended before the `week_published` audit event. A resolver service still owns producing those results.
+The command layer now also supports persisting a resolution plan and publishing an injected result payload: immutable `MatchResults` are appended before the `week_published` audit event. A future SPFx command can inject the resolution plan directly, while the browser and a server-authoritative worker can reuse the same resolver boundary.
 
 This layer owns validation and permissions at the product level, but it should not assume that the client is trusted in shared play.
 
