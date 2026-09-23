@@ -29,8 +29,9 @@ Contains rules that should work in any host:
 - Match resolution
 - Standings and statistics
 - League phase transitions
+- Role-based action permissions
 
-The domain layer should be deterministic and free of browser, SharePoint, React, Graph, and date-time UI dependencies.
+The domain layer should be deterministic and free of browser, SharePoint, React, Graph, and date-time UI dependencies. `src/domain/permissions.js` defines the shared commissioner, manager, and viewer policy; host permissions must reinforce it rather than replace it.
 
 ### Application layer
 
