@@ -50,6 +50,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in docs/PRODUCT_PLAN.md docs/ARCHITECTURE.md docs/SHAREPOINT_MULTIPLAYER.md CONTRIBUTING.md; do
+          for file in docs/PRODUCT_PLAN.md docs/ARCHITECTURE.md docs/SHAREPOINT_MULTIPLAYER.md docs/SHAREPOINT_PROVISIONING.md docs/DESIGN_REVIEW.md docs/GAMEPLAY_REVIEW.md CONTRIBUTING.md; do
             test -f "$file"
           done

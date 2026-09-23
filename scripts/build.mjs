@@ -10,4 +10,4 @@ await cp('src/application/league-workflow.js', 'dist/application/league-workflow
 await cp('src/stores/local.js', 'dist/stores/local.js');
 await cp('src/stores/game-store.js', 'dist/stores/game-store.js');
 await cp('src/stores/sharepoint.js', 'dist/stores/sharepoint.js');
-console.log('Copied domain modules to dist/domain.');
+console.log('Copied domain, application, and store modules to dist/.');
