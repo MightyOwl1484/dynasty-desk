@@ -43,6 +43,7 @@ import { createLocalGameStore } from './stores/local.js';
   }
   function save(){store.save(game)}
   function load(){return store.load()}
+  function updateTacticHelp(){const help={balanced:'Reliable shape; preserves fitness.',press:'More pressure and chances; increases fatigue.',counter:'Protects shape; rewards space behind the opponent.',control:'Keeps the ball; favors lower-risk chance creation.'};const select=$('#tacticSelect');if(select)$('#tacticHelp').textContent=help[select.value]||help.balanced}
   function exportSave(){if(!game)return;const blob=new Blob([JSON.stringify({schemaVersion:1,exportedAt:new Date().toISOString(),data:game},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`dynasty-desk-season-${game.season}-week-${game.week}.json`;link.click();URL.revokeObjectURL(url);flash('Career backup downloaded.');}
   async function importSave(file){try{game=store.importText(await file.text());selectedClub=game.userClub;render();flash('Career backup imported.')}catch{flash('That file could not be imported.');}}
   function club(id=game.userClub){return game.clubs[id]}
@@ -107,5 +108,6 @@ import { createLocalGameStore } from './stores/local.js';
   function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active-view',v.id===`${name}View`));$$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===name));$('.sidebar').classList.remove('open');if(name==='news')renderNews()}
   $('#startGame').onclick=()=>{makeGame(selectedClub);render()};$('#playMatch').onclick=playWeek;$('#exportSave').onclick=exportSave;$('#importSave').onclick=()=>$('#importFile').click();$('#importFile').onchange=event=>{const [file]=event.target.files;if(file)importSave(file);event.target.value=''};$('#resetGame').onclick=()=>{if(confirm('Start over? Your current career will be removed from this device.')){store.clear();game=null;selectedClub=null;render()}};
   $$('.nav-item').forEach(n=>n.onclick=()=>switchView(n.dataset.view));$$('[data-go]').forEach(n=>n.onclick=()=>switchView(n.dataset.go));$('#mobileMenu').onclick=()=>$('.sidebar').classList.toggle('open');$('#continueBtn').onclick=()=>$('#resultDialog').close();$('#replayBtn').onclick=()=>{$('#resultDialog').close();$('#replayDialog').showModal()};$('#replayClose').onclick=()=>{$('#replayDialog').close();if(replayState.timer)clearTimeout(replayState.timer);replayState.timer=null};$('#replayPlay').onclick=startReplay;$('#replaySkip').onclick=skipReplay;
-  if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});render();
+  $('#tacticSelect').onchange=updateTacticHelp;
+  if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});render();updateTacticHelp();
 })();
