@@ -15,6 +15,7 @@ Create the game on a dedicated modern SharePoint site, then apply [`spfx/sharepo
 - `Fixtures`
 - `ClubActions`
 - `MatchResults`
+- `ResolutionRuns`
 - `LeagueEvents`
 
 Index `LeagueId` on every list. Also index `MatchWeek` on `Fixtures` and `Status` on `ClubActions` and `MatchResults`. Views should filter by league before displaying event history so the design remains safe under SharePoint's list-view threshold.
@@ -32,8 +33,8 @@ The commissioner view should consume `src/application/admin-summary.js`. That ke
 1. Commissioner confirms the league is in `OPEN` and checks the deadline.
 2. Managers review their XI and submit actions.
 3. The commissioner locks the week; stale writes must be rejected by ETag.
-4. The resolver validates the locked snapshot and writes immutable `MatchResults` plus `LeagueEvents`.
-5. The commissioner publishes the results and advances the league to the next week.
+4. The resolver validates the locked snapshot and writes a pending `ResolutionRuns` payload plus `LeagueEvents`.
+5. The commissioner publishes the pending run; immutable `MatchResults` are appended before the run is marked published.
 6. Any correction creates a new result version and audit event; do not overwrite published history.
 
 The first lock mutation implementation is `src/application/admin-commands.js`. It requires the SharePoint item IDs and ETags for the league and each club action, then appends the generated `week_locked` events only after the state writes are issued.

@@ -22,18 +22,22 @@ export async function persistLockPlan(store, plan) {
 /** Persist the resolving phase and its audit event before publication. */
 export async function persistResolutionPlan(store, plan) {
   await store.updateLeague(plan.leagueRecord.itemId, plan.league, { etag: plan.leagueRecord.etag });
+  await store.appendResolutionRun(plan.resolutionRun);
   await Promise.all(plan.auditEvents.map((event) => store.appendLeagueEvent(event)));
   return plan;
 }
 
-export function createPublishPlan({ league, results, leagueRecord, actorId, publishedAt }) {
+export function createPublishPlan({ league, results, leagueRecord, resolutionRunRecord, actorId, publishedAt }) {
   const { league: nextLeague, results: publishedResults, auditEvents } = publishMatchWeek(league, results, publishedAt, { actorId });
-  return { league: nextLeague, results: publishedResults, auditEvents, leagueRecord };
+  return { league: nextLeague, results: publishedResults, auditEvents, leagueRecord, resolutionRunRecord };
 }
 
 export async function persistPublishPlan(store, plan) {
   await store.updateLeague(plan.leagueRecord.itemId, plan.league, { etag: plan.leagueRecord.etag });
   await Promise.all(plan.results.map((result) => store.appendMatchResult(result)));
+  if (plan.resolutionRunRecord) {
+    await store.updateResolutionRun(plan.resolutionRunRecord.itemId, { status: 'published', publishedAt: plan.results[0]?.publishedAt ?? null }, { etag: plan.resolutionRunRecord.etag });
+  }
   await Promise.all(plan.auditEvents.map((event) => store.appendLeagueEvent(event)));
   return plan;
 }

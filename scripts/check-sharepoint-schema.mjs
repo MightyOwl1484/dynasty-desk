@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { createProvisioningPlan } from '../src/stores/sharepoint-provisioning.js';
 
 const schema = JSON.parse(await readFile('spfx/sharepoint-schema.json', 'utf8'));
-const expected = ['Leagues', 'LeagueMembers', 'Clubs', 'Players', 'Fixtures', 'ClubActions', 'MatchResults', 'LeagueEvents'];
+const expected = ['Leagues', 'LeagueMembers', 'Clubs', 'Players', 'Fixtures', 'ClubActions', 'MatchResults', 'ResolutionRuns', 'LeagueEvents'];
 const titles = schema.lists.map((list) => list.title);
 const missing = expected.filter((title) => !titles.includes(title));
 if (schema.schemaVersion !== 1 || missing.length || !schema.roles?.commissioner || !schema.roles?.manager || !schema.roles?.viewer) {

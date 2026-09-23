@@ -32,6 +32,8 @@ test('resolution plan applies locked tactics and is deterministic', () => {
   assert.deepEqual(first.results, second.results);
   assert.equal(first.results[0].matchWeek, 3);
   assert.equal(first.results[0].leagueId, 'league-1');
+  assert.equal(first.resolutionRun.status, 'pending');
+  assert.deepEqual(first.resolutionRun.results, first.results);
   assert.equal(first.auditEvents[0].type, 'week_resolving');
 });
 
@@ -44,7 +46,8 @@ test('resolution persistence updates the league before its audit event', async (
   const calls = [];
   await persistResolutionPlan({
     updateLeague: async (...args) => calls.push(['league', ...args]),
+    appendResolutionRun: async (...args) => calls.push(['run', ...args]),
     appendLeagueEvent: async (...args) => calls.push(['event', ...args])
-  }, { leagueRecord: { itemId: 10, etag: '"5"' }, league: { phase: 'resolving' }, auditEvents: [{ id: 'event-1' }] });
-  assert.deepEqual(calls.map(([kind]) => kind), ['league', 'event']);
+  }, { leagueRecord: { itemId: 10, etag: '"5"' }, league: { phase: 'resolving' }, resolutionRun: { id: 'run-1' }, auditEvents: [{ id: 'event-1' }] });
+  assert.deepEqual(calls.map(([kind]) => kind), ['league', 'run', 'event']);
 });

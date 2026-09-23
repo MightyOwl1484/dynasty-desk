@@ -5,7 +5,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 import { DynastyDesk } from './components/DynastyDesk';
 import { IAdminSummary, IDynastyDeskProps } from './components/IDynastyDeskProps';
 import { loadAdminContext } from '../../../../src/application/admin-service';
-import { createLockPlan, persistLockPlan, persistResolutionPlan } from '../../../../src/application/admin-commands';
+import { createLockPlan, createPublishPlan, persistLockPlan, persistPublishPlan, persistResolutionPlan } from '../../../../src/application/admin-commands';
 import { createResolutionPlan } from '../../../../src/application/match-week-resolver';
 import { createSharePointGameStore } from '../../../../src/stores/sharepoint';
 import { createSpfxListClient } from '../../../../src/stores/spfx-client';
@@ -53,7 +53,10 @@ export default class DynastyDeskWebPart extends BaseClientSideWebPart<IDynastyDe
         const plan = createResolutionPlan({ league: this.adminContext.league, fixtures: this.adminContext.fixtures, clubsById: this.adminContext.clubsById, actions: this.adminContext.actions, actorId: this.context.pageContext.user.loginName, resolvedAt: new Date().toISOString() });
         await persistResolutionPlan(this.store, { ...plan, leagueRecord: this.adminContext.leagueRecord });
       } else {
-        throw new Error('Publish awaits durable pending-result storage so a page reload cannot lose the resolved payload.');
+        const pendingRun = this.adminContext.pendingRun;
+        if (!pendingRun || !this.adminContext.resolutionRunRecord) throw new Error('No pending resolution run is available to publish.');
+        const plan = createPublishPlan({ league: this.adminContext.league, results: pendingRun.results, leagueRecord: this.adminContext.leagueRecord, resolutionRunRecord: this.adminContext.resolutionRunRecord, actorId: this.context.pageContext.user.loginName, publishedAt: new Date().toISOString() });
+        await persistPublishPlan(this.store, plan);
       }
       await this.refreshSummary();
     } };

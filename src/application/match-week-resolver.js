@@ -56,5 +56,21 @@ export function createResolutionPlan({
     timestamp: resolvedAt
   });
 
-  return { league: nextLeague, results, auditEvents: [auditEvent] };
+  const runId = `${league.id}:week:${matchWeek}:run:${nextLeague.phaseVersion}`;
+  return {
+    league: nextLeague,
+    results,
+    resolutionRun: {
+      id: runId,
+      leagueId: league.id,
+      matchWeek,
+      status: 'pending',
+      results,
+      resolverVersion: league.resolverVersion ?? '0.1.0',
+      createdAt: resolvedAt,
+      createdBy: actorId,
+      publishedAt: null
+    },
+    auditEvents: [auditEvent]
+  };
 }

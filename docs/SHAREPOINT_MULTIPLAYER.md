@@ -44,6 +44,10 @@ League, fixture or match week, club, manager, lineup, formation, tactics, traini
 
 League, fixture, score, events, statistics, seed, resolver version, published time.
 
+### `ResolutionRuns`
+
+One pending or published result payload per league and match week. This durable handoff lets a commissioner reload the page between Resolve and Publish without regenerating or losing results. Pending payloads are JSON snapshots; published `MatchResults` remain append-only.
+
 ### `LeagueEvents`
 
 League, event type, title, message, related object, actor, timestamp.
@@ -71,7 +75,7 @@ Rules:
 - Managers can edit actions during `OPEN`.
 - Actions are read-only in `LOCKED`.
 - Only the resolver/commissioner can transition `LOCKED` to `RESOLVING`.
-- Results are immutable after `PUBLISHED`.
+- Results are immutable after `PUBLISHED`; the pending resolution run is the only mutable handoff record.
 - Any correction creates an audit event and a new result version rather than silently overwriting history.
 
 ## Conflict handling

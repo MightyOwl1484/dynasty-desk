@@ -57,7 +57,7 @@ The first React/SPFx host source is under `spfx/src/webparts/dynastyDesk`. It co
 
 `src/application/admin-commands.js` owns the first write path. It creates a lock plan, persists the league and club-action snapshots with ETags, then appends audit events. This ordering is explicit so a future retry/conflict UI can report which stage failed without hiding a partial tenant write.
 
-The SPFx scaffold now calls that lock path and reloads the admin context after success. Resolve and publish remain guarded until the result-payload service is connected; the UI reports that boundary explicitly rather than pretending those buttons perform tenant writes.
+The SPFx scaffold calls the lock path and reloads the admin context after success. It now reads tenant fixtures, clubs, players, and pending resolution runs. Resolve persists a deterministic pending payload; Publish reloads that payload, appends immutable results, marks the handoff published with an ETag, and reloads the commissioner view.
 
 The command layer now also supports persisting a resolution plan and publishing an injected result payload: immutable `MatchResults` are appended before the `week_published` audit event. A future SPFx command can inject the resolution plan directly, while the browser and a server-authoritative worker can reuse the same resolver boundary.
 

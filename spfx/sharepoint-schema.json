@@ -8,6 +8,7 @@
     { "title": "Fixtures", "fields": ["LeagueId", "FixtureId", "MatchWeek", "HomeClubId", "AwayClubId", "Deadline", "Status", "ResultId"], "indexed": ["LeagueId", "MatchWeek", "Status"] },
     { "title": "ClubActions", "fields": ["LeagueId", "MatchWeek", "ClubId", "ManagerId", "Lineup", "Formation", "Tactic", "TrainingFocus", "Status", "SubmittedAt", "LockedAt"], "indexed": ["LeagueId", "MatchWeek", "Status"] },
     { "title": "MatchResults", "fields": ["LeagueId", "FixtureId", "HomeGoals", "AwayGoals", "Events", "Seed", "ResolverVersion", "PublishedAt"], "indexed": ["LeagueId", "FixtureId"] },
+    { "title": "ResolutionRuns", "fields": ["LeagueId", "RunId", "MatchWeek", "Status", "Results", "ResolverVersion", "CreatedAt", "CreatedBy", "PublishedAt"], "indexed": ["LeagueId", "MatchWeek", "Status"] },
     { "title": "LeagueEvents", "fields": ["LeagueId", "EventId", "Type", "ActorId", "Message", "RelatedId", "Timestamp"], "indexed": ["LeagueId", "Timestamp"] }
   ],
   "roles": { "commissioner": "manage league setup and resolution", "manager": "edit assigned ClubActions", "viewer": "read published league state" }

@@ -18,6 +18,9 @@ export async function loadAdminContext(store, viewerRole) {
     typeof store.getClubs === 'function' ? store.getClubs() : [],
     typeof store.getPlayers === 'function' ? store.getPlayers() : []
   ]);
+  const resolutionRuns = typeof store.getResolutionRuns === 'function'
+    ? await store.getResolutionRuns(league.MatchWeek ?? league.matchWeek)
+    : [];
   const normalizedLeague = {
     ...league,
     id: league.id ?? league.LeagueId,
@@ -86,6 +89,20 @@ export async function loadAdminContext(store, viewerRole) {
     };
     return result;
   }, {});
+  const pendingRun = resolutionRuns
+    .map((run) => ({
+      ...run,
+      id: run.id ?? run.RunId,
+      leagueId: run.leagueId ?? run.LeagueId,
+      matchWeek: run.matchWeek ?? run.MatchWeek,
+      status: run.status ?? run.Status,
+      results: typeof (run.results ?? run.Results) === 'string'
+        ? JSON.parse(run.results ?? run.Results)
+        : (run.results ?? run.Results ?? []),
+      resolverVersion: run.resolverVersion ?? run.ResolverVersion,
+      publishedAt: run.publishedAt ?? run.PublishedAt
+    }))
+    .find((run) => run.status === 'pending');
   return {
     summary: createAdminSummary({
     league: normalizedLeague,
@@ -95,6 +112,8 @@ export async function loadAdminContext(store, viewerRole) {
     actions: normalizedActions,
     fixtures: normalizedFixtures,
     clubsById,
+    pendingRun,
+    resolutionRunRecord: pendingRun ? { itemId: pendingRun.Id ?? pendingRun.id, etag: pendingRun['@odata.etag'] ?? pendingRun.ETag } : undefined,
     leagueRecord: { itemId: league.Id ?? league.id, etag: league['@odata.etag'] ?? league.ETag },
     actionRecords: actions.map((action) => ({ itemId: action.Id ?? action.id, etag: action['@odata.etag'] ?? action.ETag, clubId: action.ClubId ?? action.clubId }))
   };

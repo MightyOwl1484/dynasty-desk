@@ -61,6 +61,23 @@ test('SharePoint store exposes clubs and players for resolution', async () => {
   ]);
 });
 
+test('SharePoint store persists and updates pending resolution runs with ETags', async () => {
+  const calls = [];
+  const store = createSharePointGameStore({
+    query: async (...args) => { calls.push(['query', ...args]); return []; },
+    update: async (...args) => { calls.push(['update', ...args]); return null; },
+    create: async (...args) => { calls.push(['create', ...args]); return null; }
+  }, 'league-7');
+  await store.getResolutionRuns(4);
+  await store.appendResolutionRun({ id: 'run-1', leagueId: 'league-7', matchWeek: 4, status: 'pending', results: [{ fixtureId: 'f1' }], resolverVersion: '0.1.0', createdAt: '2026-09-24T18:00:00Z', createdBy: 'u1', publishedAt: null });
+  await store.updateResolutionRun(22, { Status: 'published' }, { etag: '"3"' });
+  assert.deepEqual(calls, [
+    ['query', 'ResolutionRuns', { LeagueId: 'league-7', MatchWeek: 4 }],
+    ['create', 'ResolutionRuns', { LeagueId: 'league-7', RunId: 'run-1', MatchWeek: 4, Status: 'pending', Results: '[{"fixtureId":"f1"}]', ResolverVersion: '0.1.0', CreatedAt: '2026-09-24T18:00:00Z', CreatedBy: 'u1', PublishedAt: null }],
+    ['update', 'ResolutionRuns', 22, { Status: 'published' }, { etag: '"3"' }]
+  ]);
+});
+
 test('SharePoint store exposes ETag league updates and append-only events', async () => {
   const calls = [];
   const store = createSharePointGameStore({

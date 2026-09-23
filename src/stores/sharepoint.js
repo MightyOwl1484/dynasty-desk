@@ -11,6 +11,31 @@ export function createSharePointGameStore(client, leagueId) {
   }
   if (!leagueId) throw new TypeError('leagueId is required.');
 
+  const toMatchResultRow = (result) => result.LeagueId
+    ? result
+    : {
+      LeagueId: result.leagueId ?? leagueId,
+      FixtureId: result.fixtureId,
+      HomeGoals: result.homeGoals,
+      AwayGoals: result.awayGoals,
+      Events: JSON.stringify(result.events ?? []),
+      Seed: result.seed,
+      ResolverVersion: result.resolverVersion,
+      PublishedAt: result.publishedAt
+    };
+
+  const toResolutionRunRow = (run) => ({
+    LeagueId: run.leagueId ?? leagueId,
+    RunId: run.id,
+    MatchWeek: run.matchWeek,
+    Status: run.status,
+    Results: JSON.stringify(run.results ?? []),
+    ResolverVersion: run.resolverVersion,
+    CreatedAt: run.createdAt,
+    CreatedBy: run.createdBy,
+    PublishedAt: run.publishedAt
+  });
+
   return {
     async loadLeague() {
       const rows = await client.query('Leagues', { LeagueId: leagueId });
@@ -26,6 +51,11 @@ export function createSharePointGameStore(client, leagueId) {
     },
     async getPlayers() {
       return client.query('Players', { LeagueId: leagueId });
+    },
+    async getResolutionRuns(matchWeek) {
+      const filter = { LeagueId: leagueId };
+      if (matchWeek !== undefined) filter.MatchWeek = matchWeek;
+      return client.query('ResolutionRuns', filter);
     },
     async getMembers() {
       return client.query('LeagueMembers', { LeagueId: leagueId });
@@ -52,7 +82,15 @@ export function createSharePointGameStore(client, leagueId) {
     },
     async appendMatchResult(result) {
       if (typeof client.create !== 'function') throw new TypeError('The SharePoint client must support creates for immutable results.');
-      return client.create('MatchResults', result);
+      return client.create('MatchResults', toMatchResultRow(result));
+    },
+    async appendResolutionRun(run) {
+      if (typeof client.create !== 'function') throw new TypeError('The SharePoint client must support creates for resolution runs.');
+      return client.create('ResolutionRuns', toResolutionRunRow(run));
+    },
+    async updateResolutionRun(itemId, payload, { etag } = {}) {
+      if (!itemId || !etag) throw new TypeError('itemId and etag are required for optimistic updates.');
+      return client.update('ResolutionRuns', itemId, payload, { etag });
     }
   };
 }
