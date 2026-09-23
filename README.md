@@ -49,6 +49,7 @@ The validation loop is intentionally small and reproducible:
 node scripts/build.mjs
 node --test
 node --check dist/app.js
+node scripts/check-a11y.mjs
 ```
 
 The solo prototype saves through a versioned local-store adapter. That keeps browser persistence replaceable when the SharePoint-backed organization adapter is introduced.

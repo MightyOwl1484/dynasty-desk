@@ -77,7 +77,7 @@ The resolver should determine the result first. The live match view then present
 
 ### Current implementation status
 
-The first presentation slice is now available in the browser prototype. A result dialog offers an optional short replay driven by the resolver's event stream. The replay includes team markers, an event log, play and skip controls, a live status message, and a reduced-motion path that completes the event list without animation. It is intentionally a presentation layer; it does not change the stored result.
+The first presentation slice is now available in the browser prototype. A result dialog offers an optional short replay driven by the resolver's event stream. The replay includes team markers, an event log, play, pause, speed, and skip controls, a live status message, and a reduced-motion path that completes the event list without animation. The match desk also explains the tradeoff behind each tactical approach, and the result dialog explains the chosen approach after full time. These are presentation layers; they do not change the stored result.
 
 ### Version 1 scope
 
@@ -143,3 +143,8 @@ Before accepting a gameplay feature, ask:
 - Does it work with keyboard and reduced motion?
 - Can the player skip or recover from it?
 - Does it make the next week more interesting?
+
+## Current quality gates
+
+- `node --test` covers deterministic domain rules, workflow transitions, persistence, permissions, and SharePoint adapter behavior.
+- `node scripts/check-a11y.mjs` checks the static HTML landmarks, dialogs, live regions, labels, and backup controls used by the solo and future organization experiences.
