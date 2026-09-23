@@ -13,7 +13,8 @@ const required = [
   ['replay status', /id="replayStatus"[^>]*role="status"[^>]*aria-live="polite"/],
   ['tactic guidance', /id="tacticHelp"[^>]*role="status"[^>]*aria-live="polite"/],
   ['backup import type', /id="importFile"[^>]*type="file"[^>]*accept="application\/json/],
-  ['replay speed label', /id="replaySpeed"[^>]*aria-label="Replay speed"/]
+  ['replay speed label', /id="replaySpeed"[^>]*aria-label="Replay speed"/],
+  ['game heading can receive focus after setup', /id="greeting"[^>]*tabindex="-1"/]
 ];
 
 const adminRequired = [
