@@ -5,6 +5,7 @@
   "description": "HTML-first fictional soccer management game",
   "type": "module",
   "scripts": {
+    "build": "node scripts/build.mjs",
     "test": "node --test",
     "check": "node --check dist/app.js"
   },

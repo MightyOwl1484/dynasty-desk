@@ -29,6 +29,9 @@ jobs:
       - name: Run domain tests
         run: node --test
 
+      - name: Build browser domain modules
+        run: node scripts/build.mjs
+
       - name: Check required prototype files
         shell: bash
         run: |

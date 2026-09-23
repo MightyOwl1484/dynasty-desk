@@ -1,3 +1,6 @@
+import { createFixture } from './domain/models.js';
+import { resolveFixture } from './domain/simulation.js';
+
 (() => {
   'use strict';
   const CLUBS = [
@@ -47,10 +50,11 @@
   }
   function simulate(f,tactic){
     const home=club(f.home),away=club(f.away);const userHome=f.home===game.userClub;
-    const hs=teamStrength(home,userHome?tactic:'balanced'),as=teamStrength(away,!userHome?tactic:'balanced');
-    const diff=(hs-as)/12;const hx=Math.max(.25,1.28+diff+(userHome&&tactic==='press'?.16:0));const ax=Math.max(.2,1.02-diff+(!userHome&&tactic==='counter'?.1:0));
-    const hg=Math.min(6,poisson(hx)),ag=Math.min(6,poisson(ax));f.played=true;f.score=[hg,ag];updateStats(home,away,hg,ag);assignGoals(home,hg);assignGoals(away,ag);return{home,away,hg,ag,hx,ax};
+    const fixture=createFixture({id:`${game.week}-${f.home}-${f.away}`,homeClubId:String(home.id),awayClubId:String(away.id),status:f.played?'played':'scheduled'});
+    const result=resolveFixture({fixture,homeClub:toDomainClub(home),awayClub:toDomainClub(away),homeTactic:userHome?tactic:'balanced',awayTactic:userHome?'balanced':tactic,seed:game.seed});
+    const hg=result.homeGoals,ag=result.awayGoals;f.played=true;f.score=[hg,ag];game.seed=(game.seed+97)>>>0;updateStats(home,away,hg,ag);assignGoals(home,hg);assignGoals(away,ag);return{home,away,hg,ag};
   }
+  function toDomainClub(team){return{id:String(team.id),name:team.name,reputation:team.reputation,players:team.players.map(p=>({id:p.id,name:p.name,position:p.pos,rating:p.rating,potential:p.potential,fitness:p.fitness,starting:p.starting}))}}
   function updateStats(h,a,hg,ag){h.stats.p++;a.stats.p++;h.stats.gf+=hg;h.stats.ga+=ag;a.stats.gf+=ag;a.stats.ga+=hg;if(hg>ag){h.stats.w++;a.stats.l++;h.stats.pts+=3}else if(ag>hg){a.stats.w++;h.stats.l++;a.stats.pts+=3}else{h.stats.d++;a.stats.d++;h.stats.pts++;a.stats.pts++}}
   function assignGoals(team,n){const xi=team.players.filter(p=>p.starting);xi.forEach(p=>p.apps++);for(let i=0;i<n;i++){const pool=xi.flatMap(p=>Array(p.pos==='FWD'?5:p.pos==='MID'?3:1).fill(p));pool[Math.floor(rand()*pool.length)].goals++}}
   function conditionSquads(){game.clubs.forEach(t=>t.players.forEach(p=>{p.fitness=Math.min(100,Math.max(55,p.fitness+(p.starting?-(5+Math.floor(rand()*8)):4)));if(game.week%4===0&&p.age<25&&p.rating<p.potential&&rand()<.17)p.rating++}))}
@@ -88,7 +92,7 @@
   function flash(msg){const old=$('.save-state span').textContent;$('.save-state span').textContent=msg;setTimeout(()=>$('.save-state span').textContent=old,1800)}
   function renderTable(){const c=club();$('#fullTable').innerHTML=table().map((t,i)=>`<tr class="${t.id===c.id?'you':''}"><td>${i+1}</td><td><span class="team-cell"><i class="table-dot" style="--team:${t.color}"></i>${t.name}</span></td><td>${t.stats.p}</td><td>${t.stats.w}</td><td>${t.stats.d}</td><td>${t.stats.l}</td><td>${t.stats.gf-t.stats.ga}</td><td><b>${t.stats.pts}</b></td></tr>`).join('')}
   function renderNews(){game.news.forEach(n=>n.read=true);save();$('#newsBadge').textContent='';$('#newsList').innerHTML=game.news.map(n=>`<article class="news-item"><time>WEEK ${n.week+1}</time><div><h3>${n.title}</h3><p>${n.text}</p></div></article>`).join('')}
-  function renderPicker(){const root=$('#clubPicker');root.innerHTML=CLUBS.map(c=>`<button class="club-option" data-club="${c.id}"><b style="color:${c.color}">${c.short}</b><span>${c.name}</span></button>`).join('');$$('[data-club]').forEach(b=>b.onclick=()=>{selectedClub=+b.dataset.club;$$('[data-club]').forEach(x=>x.classList.toggle('selected',x===b));$('#startGame').disabled=false})}
+  function renderPicker(){const root=$('#clubPicker');root.innerHTML=CLUBS.map(c=>`<button class="club-option" data-club="${c.id}" aria-pressed="${c.id===selectedClub}"><b style="color:${c.color}">${c.short}</b><span>${c.name}</span></button>`).join('');$$('[data-club]').forEach(b=>b.onclick=()=>{selectedClub=+b.dataset.club;$$('[data-club]').forEach(x=>{const selected=x===b;x.classList.toggle('selected',selected);x.setAttribute('aria-pressed',String(selected))});$('#startGame').disabled=false})}
   function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active-view',v.id===`${name}View`));$$('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.view===name));$('.sidebar').classList.remove('open');if(name==='news')renderNews()}
   $('#startGame').onclick=()=>{makeGame(selectedClub);render()};$('#playMatch').onclick=playWeek;$('#resetGame').onclick=()=>{if(confirm('Start over? Your current career will be removed from this device.')){localStorage.removeItem(SAVE_KEY);game=null;selectedClub=null;render()}};
   $$('.nav-item').forEach(n=>n.onclick=()=>switchView(n.dataset.view));$$('[data-go]').forEach(n=>n.onclick=()=>switchView(n.dataset.go));$('#mobileMenu').onclick=()=>$('.sidebar').classList.toggle('open');$('.dialog-close').onclick=$('#continueBtn').onclick=()=>$('#resultDialog').close();
