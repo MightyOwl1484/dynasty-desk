@@ -36,6 +36,8 @@ The commissioner view should consume `src/application/admin-summary.js`. That ke
 5. The commissioner publishes the results and advances the league to the next week.
 6. Any correction creates a new result version and audit event; do not overwrite published history.
 
+The first lock mutation implementation is `src/application/admin-commands.js`. It requires the SharePoint item IDs and ETags for the league and each club action, then appends the generated `week_locked` events only after the state writes are issued.
+
 ## Accessibility and support checks
 
 Before publishing the web part, verify keyboard access to club assignment, action submission, lock/resolve controls, and result dialogs. Every state change needs a visible status and an assistive-technology announcement. Do not rely on color alone for club identity or match status. Keep the commissioner view usable at narrow widths and with reduced motion enabled.

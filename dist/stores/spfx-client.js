@@ -29,6 +29,15 @@ export function createSpfxListClient({ spHttpClient, configuration, webAbsoluteU
       });
       if (!response.ok) throw new Error(`SharePoint update failed (${response.status}).`);
       return response.status === 204 ? null : response.json();
+    },
+    async create(list, payload) {
+      const response = await spHttpClient.fetch(listUrl(list, '/items'), configuration, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json;odata=nometadata' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error(`SharePoint create failed (${response.status}).`);
+      return response.json();
     }
   };
 }

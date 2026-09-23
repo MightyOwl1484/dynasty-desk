@@ -53,6 +53,8 @@ The first React/SPFx host source is under `spfx/src/webparts/dynastyDesk`. It co
 
 `src/application/admin-service.js` is the host handoff: it loads the four SharePoint read surfaces, normalizes list column casing, and returns `admin-summary.js` output. This is the seam the generated web part should call when replacing its current `summaryJson` preview property.
 
+`src/application/admin-commands.js` owns the first write path. It creates a lock plan, persists the league and club-action snapshots with ETags, then appends audit events. This ordering is explicit so a future retry/conflict UI can report which stage failed without hiding a partial tenant write.
+
 This layer owns validation and permissions at the product level, but it should not assume that the client is trusted in shared play.
 
 ### Persistence layer

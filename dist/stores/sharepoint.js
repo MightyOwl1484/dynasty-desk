@@ -35,6 +35,14 @@ export function createSharePointGameStore(client, leagueId) {
     async saveClubActions(actions, { itemId, etag } = {}) {
       if (!itemId || !etag) throw new TypeError('itemId and etag are required for optimistic updates.');
       return client.update('ClubActions', itemId, actions, { etag });
+    },
+    async updateLeague(itemId, league, { etag } = {}) {
+      if (!itemId || !etag) throw new TypeError('itemId and etag are required for optimistic updates.');
+      return client.update('Leagues', itemId, league, { etag });
+    },
+    async appendLeagueEvent(event) {
+      if (typeof client.create !== 'function') throw new TypeError('The SharePoint client must support creates for audit events.');
+      return client.create('LeagueEvents', event);
     }
   };
 }

@@ -46,3 +46,18 @@ test('SharePoint store exposes the reads required by the commissioner service', 
     ['LeagueEvents', { LeagueId: 'league-7' }]
   ]);
 });
+
+test('SharePoint store exposes ETag league updates and append-only events', async () => {
+  const calls = [];
+  const store = createSharePointGameStore({
+    query: async () => [],
+    update: async (...args) => { calls.push(['update', ...args]); return null; },
+    create: async (...args) => { calls.push(['create', ...args]); return null; }
+  }, 'league-7');
+  await store.updateLeague(3, { Phase: 'locked' }, { etag: '"2"' });
+  await store.appendLeagueEvent({ LeagueId: 'league-7', Type: 'week_locked' });
+  assert.deepEqual(calls, [
+    ['update', 'Leagues', 3, { Phase: 'locked' }, { etag: '"2"' }],
+    ['create', 'LeagueEvents', { LeagueId: 'league-7', Type: 'week_locked' }]
+  ]);
+});

@@ -10,6 +10,7 @@ await cp('src/domain/audit.js', 'dist/domain/audit.js');
 await cp('src/application/league-workflow.js', 'dist/application/league-workflow.js');
 await cp('src/application/admin-summary.js', 'dist/application/admin-summary.js');
 await cp('src/application/admin-service.js', 'dist/application/admin-service.js');
+await cp('src/application/admin-commands.js', 'dist/application/admin-commands.js');
 await cp('src/stores/local.js', 'dist/stores/local.js');
 await cp('src/stores/game-store.js', 'dist/stores/game-store.js');
 await cp('src/stores/sharepoint.js', 'dist/stores/sharepoint.js');

@@ -25,3 +25,14 @@ test('SPFx client sends ETag-protected MERGE updates', async () => {
   assert.equal(request[2].headers['X-HTTP-Method'], 'MERGE');
   assert.equal(request[2].body, JSON.stringify({ Tactic: 'counter' }));
 });
+
+test('SPFx client creates append-only list events', async () => {
+  let request;
+  const client = createSpfxListClient({
+    spHttpClient: { fetch: async (...args) => { request = args; return { ok: true, status: 201, json: async () => ({ Id: 9 }) }; } },
+    configuration: 'v1', webAbsoluteUrl: 'https://tenant/sites/game'
+  });
+  assert.deepEqual(await client.create('LeagueEvents', { LeagueId: 'league-1' }), { Id: 9 });
+  assert.equal(request[2].method, 'POST');
+  assert.equal(request[2].body, JSON.stringify({ LeagueId: 'league-1' }));
+});
