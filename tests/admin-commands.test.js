@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createLockPlan, persistLockPlan } from '../src/application/admin-commands.js';
+import { createLockPlan, createPublishPlan, persistLockPlan, persistPublishPlan } from '../src/application/admin-commands.js';
 import { createClubActions } from '../src/domain/league.js';
 
 test('lock command creates a complete league/action/audit plan', () => {
@@ -29,4 +29,16 @@ test('lock command persists league, action, and audit writes', async () => {
     appendLeagueEvent: async (...args) => calls.push(['event', ...args])
   }, plan);
   assert.deepEqual(calls.map(([kind]) => kind).sort(), ['action', 'event', 'league']);
+});
+
+test('publish command persists immutable results before its audit event', async () => {
+  const calls = [];
+  const plan = createPublishPlan({ league: { id: 'league-1', phase: 'resolving', phaseVersion: 3, matchWeek: 3 }, results: [{ fixtureId: 'f1', homeGoals: 2, awayGoals: 1 }], leagueRecord: { itemId: 10, etag: '"9"' }, actorId: 'commissioner-1', publishedAt: '2026-09-24T18:00:00Z' });
+  await persistPublishPlan({
+    updateLeague: async (...args) => calls.push(['league', ...args]),
+    appendMatchResult: async (...args) => calls.push(['result', ...args]),
+    appendLeagueEvent: async (...args) => calls.push(['event', ...args])
+  }, plan);
+  assert.equal(plan.league.phase, 'published');
+  assert.deepEqual(calls.map(([kind]) => kind).sort(), ['event', 'league', 'result']);
 });

@@ -61,3 +61,10 @@ test('SharePoint store exposes ETag league updates and append-only events', asyn
     ['create', 'LeagueEvents', { LeagueId: 'league-7', Type: 'week_locked' }]
   ]);
 });
+
+test('SharePoint store appends immutable match results', async () => {
+  let call;
+  const store = createSharePointGameStore({ query: async () => [], update: async () => null, create: async (...args) => { call = args; return null; } }, 'league-7');
+  await store.appendMatchResult({ LeagueId: 'league-7', FixtureId: 'f1' });
+  assert.deepEqual(call, ['MatchResults', { LeagueId: 'league-7', FixtureId: 'f1' }]);
+});

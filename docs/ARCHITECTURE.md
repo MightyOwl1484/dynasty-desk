@@ -57,6 +57,8 @@ The first React/SPFx host source is under `spfx/src/webparts/dynastyDesk`. It co
 
 The SPFx scaffold now calls that lock path and reloads the admin context after success. Resolve and publish remain guarded until the result-payload service is connected; the UI reports that boundary explicitly rather than pretending those buttons perform tenant writes.
 
+The command layer now also supports publishing an injected result payload: immutable `MatchResults` are appended before the `week_published` audit event. A resolver service still owns producing those results.
+
 This layer owns validation and permissions at the product level, but it should not assume that the client is trusted in shared play.
 
 ### Persistence layer

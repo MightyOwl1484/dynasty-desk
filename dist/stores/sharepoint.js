@@ -43,6 +43,10 @@ export function createSharePointGameStore(client, leagueId) {
     async appendLeagueEvent(event) {
       if (typeof client.create !== 'function') throw new TypeError('The SharePoint client must support creates for audit events.');
       return client.create('LeagueEvents', event);
+    },
+    async appendMatchResult(result) {
+      if (typeof client.create !== 'function') throw new TypeError('The SharePoint client must support creates for immutable results.');
+      return client.create('MatchResults', result);
     }
   };
 }
