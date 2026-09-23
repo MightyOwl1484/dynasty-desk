@@ -33,6 +33,7 @@ Read the project plan and architecture documents before making substantial chang
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — game layers, domain model, and persistence boundary
 - [`docs/SHAREPOINT_MULTIPLAYER.md`](docs/SHAREPOINT_MULTIPLAYER.md) — SPFx, SharePoint lists, scheduled matches, and multiplayer rules
 - [`docs/DESIGN_REVIEW.md`](docs/DESIGN_REVIEW.md) — initial visual, accessibility, game-feel, and administrative review
+- [`docs/GAMEPLAY_REVIEW.md`](docs/GAMEPLAY_REVIEW.md) — fun, accessibility, onboarding, and live-match direction
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow and definition of done
 
 ## Development workflow
