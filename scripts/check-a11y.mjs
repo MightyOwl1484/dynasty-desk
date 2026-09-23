@@ -14,7 +14,8 @@ const required = [
   ['tactic guidance', /id="tacticHelp"[^>]*role="status"[^>]*aria-live="polite"/],
   ['backup import type', /id="importFile"[^>]*type="file"[^>]*accept="application\/json/],
   ['replay speed label', /id="replaySpeed"[^>]*aria-label="Replay speed"/],
-  ['game heading can receive focus after setup', /id="greeting"[^>]*tabindex="-1"/]
+  ['game heading can receive focus after setup', /id="greeting"[^>]*tabindex="-1"/],
+  ['mobile navigation state', /id="mobileMenu"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/]
 ];
 
 const adminRequired = [

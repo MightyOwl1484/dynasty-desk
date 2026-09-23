@@ -27,7 +27,7 @@
   </div>
 
   <main id="game" class="game-shell" hidden aria-labelledby="greeting">
-    <aside class="sidebar">
+    <aside id="sidebar" class="sidebar" aria-label="Club office navigation" aria-hidden="false">
       <section class="club-identity">
         <div id="clubCrest" class="club-crest"></div>
         <div><p class="eyebrow">Club office</p><h2 id="clubName"></h2><span id="clubMeta"></span></div>
@@ -47,7 +47,7 @@
     <section class="workspace">
       <div class="mobile-clubbar">
         <div id="mobileCrest" class="mini-crest"></div><strong id="mobileClub"></strong>
-        <button id="mobileMenu" aria-label="Open navigation">Menu</button>
+        <button id="mobileMenu" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">Menu</button>
       </div>
 
       <section id="deskView" class="view active-view">

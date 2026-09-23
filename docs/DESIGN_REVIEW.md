@@ -132,6 +132,8 @@ The first reviewable commissioner console is available at `dist/commissioner.htm
 
 Administrative controls should use explicit labels, confirmation for irreversible transitions, clear error recovery, and a visible audit trail.
 
+The HTML shell now exposes mobile navigation state through `aria-expanded` and `aria-hidden`, moves focus into an opened menu, returns focus on close, and closes on Escape. A narrow-device smoke test remains part of the browser/SPFx release checklist because the local in-app browser reports a desktop-width viewport during automated review.
+
 ## Priority order
 
 1. Preserve the current playable solo loop.
