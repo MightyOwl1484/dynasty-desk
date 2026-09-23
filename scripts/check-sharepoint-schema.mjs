@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { createProvisioningPlan } from '../src/stores/sharepoint-provisioning.js';
 
 const schema = JSON.parse(await readFile('spfx/sharepoint-schema.json', 'utf8'));
 const expected = ['Leagues', 'LeagueMembers', 'Clubs', 'Players', 'Fixtures', 'ClubActions', 'MatchResults', 'LeagueEvents'];
@@ -11,4 +12,7 @@ for (const list of schema.lists) {
   if (!list.indexed?.includes('LeagueId')) throw new Error(`${list.title} must index LeagueId.`);
   if (!list.fields.includes('LeagueId')) throw new Error(`${list.title} must contain LeagueId.`);
 }
-console.log(`SharePoint schema checks passed (${schema.lists.length} lists).`);
+const plan = createProvisioningPlan(schema);
+const expectedOperations = schema.lists.reduce((count, list) => count + 1 + list.fields.length + list.indexed.length, 0);
+if (plan.length !== expectedOperations) throw new Error('Provisioning plan does not cover every schema operation.');
+console.log(`SharePoint schema checks passed (${schema.lists.length} lists, ${plan.length} operations).`);
