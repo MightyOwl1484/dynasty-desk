@@ -34,6 +34,12 @@ Read the project plan and architecture documents before making substantial chang
 - [`docs/SHAREPOINT_MULTIPLAYER.md`](docs/SHAREPOINT_MULTIPLAYER.md) — SPFx, SharePoint lists, scheduled matches, and multiplayer rules
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow and definition of done
 
+## Development workflow
+
+Use an issue for a meaningful change, create a focused branch, and open a pull request into `main`. GitHub Actions validates the prototype on pushes and pull requests.
+
+The first implementation branch is `feature/domain-model`, which will extract the game state and simulation rules from the current static build.
+
 ## Design principles
 
 1. Fictional data first. The game should be enjoyable without requiring licensed real-world data.
