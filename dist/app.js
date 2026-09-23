@@ -52,7 +52,7 @@ import { resolveFixture } from './domain/simulation.js';
     const home=club(f.home),away=club(f.away);const userHome=f.home===game.userClub;
     const fixture=createFixture({id:`${game.week}-${f.home}-${f.away}`,homeClubId:String(home.id),awayClubId:String(away.id),status:f.played?'played':'scheduled'});
     const result=resolveFixture({fixture,homeClub:toDomainClub(home),awayClub:toDomainClub(away),homeTactic:userHome?tactic:'balanced',awayTactic:userHome?'balanced':tactic,seed:game.seed});
-    const hg=result.homeGoals,ag=result.awayGoals;f.played=true;f.score=[hg,ag];game.seed=(game.seed+97)>>>0;updateStats(home,away,hg,ag);assignGoals(home,hg);assignGoals(away,ag);return{home,away,hg,ag};
+    const hg=result.homeGoals,ag=result.awayGoals;f.played=true;f.score=[hg,ag];game.seed=(game.seed+97)>>>0;updateStats(home,away,hg,ag);assignGoals(home,hg);assignGoals(away,ag);return{home,away,hg,ag,events:result.events};
   }
   function toDomainClub(team){return{id:String(team.id),name:team.name,reputation:team.reputation,players:team.players.map(p=>({id:p.id,name:p.name,position:p.pos,rating:p.rating,potential:p.potential,fitness:p.fitness,starting:p.starting}))}}
   function updateStats(h,a,hg,ag){h.stats.p++;a.stats.p++;h.stats.gf+=hg;h.stats.ga+=ag;a.stats.gf+=ag;a.stats.ga+=hg;if(hg>ag){h.stats.w++;a.stats.l++;h.stats.pts+=3}else if(ag>hg){a.stats.w++;h.stats.l++;a.stats.pts+=3}else{h.stats.d++;a.stats.d++;h.stats.pts++;a.stats.pts++}}
@@ -71,8 +71,8 @@ import { resolveFixture } from './domain/simulation.js';
   }
   function showResult(r,us,them,opp,tone){
     const usHome=r.home.id===game.userClub;$('#resultScore').textContent=`${us} — ${them}`;$('#resultHeadline').textContent=`${tone} against ${opp.name}`;
-    const events=[];let total=us+them;for(let i=0;i<Math.max(2,total);i++){const minute=8+Math.floor(rand()*82);events.push([minute,total&&i<total?(i<us?club().short:opp.short):'MATCH',total&&i<total?(i<us?'Goal — a sharp move creates the finish.':'Goal — the opposition find a way through.'):'A tense spell in midfield with neither side giving ground.'])}events.sort((a,b)=>a[0]-b[0]);
-    $('#commentary').innerHTML=events.map(e=>`<p><b>${e[0]}′ ${e[1]}</b>${e[2]}</p>`).join('');$('#resultDialog').showModal();
+    const events=r.events.map(event=>[event.minute,event.teamId===club().id?club().short:event.teamId===opp.id?opp.short:'MATCH',event.text]);
+    $('#commentary').innerHTML=events.map(e=>`<p><b>${e[0]}′ ${e[1]}</b> <span>${e[2]}</span></p>`).join('');$('#resultDialog').showModal();
   }
   function render(){if(!game){$('#setup').hidden=false;$('#game').hidden=true;renderPicker();return}$('#setup').hidden=true;$('#game').hidden=false;const c=club();
     $('#clubName').textContent=$('#mobileClub').textContent=c.name;$('#clubMeta').textContent=`${c.ground} · Season ${game.season}`;setBadge($('#clubCrest'),c);setBadge($('#mobileCrest'),c);$('#weekNumber').textContent=Math.min(game.week+1,game.fixtures.length);$('#greeting').textContent=game.week>=game.fixtures.length?'Season review':'Your match desk.';

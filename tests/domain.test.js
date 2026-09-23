@@ -34,6 +34,8 @@ test('resolves the same fixture deterministically', () => {
   const first = resolveFixture({ fixture, homeClub, awayClub, seed: 42 });
   const second = resolveFixture({ fixture, homeClub, awayClub, seed: 42 });
   assert.deepEqual(first, second);
+  assert.equal(first.events.length >= 1, true);
+  assert.equal(first.events.every((event) => Number.isInteger(event.minute)), true);
 });
 
 test('applies a result to standings without mutating the source club', () => {

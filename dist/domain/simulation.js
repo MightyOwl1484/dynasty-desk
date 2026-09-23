@@ -32,6 +32,37 @@ function poisson(lambda, seed) {
   return { goals: goals - 1, seed: cursor };
 }
 
+function createEvents(homeClub, awayClub, homeGoals, awayGoals, seed) {
+  const events = [];
+  const goals = [
+    ...Array.from({ length: homeGoals }, (_, index) => ({ teamId: homeClub.id, teamName: homeClub.name, side: 'home', index })),
+    ...Array.from({ length: awayGoals }, (_, index) => ({ teamId: awayClub.id, teamName: awayClub.name, side: 'away', index }))
+  ];
+
+  goals.forEach((goal, index) => {
+    const minute = 5 + Math.floor(random(seed + 100 + index * 17) * 84);
+    events.push({
+      minute,
+      type: 'goal',
+      teamId: goal.teamId,
+      side: goal.side,
+      text: `${goal.teamName} find the breakthrough after a sharp attacking move.`
+    });
+  });
+
+  events.sort((a, b) => a.minute - b.minute);
+  if (!events.length) {
+    events.push({
+      minute: 45,
+      type: 'match-note',
+      teamId: null,
+      side: null,
+      text: 'A tense spell in midfield with neither side giving ground.'
+    });
+  }
+  return events;
+}
+
 export function validateLineup(club) {
   const starters = club.players.filter((player) => player.starting);
   const counts = starters.reduce((result, player) => {
@@ -65,6 +96,8 @@ export function resolveFixture({ fixture, homeClub, awayClub, homeTactic = 'bala
   const awayExpected = Math.max(0.2, 1.02 - difference);
   const homeGoals = poisson(homeExpected, seed);
   const awayGoals = poisson(awayExpected, homeGoals.seed);
+  const finalHomeGoals = Math.min(homeGoals.goals, 6);
+  const finalAwayGoals = Math.min(awayGoals.goals, 6);
 
   return {
     fixtureId: fixture.id,
@@ -72,9 +105,9 @@ export function resolveFixture({ fixture, homeClub, awayClub, homeTactic = 'bala
     seed,
     homeClubId: homeClub.id,
     awayClubId: awayClub.id,
-    homeGoals: Math.min(homeGoals.goals, 6),
-    awayGoals: Math.min(awayGoals.goals, 6),
-    events: [],
+    homeGoals: finalHomeGoals,
+    awayGoals: finalAwayGoals,
+    events: createEvents(homeClub, awayClub, finalHomeGoals, finalAwayGoals, seed),
     publishedAt: null
   };
 }
