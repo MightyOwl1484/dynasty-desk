@@ -13,4 +13,4 @@ export interface IAdminSummary {
   submittedCount: number;
   auditEvents: Array<{ id: string; type: string; timestamp: string; message: string }>;
 }
-export interface IDynastyDeskProps { summary?: IAdminSummary; loadingError?: string; onPhaseAction: (action: 'lock' | 'resolve' | 'publish') => void; }
+export interface IDynastyDeskProps { summary?: IAdminSummary; loadingError?: string; onPhaseAction: (action: 'lock' | 'resolve' | 'publish') => Promise<void> | void; }

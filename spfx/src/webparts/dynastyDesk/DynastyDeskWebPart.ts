@@ -35,7 +35,7 @@ export default class DynastyDeskWebPart extends BaseClientSideWebPart<IDynastyDe
   }
 
   public render(): void {
-    const props: IDynastyDeskProps = { summary: this.summary, loadingError: this.loadingError, onPhaseAction: (action) => this.context.statusRenderer.displayLoadingIndicator(this.domElement, `Preparing to ${action}…`) };
+    const props: IDynastyDeskProps = { summary: this.summary, loadingError: this.loadingError, onPhaseAction: async (action) => { this.context.statusRenderer.displayLoadingIndicator(this.domElement, `Preparing to ${action}…`); } };
     ReactDom.render(React.createElement(DynastyDesk, props), this.domElement);
   }
   protected onDispose(): void { ReactDom.unmountComponentAtNode(this.domElement); }
