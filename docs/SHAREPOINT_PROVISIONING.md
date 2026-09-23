@@ -6,6 +6,8 @@ This is the pilot checklist for a company team-building league. It keeps tenant 
 
 Create the game on a dedicated modern SharePoint site, then apply [`spfx/sharepoint-schema.json`](../spfx/sharepoint-schema.json). It is the machine-readable version of the lists and columns described in [`SHAREPOINT_MULTIPLAYER.md`](SHAREPOINT_MULTIPLAYER.md):
 
+`src/stores/sharepoint-provisioning.js` converts that schema into a deterministic reviewable plan of list, field, and index operations. A future tenant setup command can execute the plan through the SPFx/Graph client after explicit administrator approval.
+
 - `Leagues`
 - `LeagueMembers`
 - `Clubs`
