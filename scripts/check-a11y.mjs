@@ -15,7 +15,8 @@ const required = [
   ['backup import type', /id="importFile"[^>]*type="file"[^>]*accept="application\/json/],
   ['replay speed label', /id="replaySpeed"[^>]*aria-label="Replay speed"/],
   ['game heading can receive focus after setup', /id="greeting"[^>]*tabindex="-1"/],
-  ['mobile navigation state', /id="mobileMenu"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/]
+  ['mobile navigation state', /id="mobileMenu"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/],
+  ['replay length label', /id="replayDuration"[^>]*aria-label="Replay length"/]
 ];
 
 const adminRequired = [

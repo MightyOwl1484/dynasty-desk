@@ -79,7 +79,7 @@ The resolver should determine the result first. The live match view then present
 
 The current HTML build was exercised in the in-app browser on the match desk. Selecting a club and starting a career exposes the next fixture, tactical choice, squad briefing, and starting-XI pitch. `Play match` opens a focused full-time result dialog with score, explanation, and commentary. `Watch short replay` opens a focused replay dialog; Play updates the live replay status and event log, while the speed and skip controls remain available. Starting a career now moves keyboard focus into the active match desk instead of leaving focus on the hidden setup control.
 
-The next design questions are intentionally still open: whether the two-minute presentation should show more tactical context during play, how much replay detail is useful on narrow screens, and whether a team-building league needs a shared “watch party” view in addition to the commissioner workflow.
+The replay now offers a quick 30-second recap or a two-minute tactical watch. The score remains resolved before either presentation starts; duration changes pacing only. The next design questions are intentionally still open: whether the two-minute presentation should show more tactical context during play, how much replay detail is useful on narrow screens, and whether a team-building league needs a shared “watch party” view in addition to the commissioner workflow.
 
 ### Current implementation status
 
