@@ -19,6 +19,7 @@ The current prototype is a static browser build in [`dist/`](dist/). It already 
 - A fourteen-matchweek season
 - Match simulation and commentary
 - Standings, player development, fitness, goals, and club news
+- End-of-season awards, player statistics, deterministic progression, and multi-season careers
 - Local browser persistence
 
 Open `dist/index.html` in a browser, or serve the folder with any static HTTP server. No build step is currently required.

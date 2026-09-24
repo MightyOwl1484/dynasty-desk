@@ -61,8 +61,9 @@
               <div class="fixture-team"><div id="awayBadge" class="fixture-badge"></div><strong id="awayTeam"></strong></div>
             </div>
             <div class="match-actions">
-              <label>Tactical approach<select id="tacticSelect"><option value="balanced">Balanced</option><option value="press">High press</option><option value="counter">Counter</option><option value="control">Control</option></select><span id="tacticHelp" class="tactic-help" role="status" aria-live="polite"></span></label>
+              <label id="tacticControls">Tactical approach<select id="tacticSelect"><option value="balanced">Balanced</option><option value="press">High press</option><option value="counter">Counter</option><option value="control">Control</option></select><span id="tacticHelp" class="tactic-help" role="status" aria-live="polite"></span></label>
               <button id="playMatch" class="primary">Play match</button>
+              <div id="offseasonActions" class="offseason-actions" hidden><button id="seasonReviewBtn" class="secondary" type="button">Review season</button><button id="startNextSeason" class="primary" type="button">Begin next season</button></div>
             </div>
           </article>
 
@@ -109,6 +110,13 @@
       <div id="replayEvents" class="commentary" role="log" aria-live="polite"></div>
     </div>
     <div class="dialog-actions"><button id="replayPlay" class="primary" type="button">Play replay</button><button id="replayPause" class="secondary" type="button">Pause</button><label class="replay-length">Watch<select id="replayDuration" aria-label="Replay length"><option value="30000">Quick recap · 30s</option><option value="120000">Tactical watch · 2m</option></select></label><label class="replay-speed">Speed<select id="replaySpeed" aria-label="Replay speed"><option value="1">1×</option><option value="2">2×</option><option value="0.5">0.5×</option></select></label><button id="replaySkip" class="secondary" type="button">Skip to full time</button></div>
+  </dialog>
+  <dialog id="seasonDialog" class="season-dialog" aria-labelledby="seasonTitle" aria-describedby="seasonSummary">
+    <button id="seasonClose" class="dialog-close" aria-label="Close season review">×</button>
+    <p class="eyebrow">End of season</p><h2 id="seasonTitle"></h2><p id="seasonSummary" class="result-explanation"></p>
+    <div class="season-awards" id="seasonAwards"></div>
+    <div class="table-wrap season-table"><table><caption>Player season statistics</caption><thead><tr><th scope="col">Player</th><th scope="col">Pos</th><th scope="col">Apps</th><th scope="col">Goals</th><th scope="col">Rating</th><th scope="col">Change</th></tr></thead><tbody id="seasonPlayerStats"></tbody></table></div>
+    <div class="dialog-actions"><button id="seasonLater" class="secondary" type="button">Back to club</button><button id="seasonAdvance" class="primary" type="button">Begin next season</button></div>
   </dialog>
   <script type="module" src="app.js"></script>
 </body>

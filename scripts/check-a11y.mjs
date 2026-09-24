@@ -16,7 +16,9 @@ const required = [
   ['replay speed label', /id="replaySpeed"[^>]*aria-label="Replay speed"/],
   ['game heading can receive focus after setup', /id="greeting"[^>]*tabindex="-1"/],
   ['mobile navigation state', /id="mobileMenu"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/],
-  ['replay length label', /id="replayDuration"[^>]*aria-label="Replay length"/]
+  ['replay length label', /id="replayDuration"[^>]*aria-label="Replay length"/],
+  ['season review dialog label', /<dialog id="seasonDialog"[^>]*aria-labelledby="seasonTitle"/],
+  ['season statistics caption', /<caption>Player season statistics<\/caption>/]
 ];
 
 const adminRequired = [

@@ -71,6 +71,12 @@ Balanced, pressing, counter-attacking, and control approaches should all be viab
 
 Show players improving, recovering, losing form, gaining confidence, and earning roles. Club development should be felt through stories and visual state changes, not only through rating numbers.
 
+## Offseason and career continuity
+
+The solo game now records an end-of-season review with the champions, league top scorer, club player of the season, final position, and each squad member's appearances, goals, rating, and seasonal rating change. The review is saved in career history rather than discarded when a new season begins.
+
+Starting the next season applies deterministic progression. Young players improve when they receive meaningful minutes and still have potential to reach; established players may improve after a strong workload; older players can decline. Ages advance, fitness and morale recover, seasonal statistics reset, and the club keeps the same recognizable squad. This creates a long-term reason to rotate and develop players without introducing transfer-market complexity before the core loop is ready.
+
 ## Two-minute live match presentation
 
 The resolver should determine the result first. The live match view then presents that result as a short, optional replay.

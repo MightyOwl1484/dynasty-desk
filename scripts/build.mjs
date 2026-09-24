@@ -7,6 +7,7 @@ await cp('src/domain/models.js', 'dist/domain/models.js');
 await cp('src/domain/simulation.js', 'dist/domain/simulation.js');
 await cp('src/domain/permissions.js', 'dist/domain/permissions.js');
 await cp('src/domain/audit.js', 'dist/domain/audit.js');
+await cp('src/domain/offseason.js', 'dist/domain/offseason.js');
 await cp('src/application/league-workflow.js', 'dist/application/league-workflow.js');
 await cp('src/application/admin-summary.js', 'dist/application/admin-summary.js');
 await cp('src/application/admin-service.js', 'dist/application/admin-service.js');
