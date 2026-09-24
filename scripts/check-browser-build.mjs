@@ -29,5 +29,8 @@ if (!script.includes('id="applyScoutTactic"') || !script.includes('id="applyRota
 if (!html.includes('id="boardConfidence"') || !script.includes('boardEvaluation()')) {
   throw new Error('The generated game is missing season objectives or board confidence.');
 }
+if (!html.includes('id="academyCandidates"') || !script.includes('data-prospect=')) {
+  throw new Error('The generated game is missing the youth intake selection.');
+}
 
-console.log(`Browser build checks passed (${checks.length + 4} interface checks, self-contained script).`);
+console.log(`Browser build checks passed (${checks.length + 5} interface checks, self-contained script).`);

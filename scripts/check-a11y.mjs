@@ -25,7 +25,9 @@ const required = [
   ['captain decision label', /class="squad-decision"[^>]*aria-labelledby="captainLabel"/],
   ['captain status', /id="captainHelp"[^>]*role="status"[^>]*aria-live="polite"/],
   ['rotation advice status', /id="squadAdvice"[^>]*role="status"[^>]*aria-live="polite"[^>]*tabindex="-1"/],
-  ['board confidence label', /id="boardConfidence"[^>]*aria-label="Board confidence"/]
+  ['board confidence label', /id="boardConfidence"[^>]*aria-label="Board confidence"/],
+  ['academy candidate group', /id="academyCandidates"[^>]*role="group"[^>]*aria-label="Academy prospects"/],
+  ['academy selection status', /id="academyHelp"[^>]*role="status"[^>]*aria-live="polite"/]
 ];
 
 const adminRequired = [

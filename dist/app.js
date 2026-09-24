@@ -87,6 +87,64 @@ function createLeague(input) {
 
 
 
+/* src/domain/academy.js */
+/** Deterministic fictional youth intake and signing rules. */
+
+const FIRST_NAMES = ['Avery', 'Cameron', 'Dani', 'Emery', 'Frankie', 'Harper', 'Jules', 'Kit', 'Micah', 'Remy', 'Shay', 'Toni'];
+const LAST_NAMES = ['Adebayo', 'Bauer', 'Costa', 'Dawes', 'Farrell', 'Ito', 'Mensah', 'Navarro', 'Quinn', 'Rahman', 'Santos', 'Vega'];
+const PROFILES = [
+  { position: 'DEF', archetype: 'Composed defender' },
+  { position: 'MID', archetype: 'Creative midfielder' },
+  { position: 'FWD', archetype: 'Direct forward' }
+];
+
+function stableNumber(seed, salt) {
+  let value = Number(seed) || 1;
+  for (const character of String(salt)) value = Math.imul(value ^ character.charCodeAt(0), 2654435761);
+  value ^= value >>> 16;
+  return value >>> 0;
+}
+
+function generateYouthIntake({ clubId, season, seed = 1 }) {
+  if (clubId === undefined || clubId === null || !Number.isInteger(season) || season < 1) {
+    throw new TypeError('A youth intake requires a club id and season.');
+  }
+  return PROFILES.map((profile, index) => {
+    const value = stableNumber(seed + index * 97, `${clubId}-${season}-${profile.position}`);
+    const rating = 54 + value % 10;
+    const potential = Math.min(88, rating + 12 + ((value >>> 7) % 14));
+    return {
+      id: `academy-${season}-${clubId}-${index + 1}`,
+      name: `${FIRST_NAMES[value % FIRST_NAMES.length]} ${LAST_NAMES[(value >>> 5) % LAST_NAMES.length]}`,
+      position: profile.position,
+      archetype: profile.archetype,
+      age: 17 + ((value >>> 11) % 3),
+      rating,
+      potential,
+      fitness: 96,
+      morale: 76,
+      form: 0,
+      appearances: 0,
+      goals: 0,
+      starting: false,
+      seasonStartRating: rating
+    };
+  });
+}
+
+function signAcademyPlayer({ club, prospect, maximumSquadSize = 22 }) {
+  if (!club?.players || !prospect?.id) throw new TypeError('Signing requires a club and prospect.');
+  if (club.players.length >= maximumSquadSize) throw new Error(`Squad limit of ${maximumSquadSize} reached.`);
+  if (club.players.some((player) => String(player.id) === String(prospect.id))) throw new Error(`Player ${prospect.id} is already registered.`);
+  return { ...club, players: [...club.players, { ...prospect }] };
+}
+
+function recommendedProspect(prospects) {
+  if (!Array.isArray(prospects) || !prospects.length) return null;
+  return [...prospects].sort((left, right) => right.potential - left.potential || right.rating - left.rating || left.name.localeCompare(right.name))[0];
+}
+
+
 /* src/domain/form.js */
 /** Pure player-form and captaincy rules. */
 
@@ -669,9 +727,12 @@ function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
   function applyResultMorale(team,goalsFor,goalsAgainst){syncPlayerReadiness(team,applyMatchMorale({club:toDomainClub(team),goalsFor,goalsAgainst}))}
   function applyResultForm(team,goalsFor,goalsAgainst,scorerIds){syncPlayerReadiness(team,applyMatchForm({club:toDomainClub(team),goalsFor,goalsAgainst,scorerIds}))}
   function latestSeasonReview(){return game.seasonHistory?.at(-1)??null}
-  function recordSeasonReview(){game.seasonHistory??=[];const existing=latestSeasonReview();if(existing?.season===game.season)return existing;const review=createSeasonReview({season:game.season,clubs:game.clubs.map(toDomainClub),userClubId:String(game.userClub)});review.board={...boardEvaluation(),objective:{...ensureObjective()}};game.seasonHistory.push(review);return review}
-  function applyOffseason(){if(game.week<game.fixtures.length)return;const progressed=advanceOffseason({clubs:game.clubs.map(toDomainClub),seed:game.seed}),byClub=new Map(progressed.clubs.map(c=>[String(c.id),c]));game.clubs=game.clubs.map(team=>{const next=byClub.get(String(team.id)),byPlayer=new Map(next.players.map(p=>[String(p.id),p]));return{...team,players:team.players.map(player=>{const nextPlayer=byPlayer.get(String(player.id));return{...player,age:nextPlayer.age,rating:nextPlayer.rating,fitness:nextPlayer.fitness,morale:nextPlayer.morale,form:0,apps:0,goals:0,seasonStartRating:nextPlayer.seasonStartRating}}),stats:{p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0}}});game.seed=progressed.seed;game.season++;game.week=0;game.fixtures=roundRobin(game.clubs.map(c=>c.id));game.objective={...createSeasonObjective({club:club(),clubs:game.clubs,totalMatches:game.fixtures.length}),season:game.season};game.lastResult=null;pushNews(`Season ${game.season} begins`,`${club().name} return with ${progressed.changes.filter(change=>String(change.clubId)===String(game.userClub)&&change.delta>0).length} improved players. The board asks you to ${game.objective.label.toLowerCase()}.`);save();if($('#seasonDialog').open)$('#seasonDialog').close();render();requestAnimationFrame(()=>$('#greeting').focus())}
-  function showSeasonReview(){const review=latestSeasonReview()??recordSeasonReview(),board=review.board??{...boardEvaluation(),objective:{...ensureObjective()}},verdict=board.met?'Objective met':'Objective missed';$('#seasonTitle').textContent=`Season ${review.season} review`;$('#seasonSummary').textContent=`${review.userClub.clubName} finished ${ordinal(review.userClub.position)} with ${review.userClub.points} points. ${review.champion.clubName} were champions.`;$('#seasonAwards').innerHTML=`<article><span>Champions</span><strong>${review.champion.clubName} · ${review.champion.points} pts</strong></article><article><span>League top scorer</span><strong>${review.topScorer.name} · ${review.topScorer.goals} goals</strong></article><article><span>Club player of season</span><strong>${review.clubPlayerOfSeason.name} · ${review.clubPlayerOfSeason.goals} goals</strong></article><article><span>Board verdict</span><strong>${verdict} · ${board.value}%</strong></article>`;$('#seasonPlayerStats').innerHTML=review.squad.map(player=>{const change=player.ratingChange,changeText=change>0?`+${change}`:String(change);return`<tr><td>${player.name}</td><td>${player.position}</td><td>${player.appearances}</td><td>${player.goals}</td><td>${player.rating}</td><td class="${change>0?'rating-up':change<0?'rating-down':''}">${changeText}</td></tr>`}).join('');$('#seasonAdvance').textContent=$('#startNextSeason').textContent=`Begin season ${game.season+1}`;$('#seasonDialog').showModal()}
+  function academyCandidates(review){if(!review.academyCandidates)review.academyCandidates=club().players.length>=22?[]:generateYouthIntake({clubId:game.userClub,season:game.season+1,seed:game.seed});return review.academyCandidates}
+  function recordSeasonReview(){game.seasonHistory??=[];const existing=latestSeasonReview();if(existing?.season===game.season)return existing;const review=createSeasonReview({season:game.season,clubs:game.clubs.map(toDomainClub),userClubId:String(game.userClub)});review.board={...boardEvaluation(),objective:{...ensureObjective()}};review.academyCandidates=club().players.length>=22?[]:generateYouthIntake({clubId:game.userClub,season:game.season+1,seed:game.seed});game.pendingAcademyId=recommendedProspect(review.academyCandidates)?.id??null;game.seasonHistory.push(review);return review}
+  function recruitAcademyPlayers(review,seed){game.clubs.forEach((team,index)=>{if(team.players.length>=22)return;const prospects=team.id===game.userClub?academyCandidates(review):generateYouthIntake({clubId:team.id,season:game.season+1,seed:seed+index*131}),prospect=team.id===game.userClub?(prospects.find(candidate=>candidate.id===game.pendingAcademyId)??recommendedProspect(prospects)):recommendedProspect(prospects);if(!prospect)return;const signed=signAcademyPlayer({club:toDomainClub(team),prospect}).players.at(-1);team.players.push({...signed,pos:signed.position,apps:0,goals:0,starting:false});if(team.id===game.userClub)review.academySigning={...prospect}});game.pendingAcademyId=null}
+  function applyOffseason(){if(game.week<game.fixtures.length)return;const review=latestSeasonReview()??recordSeasonReview(),progressed=advanceOffseason({clubs:game.clubs.map(toDomainClub),seed:game.seed}),byClub=new Map(progressed.clubs.map(c=>[String(c.id),c]));game.clubs=game.clubs.map(team=>{const next=byClub.get(String(team.id)),byPlayer=new Map(next.players.map(p=>[String(p.id),p]));return{...team,players:team.players.map(player=>{const nextPlayer=byPlayer.get(String(player.id));return{...player,age:nextPlayer.age,rating:nextPlayer.rating,fitness:nextPlayer.fitness,morale:nextPlayer.morale,form:0,apps:0,goals:0,seasonStartRating:nextPlayer.seasonStartRating}}),stats:{p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0}}});recruitAcademyPlayers(review,game.seed);game.seed=progressed.seed;game.season++;game.week=0;game.fixtures=roundRobin(game.clubs.map(c=>c.id));game.objective={...createSeasonObjective({club:club(),clubs:game.clubs,totalMatches:game.fixtures.length}),season:game.season};game.lastResult=null;pushNews(`Season ${game.season} begins`,`${club().name} return with ${progressed.changes.filter(change=>String(change.clubId)===String(game.userClub)&&change.delta>0).length} improved players. ${review.academySigning?`${review.academySigning.name} joins from the academy. `:''}The board asks you to ${game.objective.label.toLowerCase()}.`);save();if($('#seasonDialog').open)$('#seasonDialog').close();render();requestAnimationFrame(()=>$('#greeting').focus())}
+  function renderAcademyIntake(review){const candidates=academyCandidates(review),section=$('#academyIntake');section.hidden=!candidates.length;if(!candidates.length)return;const recommended=recommendedProspect(candidates);if(!candidates.some(candidate=>candidate.id===game.pendingAcademyId))game.pendingAcademyId=recommended.id;const paint=()=>{$('#academyCandidates').innerHTML=candidates.map(candidate=>`<button class="academy-option" type="button" data-prospect="${candidate.id}" aria-pressed="${candidate.id===game.pendingAcademyId}"><b>${candidate.position} · ${candidate.archetype}</b><strong>${candidate.name}</strong><span>Age ${candidate.age} · Rating ${candidate.rating} · Potential ${candidate.potential}${candidate.id===recommended.id?' · Recommended':''}</span></button>`).join('');const selected=candidates.find(candidate=>candidate.id===game.pendingAcademyId);$('#academyHelp').textContent=`Selected: ${selected.name}. They will join when season ${game.season+1} begins.`;$$('[data-prospect]').forEach(button=>button.onclick=()=>{game.pendingAcademyId=button.dataset.prospect;save();paint()})};paint()}
+  function showSeasonReview(){const review=latestSeasonReview()??recordSeasonReview(),board=review.board??{...boardEvaluation(),objective:{...ensureObjective()}},verdict=board.met?'Objective met':'Objective missed';$('#seasonTitle').textContent=`Season ${review.season} review`;$('#seasonSummary').textContent=`${review.userClub.clubName} finished ${ordinal(review.userClub.position)} with ${review.userClub.points} points. ${review.champion.clubName} were champions.`;$('#seasonAwards').innerHTML=`<article><span>Champions</span><strong>${review.champion.clubName} · ${review.champion.points} pts</strong></article><article><span>League top scorer</span><strong>${review.topScorer.name} · ${review.topScorer.goals} goals</strong></article><article><span>Club player of season</span><strong>${review.clubPlayerOfSeason.name} · ${review.clubPlayerOfSeason.goals} goals</strong></article><article><span>Board verdict</span><strong>${verdict} · ${board.value}%</strong></article>`;$('#seasonPlayerStats').innerHTML=review.squad.map(player=>{const change=player.ratingChange,changeText=change>0?`+${change}`:String(change);return`<tr><td>${player.name}</td><td>${player.position}</td><td>${player.appearances}</td><td>${player.goals}</td><td>${player.rating}</td><td class="${change>0?'rating-up':change<0?'rating-down':''}">${changeText}</td></tr>`}).join('');renderAcademyIntake(review);$('#seasonAdvance').textContent=$('#startNextSeason').textContent=`Begin season ${game.season+1}`;$('#seasonDialog').showModal()}
   function updateStats(h,a,hg,ag){h.stats.p++;a.stats.p++;h.stats.gf+=hg;h.stats.ga+=ag;a.stats.gf+=ag;a.stats.ga+=hg;if(hg>ag){h.stats.w++;a.stats.l++;h.stats.pts+=3}else if(ag>hg){a.stats.w++;h.stats.l++;a.stats.pts+=3}else{h.stats.d++;a.stats.d++;h.stats.pts++;a.stats.pts++}}
   function assignGoals(team,n){const xi=team.players.filter(p=>p.starting),scorers=[];xi.forEach(p=>p.apps++);for(let i=0;i<n;i++){const pool=xi.flatMap(p=>Array(p.pos==='FWD'?5:p.pos==='MID'?3:1).fill(p)),scorer=pool[Math.floor(rand()*pool.length)];scorer.goals++;scorers.push(scorer.id)}return scorers}
   function conditionSquads(){game.clubs.forEach(t=>t.players.forEach(p=>{p.fitness=Math.min(100,Math.max(55,p.fitness+(p.starting?-(5+Math.floor(rand()*8)):4)));if(game.week%4===0&&p.age<25&&p.rating<p.potential&&rand()<.17)p.rating++}))}

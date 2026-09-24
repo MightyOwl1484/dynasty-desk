@@ -95,6 +95,12 @@ Each season now begins with an expectation scaled to the club's reputation: cont
 
 The board does not fire the manager in this first version. Confidence adds stakes and narrative feedback without ending a developing career. The final season review records whether the position objective was met, preserves the verdict in career history, and creates a fresh objective after offseason progression.
 
+## Youth intake
+
+The end-of-season review now includes three deterministic fictional academy prospects: one defender, one midfielder, and one forward. The recruitment lead preselects the highest-potential option, while the manager can change the choice based on positional need. The selected player joins when the next season begins, and AI clubs recruit through the same system.
+
+This is intentionally lighter than a transfer market. It creates a recurring offseason decision and new club stories without introducing budgets, negotiations, or a separate recruitment page. Squads are capped at 22 players; once full, the academy panel stays out of the way until future release and retirement systems create room.
+
 ## Offseason and career continuity
 
 The solo game now records an end-of-season review with the champions, league top scorer, club player of the season, final position, and each squad member's appearances, goals, rating, and seasonal rating change. The review is saved in career history rather than discarded when a new season begins.
