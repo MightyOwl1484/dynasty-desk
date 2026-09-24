@@ -33,7 +33,7 @@ jobs:
         with:
           version: 4.7.2
           use-dotnet: false
-          include-templates: false
+          include-templates: true
 
       - name: Build browser distribution
         run: node scripts/build.mjs
@@ -74,6 +74,28 @@ jobs:
       - name: Run Godot simulation tests
         run: godot --headless --path game --script res://tests/run_tests.gd
 
+      - name: Export Godot web build
+        shell: bash
+        run: |
+          mkdir -p build/web
+          godot --headless --path game --export-release Web "$GITHUB_WORKSPACE/build/web/index.html"
+          touch build/web/.nojekyll
+
+      - name: Check Godot web artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s build/web/index.html
+          test -s build/web/index.wasm
+          test -s build/web/index.pck
+
+      - name: Upload Godot web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dynasty-desk-arena-web
+          path: build/web
+          if-no-files-found: error
+
       - name: Check required prototype files
         shell: bash
         run: |
@@ -92,6 +114,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in docs/PRODUCT_PLAN.md docs/ROADMAP.md docs/ARCHITECTURE.md docs/REFERENCE_PROJECTS.md docs/adr/0001-godot-pivot.md docs/SHAREPOINT_MULTIPLAYER.md docs/SHAREPOINT_PROVISIONING.md docs/DESIGN_REVIEW.md docs/GAMEPLAY_REVIEW.md CONTRIBUTING.md; do
+          for file in docs/PRODUCT_PLAN.md docs/ROADMAP.md docs/ARCHITECTURE.md docs/DEPLOYMENT.md docs/REFERENCE_PROJECTS.md docs/adr/0001-godot-pivot.md docs/SHAREPOINT_MULTIPLAYER.md docs/SHAREPOINT_PROVISIONING.md docs/DESIGN_REVIEW.md docs/GAMEPLAY_REVIEW.md CONTRIBUTING.md; do
             test -f "$file"
           done

@@ -62,8 +62,8 @@ Exit: finishing a season creates at least three meaningful choices before the ne
 
 ## P5 — Public web release
 
-- Automate Godot headless tests and Web export in GitHub Actions.
-- Publish versioned builds through GitHub Pages.
+- Validate a downloadable Godot Web artifact on every branch and pull request.
+- Publish builds from `main` through the prepared GitHub Pages workflow.
 - Add loading, compatibility, offline/PWA, and save-persistence guidance.
 - Complete keyboard, contrast, text scale, reduced-motion, and browser accessibility passes.
 - Add contributor-ready issues, screenshots, and first-release notes.
@@ -85,5 +85,5 @@ Exit: a small invited group can complete a scheduled league week without manual 
 2. Add actual animated marker playback driven exclusively by result events.
 3. Add Python Monte Carlo balance reports against the committed generated content.
 4. Add concise competitor comparison cards to the lineup decision.
-5. Add Web export templates and artifact generation to continuous integration.
+5. Browser-test the continuous-integration Web artifact and enable GitHub Pages when the branch reaches `main`.
 6. Decide the final product name after the vertical slice establishes its tone.

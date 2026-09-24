@@ -36,7 +36,7 @@ To create the web build after installing the Godot 4.7 export templates:
 godot --headless --path game --export-release Web ../build/web/index.html
 ```
 
-Godot web exports must be served over HTTP or HTTPS; opening the generated `index.html` directly with `file://` is not supported. GitHub Pages deployment is planned once the first exported build has passed browser validation.
+Godot web exports must be served over HTTP or HTTPS; opening the generated `index.html` directly with `file://` is not supported. Every GitHub validation run now produces a downloadable browser artifact, and the Pages workflow is ready to publish changes from `main` after the repository setting is enabled.
 
 ## Architecture in one sentence
 
@@ -59,6 +59,7 @@ python tools/generate_rosters.py --seed 104729 --houses 4 --roster-size 6 --outp
 - [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — vision, scope, and product boundaries
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — ordered delivery plan and milestone exit criteria
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Godot layers, determinism, persistence, and web constraints
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — CI artifacts, local web testing, and GitHub Pages setup
 - [`docs/adr/0001-godot-pivot.md`](docs/adr/0001-godot-pivot.md) — recorded pivot decision and consequences
 - [`docs/REFERENCE_PROJECTS.md`](docs/REFERENCE_PROJECTS.md) — clean-room use of open-source inspiration
 - [`docs/GAMEPLAY_REVIEW.md`](docs/GAMEPLAY_REVIEW.md) — accessibility, game-feel, and management-loop principles
