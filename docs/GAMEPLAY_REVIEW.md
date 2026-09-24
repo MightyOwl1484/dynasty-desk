@@ -71,6 +71,12 @@ Balanced, pressing, counter-attacking, and control approaches should all be viab
 
 Show players improving, recovering, losing form, gaining confidence, and earning roles. Club development should be felt through stories and visual state changes, not only through rating numbers.
 
+## Weekly preparation
+
+The match desk now offers one optional weekly training decision instead of a separate management screen. Recovery restores the most fitness, balanced work improves fitness and morale with a small readiness gain, and high intensity sacrifices fitness for the strongest immediate match bonus. Morale contributes to team strength and moves after wins, draws, and losses, with unused substitutes receiving a slightly smaller lift. The default remains balanced so a new manager can still play immediately.
+
+This choice is intentionally compact: its effect and risk appear beside the control, the squad view exposes current morale, and the match report records the selected preparation. AI clubs use the same rules and automatically choose recovery when their average fitness is low.
+
 ## Offseason and career continuity
 
 The solo game now records an end-of-season review with the champions, league top scorer, club player of the season, final position, and each squad member's appearances, goals, rating, and seasonal rating change. The review is saved in career history rather than discarded when a new season begins.

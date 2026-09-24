@@ -58,6 +58,8 @@ The first shared league should be intentionally small:
 - Improve save versioning and add a safe reset/export path.
 - Add onboarding and a new-career flow.
 
+Current progress: onboarding, safe local startup, squad fitness, weekly training, morale, match explanations, export/import, and multi-season progression are playable. Player form and deeper role planning remain open.
+
 ### M3 — shared league model
 
 - Add league phases: setup, preparation, locked, resolving, published.

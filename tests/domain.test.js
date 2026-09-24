@@ -27,6 +27,13 @@ test('uses stronger players when a lineup is incomplete', () => {
   assert.equal(teamStrength(club) > 0, true);
 });
 
+test('morale and weekly preparation contribute to match readiness', () => {
+  const baseline = makeClub('Northport');
+  const prepared = { ...baseline, preparationBonus: 0.9, players: baseline.players.map((player) => ({ ...player, morale: 84 })) };
+
+  assert.ok(teamStrength(prepared) > teamStrength(baseline) + 1.7);
+});
+
 test('resolves the same fixture deterministically', () => {
   const fixture = createFixture({ id: 'fixture-1', homeClubId: 'home', awayClubId: 'away' });
   const homeClub = makeClub('home', 75);

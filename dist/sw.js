@@ -1,7 +1,7 @@
-const CACHE = 'dynasty-desk-v13';
+const CACHE = 'dynasty-desk-v14';
 const ASSETS = [
   './', './index.html', './styles.css', './app.js', './commissioner.html', './commissioner.js', './admin.css',
-  './domain/models.js', './domain/simulation.js', './domain/permissions.js', './domain/audit.js', './domain/offseason.js',
+  './domain/models.js', './domain/simulation.js', './domain/permissions.js', './domain/audit.js', './domain/offseason.js', './domain/training.js',
   './application/league-workflow.js', './application/admin-summary.js', './application/admin-service.js',
   './application/admin-commands.js', './application/match-week-resolver.js', './stores/local.js', './stores/game-store.js',
   './stores/sharepoint.js', './stores/spfx-client.js', './stores/sharepoint-provisioning.js', './manifest.webmanifest'
