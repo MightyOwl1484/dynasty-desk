@@ -18,7 +18,10 @@ const required = [
   ['mobile navigation state', /id="mobileMenu"[^>]*aria-controls="sidebar"[^>]*aria-expanded="false"/],
   ['replay length label', /id="replayDuration"[^>]*aria-label="Replay length"/],
   ['season review dialog label', /<dialog id="seasonDialog"[^>]*aria-labelledby="seasonTitle"/],
-  ['season statistics caption', /<caption>Player season statistics<\/caption>/]
+  ['season statistics caption', /<caption>Player season statistics<\/caption>/],
+  ['club picker label', /id="clubPicker"[^>]*aria-label="Available clubs"/],
+  ['club preview status', /id="clubPreview"[^>]*aria-live="polite"/],
+  ['guided tour label', /<dialog id="tourDialog"[^>]*aria-labelledby="tourTitle"[^>]*aria-describedby="tourText"/]
 ];
 
 const adminRequired = [

@@ -8,3 +8,4 @@ dist/*.map
 Thumbs.db
 .vs/
 .vscode/settings.json
+.openai/

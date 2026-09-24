@@ -18,11 +18,19 @@
 
   <div id="setup" class="setup-shell">
     <section class="setup-card">
-      <p class="eyebrow">New career</p>
-      <h1>Choose your club.</h1>
-      <p>Fourteen matchweeks. One cup. No accounts, timers, adverts, or purchases.</p>
-      <div id="clubPicker" class="club-picker"></div>
-      <button id="startGame" class="primary" disabled>Take the job</button>
+      <div class="setup-intro">
+        <p class="eyebrow">New career · about 30 seconds</p>
+        <h1>Choose a club. We’ll handle the rest.</h1>
+        <p>Your best XI is already selected. Pick a club, take the job, and you can play your first match immediately.</p>
+      </div>
+      <div class="setup-layout">
+        <div>
+          <div class="setup-label"><strong>Choose your story</strong><span>8 fictional clubs</span></div>
+          <div id="clubPicker" class="club-picker" aria-label="Available clubs"></div>
+        </div>
+        <aside id="clubPreview" class="club-preview" aria-live="polite"></aside>
+      </div>
+      <div class="setup-actions"><span>Includes a three-step optional tour.</span><button id="startGame" class="primary">Take the job</button></div>
     </section>
   </div>
 
@@ -41,6 +49,7 @@
       <button id="exportSave" class="text-button">Export career backup</button>
       <button id="importSave" class="text-button">Import career backup</button>
       <input id="importFile" type="file" accept="application/json,.json" hidden>
+      <button id="openTour" class="text-button">How to play</button>
       <button id="resetGame" class="text-button">Start a new career</button>
     </aside>
 
@@ -98,8 +107,17 @@
   </main>
 
   <dialog id="resultDialog" aria-labelledby="resultHeadline" aria-describedby="commentary">
-    <button class="dialog-close" aria-label="Close">×</button>
+    <button id="resultClose" class="dialog-close" aria-label="Close match result">×</button>
     <p class="eyebrow">Full time</p><div id="resultScore" class="result-score" aria-live="polite"></div><h2 id="resultHeadline"></h2><p id="resultExplanation" class="result-explanation"></p><div id="commentary" class="commentary" role="log" aria-live="polite"></div><div class="dialog-actions"><button id="replayBtn" class="secondary" type="button">Watch short replay</button><button id="continueBtn" class="primary">Continue</button></div>
+  </dialog>
+  <dialog id="tourDialog" class="tour-dialog" aria-labelledby="tourTitle" aria-describedby="tourText">
+    <button id="tourClose" class="dialog-close" aria-label="Close guided tour">×</button>
+    <p id="tourProgress" class="eyebrow"></p>
+    <div id="tourIcon" class="tour-icon" aria-hidden="true"></div>
+    <h2 id="tourTitle"></h2>
+    <p id="tourText" class="result-explanation"></p>
+    <div id="tourDots" class="tour-dots" aria-hidden="true"></div>
+    <div class="dialog-actions"><button id="tourSkip" class="secondary" type="button">Skip tour</button><button id="tourNext" class="primary" type="button">Next</button></div>
   </dialog>
   <dialog id="replayDialog" aria-labelledby="replayTitle" aria-describedby="replayStatus">
     <button id="replayClose" class="dialog-close" aria-label="Close replay">×</button>
@@ -118,6 +136,6 @@
     <div class="table-wrap season-table"><table><caption>Player season statistics</caption><thead><tr><th scope="col">Player</th><th scope="col">Pos</th><th scope="col">Apps</th><th scope="col">Goals</th><th scope="col">Rating</th><th scope="col">Change</th></tr></thead><tbody id="seasonPlayerStats"></tbody></table></div>
     <div class="dialog-actions"><button id="seasonLater" class="secondary" type="button">Back to club</button><button id="seasonAdvance" class="primary" type="button">Begin next season</button></div>
   </dialog>
-  <script type="module" src="app.js"></script>
+  <script src="app.js" defer></script>
 </body>
 </html>

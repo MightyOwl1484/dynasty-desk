@@ -133,6 +133,8 @@ The first career should teach through action:
 
 Avoid a long rules tutorial before the player has a reason to care.
 
+The browser build now applies this direction. A recommended club is preselected, each club has one concise identity and challenge description, and the generated default XI is ready to play. After accepting the job, a three-step optional tour explains the match action, squad depth, and season rhythm. It can be skipped or reopened from the club menu. Detailed views remain available without blocking the first match.
+
 ## Administrative play
 
 Shared workplace leagues should preserve the fun of the solo loop while reducing burden:

@@ -23,11 +23,17 @@ jobs:
         with:
           node-version: 22
 
+      - name: Build browser distribution
+        run: node scripts/build.mjs
+
       - name: Check JavaScript syntax
         run: node --check dist/app.js
 
       - name: Run domain tests
         run: node --test
+
+      - name: Check self-contained browser build
+        run: node scripts/check-browser-build.mjs
 
       - name: Check accessibility structure
         run: node scripts/check-a11y.mjs
@@ -43,9 +49,6 @@ jobs:
 
       - name: Check SharePoint schema
         run: node scripts/check-sharepoint-schema.mjs
-
-      - name: Build browser domain modules
-        run: node scripts/build.mjs
 
       - name: Check required prototype files
         shell: bash

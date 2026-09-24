@@ -22,7 +22,9 @@ The current prototype is a static browser build in [`dist/`](dist/). It already 
 - End-of-season awards, player statistics, deterministic progression, and multi-season careers
 - Local browser persistence
 
-Open `dist/index.html` in a browser, or serve the folder with any static HTTP server. No build step is currently required.
+Open `dist/index.html` directly in a browser, or serve the `dist/` folder with any static HTTP server. The distribution uses a self-contained browser script, so club selection and the full solo game work when the file is opened locally. No install or build step is required to play.
+
+OpenAI Sites metadata is intentionally excluded. The game needs only the contents of `dist/` for GitHub Pages or another static host.
 
 ## Product direction
 

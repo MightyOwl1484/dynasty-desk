@@ -86,6 +86,8 @@ The current mobile layout is functional but tall and scroll-heavy. The next pass
 - Avoid displaying every available statistic at once. A fun game should reveal useful information at the moment it matters.
 - Do not make a live-match animation mandatory. It should be an optional replay/presentation layer after the result is known.
 
+The first-run implementation now uses progressive disclosure: one club choice, one compact club preview, and one primary action. A short optional tour appears only after the career begins, while the match desk remains the hub for the next decision. Squad, table, inbox, replay, and season review details stay one action away instead of appearing in the initial setup.
+
 ## Live match concept
 
 The simulation engine remains authoritative. The live match is a two-minute presentation of the already-resolved result.
