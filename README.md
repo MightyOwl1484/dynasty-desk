@@ -10,10 +10,12 @@ The new implementation lives in [`game/`](game/) and targets Godot 4.7 with type
 
 - A playable House and tactic selection screen
 - Four synthetic Arena Houses with six-person rosters and selectable active trios
+- Compact competitor stats and lineup advantages compared with the opponent
 - A deterministic, seeded three-round bout resolver
 - An event-driven arena view with moving high-contrast markers
 - Play, pause, 1×/2×/4× speed, skip, and replay controls
 - Reduced-motion and text-only presentation paths using the same event log
+- A post-bout review naming the leading competitor and explaining the tactical shape
 - A browser export preset using the Compatibility renderer
 - A dependency-free headless test entry point
 

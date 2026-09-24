@@ -18,14 +18,14 @@ Exit: the Godot project opens, a player can resolve a prototype bout, the same s
 
 Status: **in progress**
 
-Current progress: four generated Houses now provide six-person rosters, selectable three-person lineups, opponent choice, and visible strategy tradeoffs. The result is resolved and locked before presentation; high-contrast markers animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests.
+Current progress: four generated Houses now provide six-person rosters, selectable three-person lineups, opponent choice, compact competitor stats, opponent-relative lineup comparisons, and visible strategy tradeoffs. The result is resolved and locked before presentation; high-contrast markers animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests. A tested post-bout review identifies the winning side's leading contributor and summarizes strategy, score margin, and exchange shape without mutating the result.
 
 - Finalize the bout vocabulary and non-graphic fictional sport rules.
 - Expand the four-House prototype into the planned eight-House content set after the rules stabilize.
-- Improve lineup comparisons while preserving the current three-slot selection and four visible strategy tradeoffs.
+- Refine the implemented lineup comparisons through browser playtesting while preserving the three-slot selection and four visible strategy tradeoffs.
 - Expand the event-driven arena presentation toward a two-minute tactical watch while preserving play, pause, speed, skip, and replay.
 - Validate text-only and reduced-motion modes with assistive technology and browser builds.
-- Add a post-bout explanation identifying decisive competitors and choices.
+- Expand the implemented post-bout explanation only when new information helps the next manager decision.
 - Validate a single-threaded web export in target browsers.
 
 Exit: a first-time player can choose a House, make one informed decision, watch or skip a bout, and understand the result in under five minutes.
@@ -84,6 +84,6 @@ Exit: a small invited group can complete a scheduled league week without manual 
 1. Run the scaffold under an installed Godot 4.7 editor and fix any parser issues.
 2. Add actual animated marker playback driven exclusively by result events.
 3. Add Python Monte Carlo balance reports against the committed generated content.
-4. Add concise competitor comparison cards to the lineup decision.
+4. Start the first three-week management loop around the proven lineup and bout flow.
 5. Browser-test the continuous-integration Web artifact and enable GitHub Pages when the branch reaches `main`.
 6. Decide the final product name after the vertical slice establishes its tone.

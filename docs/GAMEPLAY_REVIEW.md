@@ -8,7 +8,7 @@ The first Godot presentation controller consumes a deep copy of the resolver's i
 
 The prototype arena uses six high-contrast markers and moves only the competitor associated with the current event. Commentary is always available beside the arena. Players can pause, use three speeds, skip to the result, replay the identical event order, suppress marker motion, or hide the arena graphic entirely. These are parallel ways to consume one result rather than separate simulation modes.
 
-The pre-bout prototype now offers four fictional Houses, direct opponent selection, and a six-person roster condensed into three lineup slots. Each slot exposes name and archetype while a single summary compares average power, guard, and technique. Duplicate competitors are explained and blocked before resolution. This creates a real preparation decision without introducing a roster spreadsheet.
+The pre-bout prototype now offers four fictional Houses, direct opponent selection, and a six-person roster condensed into three lineup slots. Each slot exposes name, archetype, power, guard, and technique; the summary shows the active trio's average profile and signed advantages against the opponent. Duplicate competitors are explained and blocked before resolution. This creates a real preparation decision without introducing a roster spreadsheet. After the event stream completes, a compact review names the winning side's leading contributor and explains the strategy, score margin, and mix of decisive and narrow exchanges.
 
 ## Design goal
 

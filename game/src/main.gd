@@ -2,6 +2,7 @@ extends Control
 
 const PrototypeLeague = preload("res://src/data/prototype_league.gd")
 const ArenaMatchResolver = preload("res://src/simulation/arena_match_resolver.gd")
+const BoutAnalysis = preload("res://src/simulation/bout_analysis.gd")
 const ArenaPresentation = preload("res://src/presentation/arena_presentation.gd")
 const ArenaView = preload("res://src/presentation/arena_view.gd")
 
@@ -24,6 +25,7 @@ var _house_summary: RichTextLabel
 var _lineup_summary: Label
 var _result_heading: Label
 var _score_label: Label
+var _explanation_label: RichTextLabel
 var _status_label: Label
 var _event_log: RichTextLabel
 var _arena_view: ArenaView
@@ -252,6 +254,14 @@ func _build_commentary_column(parent: HBoxContainer) -> void:
 	_score_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_score_label)
 
+	_explanation_label = RichTextLabel.new()
+	_explanation_label.bbcode_enabled = true
+	_explanation_label.fit_content = true
+	_explanation_label.custom_minimum_size = Vector2(320, 72)
+	_explanation_label.accessibility_name = "Post-bout explanation"
+	_explanation_label.text = "[color=#92a1b7]After the bout, a short review will explain the key contributor and tactical shape.[/color]"
+	column.add_child(_explanation_label)
+
 	_event_log = RichTextLabel.new()
 	_event_log.bbcode_enabled = true
 	_event_log.custom_minimum_size = Vector2(320, 240)
@@ -295,7 +305,10 @@ func _populate_lineup(house: Dictionary) -> void:
 		var picker := _lineup_pickers[slot]
 		picker.clear()
 		for competitor in house["roster"]:
-			picker.add_item("%s · %s" % [competitor["name"], str(competitor.get("archetype", "competitor")).capitalize()])
+			picker.add_item("%s · %s · P%d G%d T%d" % [
+				competitor["name"], str(competitor.get("archetype", "competitor")).capitalize(),
+				competitor["power"], competitor["guard"], competitor["technique"]
+			])
 			picker.set_item_metadata(picker.item_count - 1, competitor["id"])
 		picker.select(mini(slot, picker.item_count - 1))
 	_update_lineup_summary()
@@ -305,8 +318,13 @@ func _update_opponent_summary(_index: int = 0) -> void:
 	if not _house_summary or _opponent_picker.item_count == 0:
 		return
 	var opponent := _selected_opponent()
-	_opponent_summary.text = opponent["identity"]
+	var profile := _lineup_profile(opponent["roster"].slice(0, 3))
+	_opponent_summary.text = "%s · Active trio P%d G%d T%d" % [
+		opponent["identity"], profile["power"], profile["guard"], profile["technique"]
+	]
 	_house_summary.accessibility_description = "Selected opponent: %s. %s" % [opponent["name"], opponent["identity"]]
+	if _lineup_pickers.all(func(picker: OptionButton) -> bool: return picker.item_count > 0):
+		_update_lineup_summary()
 
 
 func _update_lineup_summary(_index: int = 0) -> void:
@@ -315,19 +333,19 @@ func _update_lineup_summary(_index: int = 0) -> void:
 	var house: Dictionary = _houses[_house_picker.selected]
 	var selected: Array[Dictionary] = _selected_lineup(house)
 	var names: Array[String] = []
-	var total_power: int = 0
-	var total_guard: int = 0
-	var total_technique: int = 0
 	for competitor in selected:
 		names.append(competitor["name"])
-		total_power += int(competitor["power"])
-		total_guard += int(competitor["guard"])
-		total_technique += int(competitor["technique"])
+	var profile := _lineup_profile(selected)
+	var opponent_profile := _lineup_profile(_selected_opponent()["roster"].slice(0, 3))
 	var duplicate_warning := " · Choose three different competitors." if _lineup_has_duplicates(selected) else ""
-	_lineup_summary.text = "%s · Avg POW %d · GRD %d · TEC %d%s" % [
-		", ".join(names), roundi(total_power / 3.0), roundi(total_guard / 3.0),
-		roundi(total_technique / 3.0), duplicate_warning
+	_lineup_summary.text = "%s\nTeam profile vs opponent: POW %d (%+d) · GRD %d (%+d) · TEC %d (%+d)%s" % [
+		", ".join(names),
+		profile["power"], profile["power"] - opponent_profile["power"],
+		profile["guard"], profile["guard"] - opponent_profile["guard"],
+		profile["technique"], profile["technique"] - opponent_profile["technique"],
+		duplicate_warning
 	]
+	_lineup_summary.accessibility_description = _lineup_summary.text
 
 
 func _update_strategy_summary(index: int) -> void:
@@ -357,6 +375,7 @@ func _resolve_exhibition() -> void:
 	_arena_view.configure(player_house, opponent_house)
 	_revealed_events.clear()
 	_event_log.text = "[color=#92a1b7]Result locked. Press Play, choose Skip, or use Text only.[/color]"
+	_explanation_label.text = "[color=#92a1b7]The post-bout review appears when the presentation completes.[/color]"
 	_result_heading.text = "Bout ready"
 	_score_label.text = "%s 0 — 0 %s · Seed %d" % [player_house["name"], opponent_house["name"], _last_result["seed"]]
 	_status_label.text = "Ready · %s" % _presentation.progress_text()
@@ -425,6 +444,7 @@ func _replay_presentation() -> void:
 	_revealed_events.clear()
 	_arena_view.reset_view()
 	_event_log.text = "[color=#92a1b7]Replay ready. The locked result and event order are unchanged.[/color]"
+	_explanation_label.text = "[color=#92a1b7]The post-bout review will return at the end of this replay.[/color]"
 	_result_heading.text = "Replay ready"
 	var home_house := _house_by_id(_last_result["home_house_id"])
 	var away_house := _house_by_id(_last_result["away_house_id"])
@@ -450,6 +470,8 @@ func _finish_presentation() -> void:
 	_play_button.disabled = true
 	_skip_button.disabled = true
 	_replay_button.disabled = false
+	var analysis := BoutAnalysis.summarize(_last_result, home_house, away_house)
+	_explanation_label.text = "[b]Why it happened[/b]\n%s\n[color=#92a1b7]%s[/color]" % [analysis["headline"], analysis["detail"]]
 	_event_log.grab_focus()
 
 
@@ -504,3 +526,16 @@ func _lineup_has_duplicates(lineup: Array[Dictionary]) -> bool:
 	for competitor in lineup:
 		ids[competitor["id"]] = true
 	return ids.size() != lineup.size()
+
+
+func _lineup_profile(lineup: Array) -> Dictionary:
+	var totals := {"power": 0, "guard": 0, "technique": 0}
+	for competitor in lineup:
+		for attribute in totals:
+			totals[attribute] += int(competitor[attribute])
+	var divisor: float = maxf(1.0, float(lineup.size()))
+	return {
+		"power": roundi(totals["power"] / divisor),
+		"guard": roundi(totals["guard"] / divisor),
+		"technique": roundi(totals["technique"] / divisor)
+	}

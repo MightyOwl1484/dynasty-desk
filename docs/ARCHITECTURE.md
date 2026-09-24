@@ -60,7 +60,7 @@ A resolver accepts only serializable values:
   "away_house": { ...locked snapshot... },
   "home_strategy": "guarded",
   "away_strategy": "aggressive",
-  "resolver_version": "arena-0.1.0"
+  "resolver_version": "arena-0.2.0"
 }
 ```
 
@@ -73,7 +73,7 @@ It returns a serializable result:
   "away_score": 8,
   "events": [ ...chronological immutable events... ],
   "seed": 104729,
-  "resolver_version": "arena-0.1.0"
+  "resolver_version": "arena-0.2.0"
 }
 ```
 
@@ -85,7 +85,7 @@ Gameplay must use the project-owned deterministic random generator rather than g
 
 ## Presentation boundary
 
-The first prototype presents the complete result immediately. The next slice will add an `ArenaPresentation` that consumes one event at a time. Presentation may interpolate positions and timing, but it may not call the resolver or mutate the result.
+`ArenaPresentation` consumes one immutable event at a time and owns only playback state. `BoutAnalysis` reads the same locked result to produce the post-bout explanation. Presentation may interpolate positions and timing, but neither layer may call the resolver or mutate the result.
 
 Accessibility variants are equal presentation clients:
 

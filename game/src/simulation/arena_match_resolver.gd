@@ -2,7 +2,7 @@ class_name ArenaMatchResolver
 extends RefCounted
 
 const DeterministicRng = preload("res://src/simulation/deterministic_rng.gd")
-const RESOLVER_VERSION: String = "arena-0.1.0"
+const RESOLVER_VERSION: String = "arena-0.2.0"
 const STRATEGIES: Dictionary = {
 	"balanced": {"attack": 1.0, "defense": 1.0, "tempo": 0},
 	"aggressive": {"attack": 1.13, "defense": 0.90, "tempo": 3},
@@ -56,6 +56,9 @@ static func resolve_bout(
 				"type": "decisive_exchange" if points == 2 else "narrow_exchange",
 				"house_id": event_house["id"],
 				"competitor_id": event_competitor["id"],
+				"competitor_name": event_competitor["name"],
+				"points": points,
+				"margin": absf(margin),
 				"home_score": home_score,
 				"away_score": away_score,
 				"text": _event_text(event_competitor["name"], event_house["name"], points)
@@ -134,6 +137,9 @@ static func _tiebreak_event(
 		"type": "resolve_tiebreak",
 		"house_id": house["id"],
 		"competitor_id": "",
+		"competitor_name": "",
+		"points": 1,
+		"margin": 0.0,
 		"home_score": home_score,
 		"away_score": away_score,
 		"text": "%s holds its nerve and claims the deciding point." % house["name"]
