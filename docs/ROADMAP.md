@@ -18,11 +18,11 @@ Exit: the Godot project opens, a player can resolve a prototype bout, the same s
 
 Status: **in progress**
 
-Current progress: the result is resolved and locked before presentation; high-contrast markers now animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests.
+Current progress: four generated Houses now provide six-person rosters, selectable three-person lineups, opponent choice, and visible strategy tradeoffs. The result is resolved and locked before presentation; high-contrast markers animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests.
 
 - Finalize the bout vocabulary and non-graphic fictional sport rules.
-- Expand to four Houses with generated rosters.
-- Add lineup selection and four strategies with visible tradeoffs.
+- Expand the four-House prototype into the planned eight-House content set after the rules stabilize.
+- Improve lineup comparisons while preserving the current three-slot selection and four visible strategy tradeoffs.
 - Expand the event-driven arena presentation toward a two-minute tactical watch while preserving play, pause, speed, skip, and replay.
 - Validate text-only and reduced-motion modes with assistive technology and browser builds.
 - Add a post-bout explanation identifying decisive competitors and choices.
@@ -83,7 +83,7 @@ Exit: a small invited group can complete a scheduled league week without manual 
 
 1. Run the scaffold under an installed Godot 4.7 editor and fix any parser issues.
 2. Add actual animated marker playback driven exclusively by result events.
-3. Replace hard-coded prototype Houses with validated JSON content.
-4. Add Python roster generation and Monte Carlo balance reports.
+3. Add Python Monte Carlo balance reports against the committed generated content.
+4. Add concise competitor comparison cards to the lineup decision.
 5. Add Web export templates and artifact generation to continuous integration.
 6. Decide the final product name after the vertical slice establishes its tone.

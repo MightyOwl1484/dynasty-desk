@@ -9,7 +9,7 @@ Dynasty Desk is pivoting into a Godot-first fictional arena management game. You
 The new implementation lives in [`game/`](game/) and targets Godot 4.7 with typed GDScript. The first vertical slice contains:
 
 - A playable House and tactic selection screen
-- Two synthetic Arena Houses with compact three-person lineups
+- Four synthetic Arena Houses with six-person rosters and selectable active trios
 - A deterministic, seeded three-round bout resolver
 - An event-driven arena view with moving high-contrast markers
 - Play, pause, 1×/2×/4× speed, skip, and replay controls
@@ -47,6 +47,12 @@ Manager decisions → deterministic resolver → result + event log → short ar
 ```
 
 Python is reserved for offline tooling such as roster generation, content validation, and large balance simulations. It is not part of the browser runtime. A future Python service may coordinate scheduled organization leagues without becoming authoritative over solo saves.
+
+The committed prototype league is reproducible with:
+
+```powershell
+python tools/generate_rosters.py --seed 104729 --houses 4 --roster-size 6 --output game/data/prototype_league.json
+```
 
 ## Project documentation
 

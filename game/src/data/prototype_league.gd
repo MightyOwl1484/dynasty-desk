@@ -1,49 +1,36 @@
 class_name PrototypeLeague
 extends RefCounted
 
+const DATA_PATH: String = "res://data/prototype_league.json"
+const SUPPORTED_SCHEMA_VERSION: int = 1
+
 
 static func create_houses() -> Array[Dictionary]:
-	return [
-		{
-			"id": "ember",
-			"name": "Ember Crown",
-			"identity": "Patient veterans who turn resolve into late-round pressure.",
-			"color": Color("ef8354"),
-			"roster": [
-				_competitor("ember-1", "Mara Venn", 74, 62, 76, 68, 84),
-				_competitor("ember-2", "Oren Pike", 81, 58, 70, 66, 78),
-				_competitor("ember-3", "Sable Ro", 65, 79, 64, 76, 73)
-			]
-		},
-		{
-			"id": "tide",
-			"name": "Tidebreak Union",
-			"identity": "Quick technicians who create openings through movement.",
-			"color": Color("45b7d1"),
-			"roster": [
-				_competitor("tide-1", "Ilya Fen", 66, 84, 63, 80, 72),
-				_competitor("tide-2", "Niko Vale", 70, 76, 72, 79, 69),
-				_competitor("tide-3", "Tamsin Quill", 62, 88, 60, 77, 75)
-			]
-		}
-	]
+	assert(FileAccess.file_exists(DATA_PATH), "Prototype league data is missing")
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH))
+	assert(parsed is Dictionary, "Prototype league data must be a JSON object")
+	assert(parsed.get("schema_version", 0) == SUPPORTED_SCHEMA_VERSION, "Unsupported league data schema")
+	assert(parsed.get("houses", []) is Array, "Prototype league data must include Houses")
+
+	var houses: Array[Dictionary] = []
+	for raw_house in parsed["houses"]:
+		assert(raw_house is Dictionary, "Each House must be a JSON object")
+		var house: Dictionary = raw_house.duplicate(true)
+		_assert_house(house)
+		house["color"] = Color(str(house["color"]))
+		houses.append(house)
+	assert(houses.size() >= 2, "A prototype league needs at least two Houses")
+	return houses
 
 
-static func _competitor(
-	id: String,
-	name: String,
-	power: int,
-	agility: int,
-	guard: int,
-	technique: int,
-	resolve: int
-) -> Dictionary:
-	return {
-		"id": id,
-		"name": name,
-		"power": power,
-		"agility": agility,
-		"guard": guard,
-		"technique": technique,
-		"resolve": resolve
-	}
+static func _assert_house(house: Dictionary) -> void:
+	for required_key in ["id", "name", "identity", "color", "roster"]:
+		assert(house.has(required_key), "House is missing %s" % required_key)
+	assert(house["roster"] is Array and house["roster"].size() >= 3, "A House needs three competitors")
+	var competitor_ids: Dictionary = {}
+	for competitor in house["roster"]:
+		assert(competitor is Dictionary, "Each competitor must be a JSON object")
+		for required_key in ["id", "name", "power", "agility", "guard", "technique", "resolve"]:
+			assert(competitor.has(required_key), "Competitor is missing %s" % required_key)
+		assert(not competitor_ids.has(competitor["id"]), "Competitor ids must be unique inside a House")
+		competitor_ids[competitor["id"]] = true

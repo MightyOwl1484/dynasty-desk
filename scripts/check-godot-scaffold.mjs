@@ -4,6 +4,7 @@ const requiredFiles = [
   'game/project.godot',
   'game/export_presets.cfg',
   'game/main.tscn',
+  'game/data/prototype_league.json',
   'game/src/main.gd',
   'game/src/data/prototype_league.gd',
   'game/src/simulation/deterministic_rng.gd',

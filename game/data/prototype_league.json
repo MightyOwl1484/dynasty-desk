@@ -1,0 +1,327 @@
+{
+  "schema_version": 1,
+  "generator_version": "roster-0.1.0",
+  "seed": 104729,
+  "houses": [
+    {
+      "id": "ember-crown",
+      "name": "Ember Crown",
+      "color": "ef8354",
+      "identity": "Patient veterans who turn resolve into late-round pressure.",
+      "roster": [
+        {
+          "id": "ember-crown-01-fenn-thorne",
+          "name": "Fenn Thorne",
+          "age": 25,
+          "archetype": "tactician",
+          "power": 78,
+          "agility": 62,
+          "guard": 57,
+          "technique": 75,
+          "resolve": 58,
+          "potential": 73
+        },
+        {
+          "id": "ember-crown-02-xara-gale",
+          "name": "Xara Gale",
+          "age": 26,
+          "archetype": "vanguard",
+          "power": 61,
+          "agility": 78,
+          "guard": 81,
+          "technique": 72,
+          "resolve": 77,
+          "potential": 86
+        },
+        {
+          "id": "ember-crown-03-ilya-ro",
+          "name": "Ilya Ro",
+          "age": 31,
+          "archetype": "vanguard",
+          "power": 67,
+          "agility": 50,
+          "guard": 76,
+          "technique": 58,
+          "resolve": 60,
+          "potential": 65
+        },
+        {
+          "id": "ember-crown-04-yori-ash",
+          "name": "Yori Ash",
+          "age": 31,
+          "archetype": "tactician",
+          "power": 56,
+          "agility": 67,
+          "guard": 77,
+          "technique": 75,
+          "resolve": 71,
+          "potential": 85
+        },
+        {
+          "id": "ember-crown-05-ada-kestrel",
+          "name": "Ada Kestrel",
+          "age": 21,
+          "archetype": "tactician",
+          "power": 63,
+          "agility": 67,
+          "guard": 51,
+          "technique": 67,
+          "resolve": 79,
+          "potential": 80
+        },
+        {
+          "id": "ember-crown-06-bren-umber",
+          "name": "Bren Umber",
+          "age": 25,
+          "archetype": "tactician",
+          "power": 65,
+          "agility": 72,
+          "guard": 68,
+          "technique": 62,
+          "resolve": 55,
+          "potential": 82
+        }
+      ]
+    },
+    {
+      "id": "tidebreak-union",
+      "name": "Tidebreak Union",
+      "color": "45b7d1",
+      "identity": "Quick technicians who create openings through movement.",
+      "roster": [
+        {
+          "id": "tidebreak-union-01-niko-stone",
+          "name": "Niko Stone",
+          "age": 30,
+          "archetype": "duelist",
+          "power": 78,
+          "agility": 81,
+          "guard": 67,
+          "technique": 59,
+          "resolve": 58,
+          "potential": 80
+        },
+        {
+          "id": "tidebreak-union-02-sable-ire",
+          "name": "Sable Ire",
+          "age": 22,
+          "archetype": "tactician",
+          "power": 71,
+          "agility": 71,
+          "guard": 70,
+          "technique": 68,
+          "resolve": 57,
+          "potential": 75
+        },
+        {
+          "id": "tidebreak-union-03-dara-holt",
+          "name": "Dara Holt",
+          "age": 19,
+          "archetype": "duelist",
+          "power": 64,
+          "agility": 84,
+          "guard": 66,
+          "technique": 60,
+          "resolve": 69,
+          "potential": 78
+        },
+        {
+          "id": "tidebreak-union-04-gia-gale",
+          "name": "Gia Gale",
+          "age": 19,
+          "archetype": "vanguard",
+          "power": 91,
+          "agility": 63,
+          "guard": 59,
+          "technique": 62,
+          "resolve": 64,
+          "potential": 78
+        },
+        {
+          "id": "tidebreak-union-05-gia-cairn",
+          "name": "Gia Cairn",
+          "age": 32,
+          "archetype": "survivor",
+          "power": 56,
+          "agility": 54,
+          "guard": 68,
+          "technique": 54,
+          "resolve": 70,
+          "potential": 65
+        },
+        {
+          "id": "tidebreak-union-06-yori-north",
+          "name": "Yori North",
+          "age": 29,
+          "archetype": "tactician",
+          "power": 59,
+          "agility": 73,
+          "guard": 54,
+          "technique": 82,
+          "resolve": 82,
+          "potential": 77
+        }
+      ]
+    },
+    {
+      "id": "verdant-oath",
+      "name": "Verdant Oath",
+      "color": "73c088",
+      "identity": "Disciplined defenders who absorb pressure and answer together.",
+      "roster": [
+        {
+          "id": "verdant-oath-01-kael-dusk",
+          "name": "Kael Dusk",
+          "age": 18,
+          "archetype": "sentinel",
+          "power": 48,
+          "agility": 76,
+          "guard": 73,
+          "technique": 69,
+          "resolve": 72,
+          "potential": 77
+        },
+        {
+          "id": "verdant-oath-02-bren-holt",
+          "name": "Bren Holt",
+          "age": 33,
+          "archetype": "vanguard",
+          "power": 72,
+          "agility": 60,
+          "guard": 84,
+          "technique": 56,
+          "resolve": 75,
+          "potential": 75
+        },
+        {
+          "id": "verdant-oath-03-hale-stone",
+          "name": "Hale Stone",
+          "age": 22,
+          "archetype": "vanguard",
+          "power": 87,
+          "agility": 74,
+          "guard": 54,
+          "technique": 57,
+          "resolve": 56,
+          "potential": 84
+        },
+        {
+          "id": "verdant-oath-04-xara-onyx",
+          "name": "Xara Onyx",
+          "age": 29,
+          "archetype": "tactician",
+          "power": 48,
+          "agility": 76,
+          "guard": 69,
+          "technique": 62,
+          "resolve": 82,
+          "potential": 76
+        },
+        {
+          "id": "verdant-oath-05-mara-gale",
+          "name": "Mara Gale",
+          "age": 19,
+          "archetype": "duelist",
+          "power": 53,
+          "agility": 66,
+          "guard": 50,
+          "technique": 82,
+          "resolve": 51,
+          "potential": 68
+        },
+        {
+          "id": "verdant-oath-06-ilya-zeal",
+          "name": "Ilya Zeal",
+          "age": 27,
+          "archetype": "tactician",
+          "power": 57,
+          "agility": 59,
+          "guard": 66,
+          "technique": 67,
+          "resolve": 77,
+          "potential": 72
+        }
+      ]
+    },
+    {
+      "id": "gilded-jackals",
+      "name": "Gilded Jackals",
+      "color": "f0c75e",
+      "identity": "Fearless attackers who chase decisive exchanges.",
+      "roster": [
+        {
+          "id": "gilded-jackals-01-dara-ro",
+          "name": "Dara Ro",
+          "age": 28,
+          "archetype": "duelist",
+          "power": 67,
+          "agility": 72,
+          "guard": 66,
+          "technique": 76,
+          "resolve": 78,
+          "potential": 81
+        },
+        {
+          "id": "gilded-jackals-02-jori-morrow",
+          "name": "Jori Morrow",
+          "age": 26,
+          "archetype": "sentinel",
+          "power": 55,
+          "agility": 49,
+          "guard": 87,
+          "technique": 73,
+          "resolve": 58,
+          "potential": 78
+        },
+        {
+          "id": "gilded-jackals-03-pax-ash",
+          "name": "Pax Ash",
+          "age": 25,
+          "archetype": "tactician",
+          "power": 61,
+          "agility": 67,
+          "guard": 72,
+          "technique": 73,
+          "resolve": 70,
+          "potential": 81
+        },
+        {
+          "id": "gilded-jackals-04-sable-ember",
+          "name": "Sable Ember",
+          "age": 19,
+          "archetype": "survivor",
+          "power": 55,
+          "agility": 63,
+          "guard": 59,
+          "technique": 78,
+          "resolve": 71,
+          "potential": 77
+        },
+        {
+          "id": "gilded-jackals-05-xara-ward",
+          "name": "Xara Ward",
+          "age": 29,
+          "archetype": "tactician",
+          "power": 72,
+          "agility": 80,
+          "guard": 66,
+          "technique": 87,
+          "resolve": 54,
+          "potential": 87
+        },
+        {
+          "id": "gilded-jackals-06-yori-zeal",
+          "name": "Yori Zeal",
+          "age": 27,
+          "archetype": "vanguard",
+          "power": 61,
+          "agility": 66,
+          "guard": 66,
+          "technique": 56,
+          "resolve": 60,
+          "potential": 78
+        }
+      ]
+    }
+  ]
+}

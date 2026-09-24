@@ -1,3 +1,4 @@
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -37,6 +38,13 @@ class GenerateRostersTests(unittest.TestCase):
             generate_league(1, house_count=1)
         with self.assertRaises(ValueError):
             generate_league(1, roster_size=2)
+
+    def test_committed_prototype_matches_generator(self) -> None:
+        repository_root = TOOLS_DIRECTORY.parent
+        committed = json.loads(
+            (repository_root / "game" / "data" / "prototype_league.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(committed, generate_league(104729, house_count=4, roster_size=6))
 
 
 if __name__ == "__main__":

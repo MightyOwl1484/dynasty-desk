@@ -46,6 +46,8 @@ build/web/           ignored generated web export
 
 The current `src/`, `tests/`, `dist/`, and `spfx/` directories contain the preserved HTML generation. They are legacy references, not dependencies of the Godot runtime.
 
+Prototype content is committed as JSON under `game/data/` and generated deterministically by the standard-library Python tools under `tools/`. CI verifies that the committed league exactly matches its recorded generator version, seed, House count, and roster size. Godot validates the schema again at runtime and converts presentation-only values such as colors after parsing.
+
 ## Deterministic match contract
 
 A resolver accepts only serializable values:

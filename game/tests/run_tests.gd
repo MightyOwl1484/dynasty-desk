@@ -12,6 +12,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	_test_prototype_league_loads_generated_content()
 	_test_same_seed_repeats_result()
 	_test_different_seed_changes_event_stream()
 	_test_result_has_one_winner_and_events()
@@ -19,10 +20,17 @@ func _run() -> void:
 	_test_presentation_pause_skip_and_replay()
 
 	if _failures == 0:
-		print("PASS: 5 arena simulation and presentation tests")
+		print("PASS: 6 arena content, simulation, and presentation tests")
 	else:
 		push_error("FAIL: %d arena simulation assertions" % _failures)
 	quit(_failures)
+
+
+func _test_prototype_league_loads_generated_content() -> void:
+	var houses := PrototypeLeague.create_houses()
+	_expect(houses.size() == 4, "prototype league loads four generated Houses")
+	_expect(houses.all(func(house: Dictionary) -> bool: return house["roster"].size() == 6), "every House has six generated competitors")
+	_expect(houses[0]["color"] is Color, "JSON House colors become Godot colors")
 
 
 func _test_same_seed_repeats_result() -> void:

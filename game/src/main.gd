@@ -15,9 +15,13 @@ var _seed: int = 104729
 var _speed_index: int = 0
 
 var _house_picker: OptionButton
+var _opponent_picker: OptionButton
+var _opponent_summary: Label
 var _strategy_picker: OptionButton
+var _lineup_pickers: Array[OptionButton] = []
 var _strategy_summary: Label
 var _house_summary: RichTextLabel
+var _lineup_summary: Label
 var _result_heading: Label
 var _score_label: Label
 var _status_label: Label
@@ -88,6 +92,7 @@ func _build_interface() -> void:
 	setup.add_theme_constant_override("separation", 20)
 	page.add_child(setup)
 	_build_house_picker(setup)
+	_build_opponent_picker(setup)
 	_build_strategy_picker(setup)
 
 	_house_summary = RichTextLabel.new()
@@ -96,6 +101,7 @@ func _build_interface() -> void:
 	_house_summary.bbcode_enabled = true
 	_house_summary.accessibility_name = "Selected House summary"
 	page.add_child(_house_summary)
+	_build_lineup_picker(page)
 
 	var resolve_button := Button.new()
 	resolve_button.text = "Lock result and enter the arena"
@@ -131,6 +137,23 @@ func _build_house_picker(parent: HBoxContainer) -> void:
 	column.add_child(_house_picker)
 
 
+func _build_opponent_picker(parent: HBoxContainer) -> void:
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	parent.add_child(column)
+	var label := Label.new()
+	label.text = "Opponent"
+	column.add_child(label)
+	_opponent_picker = OptionButton.new()
+	_opponent_picker.accessibility_name = "Choose an opposing Arena House"
+	_opponent_picker.item_selected.connect(_update_opponent_summary)
+	column.add_child(_opponent_picker)
+	_opponent_summary = Label.new()
+	_opponent_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_opponent_summary.add_theme_font_size_override("font_size", 15)
+	column.add_child(_opponent_summary)
+
+
 func _build_strategy_picker(parent: HBoxContainer) -> void:
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -148,6 +171,27 @@ func _build_strategy_picker(parent: HBoxContainer) -> void:
 	_strategy_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_strategy_summary.add_theme_font_size_override("font_size", 15)
 	column.add_child(_strategy_summary)
+
+
+func _build_lineup_picker(parent: VBoxContainer) -> void:
+	var lineup_row := HBoxContainer.new()
+	lineup_row.add_theme_constant_override("separation", 12)
+	parent.add_child(lineup_row)
+	var label := Label.new()
+	label.text = "Active trio"
+	label.custom_minimum_size = Vector2(110, 0)
+	lineup_row.add_child(label)
+	for slot in range(3):
+		var picker := OptionButton.new()
+		picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		picker.accessibility_name = "Choose competitor for lineup slot %d" % (slot + 1)
+		picker.item_selected.connect(_update_lineup_summary)
+		lineup_row.add_child(picker)
+		_lineup_pickers.append(picker)
+	_lineup_summary = Label.new()
+	_lineup_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_lineup_summary.add_theme_font_size_override("font_size", 14)
+	parent.add_child(_lineup_summary)
 
 
 func _build_arena_column(parent: HBoxContainer) -> void:
@@ -228,12 +272,61 @@ func _control_button(label: String, accessible_label: String, callback: Callable
 
 func _update_house_summary(index: int) -> void:
 	var house: Dictionary = _houses[index]
-	var opponent: Dictionary = _houses[1 - index]
+	_populate_opponents(house["id"])
+	_populate_lineup(house)
+	_house_summary.text = "[b]%s[/b] — %s\n%d competitors available. Choose the three who enter the arena." % [
+		house["name"], house["identity"], house["roster"].size()
+	]
+
+
+func _populate_opponents(player_house_id: String) -> void:
+	_opponent_picker.clear()
+	for house in _houses:
+		if house["id"] == player_house_id:
+			continue
+		_opponent_picker.add_item(house["name"])
+		_opponent_picker.set_item_metadata(_opponent_picker.item_count - 1, house["id"])
+	_opponent_picker.select(0)
+	_update_opponent_summary(0)
+
+
+func _populate_lineup(house: Dictionary) -> void:
+	for slot in range(_lineup_pickers.size()):
+		var picker := _lineup_pickers[slot]
+		picker.clear()
+		for competitor in house["roster"]:
+			picker.add_item("%s · %s" % [competitor["name"], str(competitor.get("archetype", "competitor")).capitalize()])
+			picker.set_item_metadata(picker.item_count - 1, competitor["id"])
+		picker.select(mini(slot, picker.item_count - 1))
+	_update_lineup_summary()
+
+
+func _update_opponent_summary(_index: int = 0) -> void:
+	if not _house_summary or _opponent_picker.item_count == 0:
+		return
+	var opponent := _selected_opponent()
+	_opponent_summary.text = opponent["identity"]
+	_house_summary.accessibility_description = "Selected opponent: %s. %s" % [opponent["name"], opponent["identity"]]
+
+
+func _update_lineup_summary(_index: int = 0) -> void:
+	if not _lineup_summary or _lineup_pickers.is_empty():
+		return
+	var house: Dictionary = _houses[_house_picker.selected]
+	var selected: Array[Dictionary] = _selected_lineup(house)
 	var names: Array[String] = []
-	for competitor in house["roster"]:
+	var total_power: int = 0
+	var total_guard: int = 0
+	var total_technique: int = 0
+	for competitor in selected:
 		names.append(competitor["name"])
-	_house_summary.text = "[b]%s[/b] — %s\nLineup: %s · Next opponent: [b]%s[/b]" % [
-		house["name"], house["identity"], ", ".join(names), opponent["name"]
+		total_power += int(competitor["power"])
+		total_guard += int(competitor["guard"])
+		total_technique += int(competitor["technique"])
+	var duplicate_warning := " · Choose three different competitors." if _lineup_has_duplicates(selected) else ""
+	_lineup_summary.text = "%s · Avg POW %d · GRD %d · TEC %d%s" % [
+		", ".join(names), roundi(total_power / 3.0), roundi(total_guard / 3.0),
+		roundi(total_technique / 3.0), duplicate_warning
 	]
 
 
@@ -250,9 +343,14 @@ func _update_strategy_summary(index: int) -> void:
 func _resolve_exhibition() -> void:
 	_presentation_timer.stop()
 	var selected_index: int = _house_picker.selected
-	var opponent_index: int = 1 - selected_index
-	var player_house: Dictionary = _houses[selected_index]
-	var opponent_house: Dictionary = _houses[opponent_index]
+	var source_house: Dictionary = _houses[selected_index]
+	var selected_lineup := _selected_lineup(source_house)
+	if _lineup_has_duplicates(selected_lineup):
+		_status_label.text = "Choose three different competitors before entering the arena."
+		return
+	var player_house: Dictionary = source_house.duplicate(true)
+	player_house["roster"] = selected_lineup
+	var opponent_house: Dictionary = _selected_opponent()
 	var strategy: String = _strategy_picker.get_item_text(_strategy_picker.selected).to_lower()
 	_last_result = ArenaMatchResolver.resolve_bout(player_house, opponent_house, _seed, strategy, "balanced")
 	_presentation.load_result(_last_result)
@@ -383,3 +481,26 @@ func _house_by_id(house_id: String) -> Dictionary:
 			return house
 	assert(false, "Unknown House id")
 	return {}
+
+
+func _selected_opponent() -> Dictionary:
+	var opponent_id: String = str(_opponent_picker.get_item_metadata(_opponent_picker.selected))
+	return _house_by_id(opponent_id)
+
+
+func _selected_lineup(house: Dictionary) -> Array[Dictionary]:
+	var selected: Array[Dictionary] = []
+	for picker in _lineup_pickers:
+		var competitor_id: String = str(picker.get_item_metadata(picker.selected))
+		for competitor in house["roster"]:
+			if competitor["id"] == competitor_id:
+				selected.append(competitor.duplicate(true))
+				break
+	return selected
+
+
+func _lineup_has_duplicates(lineup: Array[Dictionary]) -> bool:
+	var ids: Dictionary = {}
+	for competitor in lineup:
+		ids[competitor["id"]] = true
+	return ids.size() != lineup.size()
