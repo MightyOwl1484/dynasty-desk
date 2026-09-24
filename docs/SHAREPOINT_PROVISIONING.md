@@ -1,5 +1,7 @@
 # SharePoint provisioning checklist
 
+> Status: deferred. No tenant work is required for the Godot vertical slice. Retain this runbook for possible organization-league research in roadmap milestone P6.
+
 This is the pilot checklist for a company team-building league. It keeps tenant administration narrow and makes the setup repeatable.
 
 ## Site and lists

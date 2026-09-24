@@ -1,5 +1,7 @@
 # Initial design and game-feel review
 
+> Historical review: this evaluates the preserved HTML soccer prototype. Its accessibility and progressive-disclosure lessons remain requirements for the Godot arena interface; its visual recommendations are not the new art direction.
+
 This is the first review of the current static prototype at the start of the HTML-first rebuild. It is a product-direction document, not a final visual specification.
 
 ## Current overview

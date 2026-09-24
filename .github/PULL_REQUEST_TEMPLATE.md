@@ -8,7 +8,8 @@
 
 ## How was it tested?
 
-- [ ] Opened or served the browser prototype
+- [ ] Ran the Godot project or exported web build when applicable
+- [ ] Opened or served the legacy browser prototype when applicable
 - [ ] Ran the relevant automated checks
 - [ ] Tested the affected flow manually
 - [ ] Added or updated tests where appropriate
@@ -20,7 +21,8 @@
 ## Checklist
 
 - [ ] The change is focused and documented.
-- [ ] Solo mode still works.
+- [ ] The affected solo mode still works.
+- [ ] Deterministic rules produce the same result from the same inputs.
 - [ ] Save compatibility was considered.
 - [ ] No secrets, personal data, or unlicensed assets are included.
 - [ ] SharePoint or SPFx behavior is documented if affected.

@@ -1,5 +1,7 @@
 # Game-development review
 
+> Migration note: this review began with the HTML soccer prototype. The preparation-to-reaction loop, deterministic presentation boundary, accessibility requirements, and anti-spreadsheet principles carry into the fictional arena game. Soccer-specific examples are historical context until the arena equivalents replace them.
+
 ## Design goal
 
 Dynasty Desk should feel like a club story with meaningful decisions, not a spreadsheet with soccer labels. Numbers should explain the world and support decisions, but the player should remember moments, rivalries, breakthroughs, and consequences.

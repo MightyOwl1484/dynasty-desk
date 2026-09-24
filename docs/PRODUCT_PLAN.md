@@ -1,104 +1,73 @@
-# Dynasty Desk product plan
+# Dynasty Desk: Arena product plan
 
 ## Vision
 
-Dynasty Desk is a fictional soccer management game that turns a league into a shared story. A solo player can enjoy a complete career locally. A group of coworkers can each manage a club, prepare for scheduled fixtures, and see the league resolve together through SharePoint and Teams.
+Dynasty Desk: Arena is an approachable management game about building a fictional Arena House and watching its competitors become legends. The experience should create memorable rivalries and career stories without requiring players to operate a spreadsheet.
 
-## Target experiences
+The primary release is a Godot game exported to the web. Native desktop builds remain possible, but every core feature must be designed for browser performance, keyboard operation, and short play sessions.
 
-### Solo career
+## Product promises
 
-- Start a fictional club career without an account.
-- Manage a squad, tactics, training, development, and transfers.
-- Simulate a season at the player's pace.
-- Save and resume in the browser.
-- Export and import a league save when practical.
+1. **A meaningful decision in minutes.** A new player can choose a House, understand a recommendation, and complete a bout without studying a manual.
+2. **The result is fair and explainable.** Identical locked inputs and a seed produce the same result and event log.
+3. **The presentation never changes the outcome.** Watching, accelerating, skipping, or using text-only mode cannot alter a resolved bout.
+4. **Depth arrives through stories and tradeoffs.** Training, fatigue, morale, injuries, contracts, rivalries, and development interact without exposing unnecessary accounting.
+5. **Fictional content is a strength.** Synthetic competitors and Houses let the game build its own identity and avoid licensed sports data.
 
-### Workplace league
+## Initial game
 
-- An organizer creates a league and assigns one club to each participant.
-- Managers submit lineups and tactics before a match-week deadline.
-- The league locks submitted actions and resolves fixtures together.
-- Results, standings, news, and next deadlines are visible to everyone.
-- The organizer can pause, reopen, or advance a match week.
+- 8 fictional Arena Houses
+- 8–12 competitors per House
+- Three active competitors per bout
+- A short regular season and playoff event
+- Four readable strategies: balanced, aggressive, guarded, and elusive
+- Competitor attributes centered on power, agility, guard, technique, and resolve
+- Training, fatigue, morale, injuries, development, recruitment, and retirement
+- A deterministic event stream supporting quick resolve, text commentary, and an optional two-minute arena presentation
+- Local solo saves and export/import
 
-## Initial game scope
+Violence is stylized and non-graphic. Defeat means points, submission, or knockout; permanent death is not part of the default game. This keeps the game suitable for a broad audience and future workplace leagues.
 
-The first shared league should be intentionally small:
+## Technology direction
 
-- 8–12 fictional clubs
-- 18–22 players per club
-- 14–18 match weeks
-- One scheduled match round per week
-- Starting XI, formation, tactical approach, fitness, morale, and development
-- Simple transfers and contracts after the core loop is stable
-- League table, match reports, player statistics, and news
+- Godot 4.7 Compatibility renderer
+- Typed GDScript for runtime and gameplay
+- Pure, deterministic simulation code independent of scenes and animation
+- Python standard-library tools for data generation and large balance runs
+- JSON-compatible content and save boundaries
+- Single-threaded web export first; native extensions only after a proven need
+- GitHub Actions for validation and, after browser acceptance, GitHub Pages deployment
 
-## Milestones
+## Modes
 
-### M0 — project foundation
+### Solo career — active priority
 
-- Document the domain model and contribution workflow.
-- Establish the source layout and test strategy.
-- Define the fictional data and asset licensing policy.
-- Create GitHub-ready issue templates and project labels.
+The player controls one House through repeated preparation, bout, reaction, and offseason loops. The game works without an account or network connection after loading.
 
-### M1 — HTML game foundation
+### Organization league — deferred
 
-- Extract game state from the current single-file prototype.
-- Create typed domain models for clubs, players, fixtures, actions, and results.
-- Move simulation rules into a pure TypeScript module.
-- Add deterministic seeds and repeatable simulation tests.
-- Keep the existing static prototype playable during the refactor.
+Scheduled company leagues remain a product possibility. Managers would submit choices before a deadline and receive synchronized results from locked inputs. SharePoint, Teams, or a small API may host this mode later, but organization integration must not constrain the first playable game.
 
-### M2 — refreshed solo experience
+## Non-goals for the first Godot release
 
-- Update the visual system and navigation for a modern sports operations dashboard.
-- Add squad depth planning, player cards, form, morale, and clearer match reports.
-- Improve save versioning and add a safe reset/export path.
-- Add onboarding and a new-career flow.
-
-Current progress: onboarding, safe local startup, squad fitness, weekly training, morale, player form, captaincy, opponent scouting, rotation advice, season objectives, board confidence, youth intake, match explanations, export/import, and multi-season progression are playable. Player releases, retirements, and a lightweight senior transfer market remain open.
-
-### M3 — shared league model
-
-- Add league phases: setup, preparation, locked, resolving, published.
-- Add a commissioner role and club assignment flow.
-- Add scheduled fixtures and action deadlines.
-- Add append-only match results and audit-friendly events.
-- Test conflicts, missed submissions, and late changes.
-
-### M4 — SPFx integration
-
-- Create a React-based SPFx web part shell.
-- Add SharePoint persistence behind the same `GameStore` interface.
-- Use tenant identity for participant mapping.
-- Add SharePoint-hosted commissioner and manager views.
-- Make the component available as a Teams tab.
-
-### M5 — organization polish
-
-- Add league announcements and optional notifications.
-- Improve Teams and SharePoint dashboard entry points.
-- Add accessibility and keyboard-navigation checks.
-- Add tenant setup documentation and sample list provisioning.
-- Package a small demo league for evaluation by a company team.
-
-## Non-goals for the first release
-
-- Real player names, club logos, or licensed player ratings
-- Live 2D or 3D match visuals
-- Real-time multiplayer during a match
-- A global public matchmaking service
-- Full financial accounting or complex transfer regulations
-- A SharePoint-only implementation of the entire simulation engine
+- Historical gladiator simulation or graphic violence
+- Real athletes, leagues, ratings, logos, or scraped databases
+- A Python runtime embedded in the web build
+- Physics determining competitive results
+- Real-time player-versus-player networking
+- Native C++ extensions or multithreaded web requirements
+- SharePoint or SPFx deployment before the solo loop is proven
+- A full economy or equipment-crafting simulator
 
 ## Success criteria
 
-The first meaningful release is successful when:
+The first public Godot release succeeds when:
 
-1. A new player can start a solo career and understand the next decision without instructions.
-2. A match week can be completed in a few minutes.
-3. An 8–12 person league can run one scheduled match week without manual database repair.
-4. The same fixture produces the same result from the same locked state and seed.
-5. A contributor can work on the simulation, UI, data, or SPFx adapter without needing to understand the entire codebase.
+1. A new player completes a meaningful decision and bout in under five minutes.
+2. The same seed and locked choices reproduce the same result.
+3. A full season can be completed, saved, resumed, and advanced into an offseason.
+4. Quick resolve, animated presentation, reduced-motion presentation, and text-only presentation agree on the outcome.
+5. The web build loads from GitHub Pages in current Chromium, Firefox, and Safari-class browsers targeted by Godot.
+6. Contributors can modify simulation, presentation, content, or tooling without understanding the entire project.
+
+See [`ROADMAP.md`](ROADMAP.md) for milestone order and exit criteria.

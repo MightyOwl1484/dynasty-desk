@@ -9,3 +9,9 @@ Thumbs.db
 .vs/
 .vscode/settings.json
 .openai/
+.godot/
+game/.godot/
+build/
+*.tmp
+__pycache__/
+*.py[cod]

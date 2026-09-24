@@ -1,141 +1,123 @@
-# Architecture
+# Godot architecture
 
 ## Core rule
 
-The game engine is the product. HTML, SharePoint, and Teams are hosts for the engine.
+The resolver determines truth. Scenes communicate and present that truth.
 
 ```text
-React or plain HTML UI
-          |
-     application layer
-          |
-  pure soccer domain engine
-          |
-       GameStore
-       /       \
- local browser  SharePoint / future API
+Godot Control scenes
+        ↓ commands / view models
+Application services
+        ↓ locked decisions
+Deterministic domain and simulation
+        ↓ immutable result + event log
+Presentation player / text commentary / save store
 ```
 
-## Layers
+No animation callback, frame rate, physics tick, or wall-clock time may affect a competitive result.
 
-### Domain layer
+## Runtime choices
 
-Contains rules that should work in any host:
+- **Godot 4.7:** editor, UI, audio, animation, input, and export pipeline.
+- **Typed GDScript:** production gameplay code. It has first-class Godot integration and exports to the web without an additional runtime.
+- **Compatibility renderer:** required for Godot 4 web exports and suitable for the planned 2D presentation.
+- **Single-threaded Web export:** maximizes compatibility and avoids cross-origin-isolation requirements during the first release.
+- **Python:** offline generators, validators, and balance simulations only. A future hosted service is a separate deployment boundary.
 
-- Player attributes and development
-- Club strength and tactical modifiers
-- Squad selection and lineup validation
-- Fixture generation
-- Match resolution
-- Standings and statistics
-- League phase transitions
-- Role-based action permissions
-- Append-only audit events
+## Source layout
 
-The domain layer should be deterministic and free of browser, SharePoint, React, Graph, and date-time UI dependencies. `src/domain/permissions.js` defines the shared commissioner, manager, and viewer policy; `src/domain/audit.js` defines immutable support-friendly events. Host permissions must reinforce these rules rather than replace them.
+```text
+game/
+  project.godot
+  export_presets.cfg
+  main.tscn
+  src/
+    domain/          data definitions and invariant checks
+    simulation/      deterministic rules and event production
+    application/     use cases such as start career and play week
+    presentation/    arena playback and commentary adapters
+    persistence/     versioned local save envelopes and migrations
+    ui/              reusable Control scenes and accessibility behavior
+  data/              original fictional content
+  tests/             dependency-free headless tests
+tools/               Python generation, validation, and balancing tools
+build/web/           ignored generated web export
+```
 
-### Application layer
+The current `src/`, `tests/`, `dist/`, and `spfx/` directories contain the preserved HTML generation. They are legacy references, not dependencies of the Godot runtime.
 
-Coordinates user actions and domain operations:
+## Deterministic match contract
 
-- Load a league
-- Submit or update club actions
-- Lock a match week
-- Resolve fixtures
-- Publish results
-- Create news and audit events
+A resolver accepts only serializable values:
 
-The first scheduled-week orchestration lives in `src/application/league-workflow.js`. It turns submitted actions into locked snapshots, applies deterministic fallback actions for missed deadlines, and requires explicit resolving and publishing phases.
-
-`src/application/match-week-resolver.js` provides the host-neutral bridge from a locked league snapshot to replay-ready `MatchResults`. It selects the current week's fixtures, applies locked tactics, derives deterministic seeds, validates club references, and emits a `week_resolving` audit event. It does not write storage; `persistResolutionPlan` owns the SharePoint-facing transition to `resolving`.
-
-`src/application/admin-summary.js` is the first commissioner-shell view model. It exposes phase, deadline, resolver version, per-club submission status, role-aware actions, and audit history without leaking SharePoint response shapes into a React/SPFx component.
-
-The first React/SPFx host source is under `spfx/src/webparts/dynastyDesk`. It consumes that view model through props; it is intentionally scaffolded separately from the offline HTML build until a generated SPFx solution supplies the Microsoft dependencies and packaging configuration.
-
-`src/application/admin-service.js` is the host handoff: it loads the four SharePoint read surfaces, normalizes list column casing, and returns `admin-summary.js` output. This is the seam the generated web part should call when replacing its current `summaryJson` preview property.
-
-`src/application/admin-commands.js` owns the first write path. It creates a lock plan, persists the league and club-action snapshots with ETags, then appends audit events. This ordering is explicit so a future retry/conflict UI can report which stage failed without hiding a partial tenant write.
-
-The SPFx scaffold calls the lock path and reloads the admin context after success. It now reads tenant fixtures, clubs, players, and pending resolution runs. Resolve persists a deterministic pending payload; Publish reloads that payload, appends immutable results, marks the handoff published with an ETag, and reloads the commissioner view.
-
-The command layer now also supports persisting a resolution plan and publishing an injected result payload: immutable `MatchResults` are appended before the `week_published` audit event. A future SPFx command can inject the resolution plan directly, while the browser and a server-authoritative worker can reuse the same resolver boundary.
-
-This layer owns validation and permissions at the product level, but it should not assume that the client is trusted in shared play.
-
-### Persistence layer
-
-Use an adapter interface rather than calling `localStorage` or SharePoint directly from UI components. The current browser build uses `src/stores/local.js`, which wraps browser storage behind the contract and version-tags saved envelopes so future migrations have an explicit home. `src/stores/game-store.js` documents the contract while the JavaScript prototype remains lightweight.
-
-```ts
-interface GameStore {
-  loadLeague(leagueId: string): Promise<LeagueState>;
-  saveClubActions(actions: ClubActions): Promise<void>;
-  getFixtures(leagueId: string, matchWeek?: number): Promise<Fixture[]>;
-  saveMatchResults(results: MatchResult[]): Promise<void>;
+```gdscript
+{
+  "fixture_id": "week-1-ember-tide",
+  "seed": 104729,
+  "home_house": { ...locked snapshot... },
+  "away_house": { ...locked snapshot... },
+  "home_strategy": "guarded",
+  "away_strategy": "aggressive",
+  "resolver_version": "arena-0.1.0"
 }
 ```
 
-Initial adapters:
+It returns a serializable result:
 
-- `LocalGameStore` for solo mode (implemented first)
-- `SharePointGameStore` for organization mode
-
-Possible later adapter:
-
-- `ApiGameStore` for a server-authoritative resolver
-
-## Core entities
-
-- `League`: identity, season, phase, schedule, settings, commissioner
-- `Club`: identity, reputation, budget, squad, staff, current record
-- `Player`: fictional identity, position, attributes, potential, fitness, morale, contract
-- `Fixture`: home club, away club, match week, status, locked state
-- `ClubActions`: lineup, formation, tactics, training, transfer decisions, submission metadata
-- `MatchResult`: immutable score, events, player statistics, seed, resolver version
-- `LeagueEvent`: append-only news or audit record
-
-## Determinism
-
-Every match resolution must record:
-
-- League ID
-- Fixture ID
-- Match-week state version
-- Resolver version
-- Random seed
-- Locked club actions
-
-This makes results reproducible and gives the commissioner a useful audit trail.
-
-## Source layout target
-
-The current prototype is a static build. The target layout is:
-
-```text
-src/
-  domain/
-    models/
-    league.js
-    simulation/
-    standings/
-    schedule/
-  application/
-  stores/
-    local/
-    sharepoint/
-  ui/
-  data/
-spfx/
-docs/
-tests/
-dist/
+```gdscript
+{
+  "winner_id": "ember",
+  "home_score": 11,
+  "away_score": 8,
+  "events": [ ...chronological immutable events... ],
+  "seed": 104729,
+  "resolver_version": "arena-0.1.0"
+}
 ```
 
-The exact bundler can be selected during M1. The important boundary is that `domain/` must remain host-independent.
+The event stream is the common input for animation, text commentary, post-bout reports, news, replay, and future multiplayer verification.
 
-## Security boundary
+## Randomness
 
-In solo mode, the browser is trusted because the save is local.
+Gameplay must use the project-owned deterministic random generator rather than global `rand*` functions. Every resolving operation records its seed and resolver version. A saved result is never silently re-resolved under a newer rules version.
 
-In shared mode, the browser is not authoritative. A client should submit intended actions, but the final match result should be resolved from locked actions by a commissioner-controlled process or future server-side service. The first casual workplace release may use a trusted commissioner flow, but the architecture must leave room for a server-authoritative resolver.
+## Presentation boundary
+
+The first prototype presents the complete result immediately. The next slice will add an `ArenaPresentation` that consumes one event at a time. Presentation may interpolate positions and timing, but it may not call the resolver or mutate the result.
+
+Accessibility variants are equal presentation clients:
+
+- Standard animation
+- Reduced-motion presentation
+- Text-only event log
+- Quick result
+
+## Persistence
+
+Solo saves will use `user://` and a versioned JSON envelope. Web persistence depends on browser IndexedDB and may be unavailable in private browsing, so export/import remains a planned recovery path.
+
+```json
+{
+  "schemaVersion": 1,
+  "gameVersion": "0.1.0",
+  "savedAt": "ISO-8601 timestamp",
+  "career": {}
+}
+```
+
+Migrations are explicit functions from one schema version to the next. Tests retain representative old save fixtures once public saves exist.
+
+## Future organization mode
+
+Clients submit intended decisions, not results. A commissioner-controlled process or service locks inputs, resolves the fixture once, and publishes the immutable result. The initial service candidate is Python with HTTP/WebSocket endpoints, but it will consume the same serializable resolver contract rather than embedding business rules in SharePoint.
+
+## Web constraints
+
+- Web output must be served over HTTP or HTTPS.
+- The game renders in a canvas; focus order, keyboard operation, labels, scaling, contrast, reduced motion, and textual alternatives require explicit testing.
+- Browser tabs may pause background processing, so deadlines and authoritative scheduling cannot depend on an open client.
+- Native extensions must be compiled specifically for WebAssembly and increase hosting complexity. They are prohibited until profiling demonstrates a need.
+
+## License boundary
+
+This implementation is Apache-2.0 and clean-room. AGPL reference projects may inform concepts and evaluation criteria, but their source and assets may not be copied. See [`REFERENCE_PROJECTS.md`](REFERENCE_PROJECTS.md).

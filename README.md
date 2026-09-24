@@ -1,86 +1,79 @@
-# Dynasty Desk
+# Dynasty Desk: Arena
 
-Dynasty Desk is an HTML-first fictional soccer management game. You run a club, build a squad, set tactics, develop players, and guide the team through a scheduled league season.
+Dynasty Desk is pivoting into a Godot-first fictional arena management game. You lead an Arena House, recruit and develop competitors, choose a match strategy, and watch short deterministic bouts turn a season into a shared story.
 
-The project is designed to work in two modes:
+`Dynasty Desk: Arena` is a working title. The project remains intentionally fictional so its competitors, Houses, competitions, and artwork can be distributed without sports-data or trademark dependencies.
 
-- **Solo mode:** an offline browser game with local saves.
-- **Organization mode:** a SharePoint Framework (SPFx) experience where coworkers manage clubs in a shared, scheduled league.
+## Current status
 
-The roster, clubs, competitions, and artwork are fictional. Public soccer data and open-source management games may inform the shape of the simulation, but the project does not copy proprietary databases, player identities, logos, or commercial game assets.
+The new implementation lives in [`game/`](game/) and targets Godot 4.7 with typed GDScript. The first vertical slice contains:
 
-## Current prototype
+- A playable House and tactic selection screen
+- Two synthetic Arena Houses with compact three-person lineups
+- A deterministic, seeded three-round bout resolver
+- A chronological event log separated from presentation
+- A browser export preset using the Compatibility renderer
+- A dependency-free headless test entry point
 
-The current prototype is a static browser build in [`dist/`](dist/). It already includes:
+The prior HTML soccer prototype remains in [`dist/`](dist/) and its source remains under [`src/`](src/). It is preserved as a playable product and UX reference during migration; new gameplay development should target Godot unless an issue explicitly concerns the legacy build.
 
-- Fictional clubs and synthetic players
-- Squad selection and starting XI management
-- Tactical approaches
-- A fourteen-matchweek season
-- Match simulation and commentary
-- Standings, player development, fitness, goals, and club news
-- Weekly training choices with visible fitness, morale, and match-readiness tradeoffs
-- Player form and a selectable captaincy role that affect match readiness
-- Opponent scouting, tactical matchup recommendations, and one-click rotation advice
-- Reputation-scaled season objectives and transparent board confidence
-- Deterministic youth intakes with one concise offseason recruitment choice
-- End-of-season awards, player statistics, deterministic progression, and multi-season careers
-- Local browser persistence
+## Run the Godot prototype
 
-Open `dist/index.html` directly in a browser, or serve the `dist/` folder with any static HTTP server. The distribution uses a self-contained browser script, so club selection and the full solo game work when the file is opened locally. No install or build step is required to play.
+Install Godot 4.7, then open `game/project.godot` in the editor and press **F6** or **F5**.
 
-OpenAI Sites metadata is intentionally excluded. The game needs only the contents of `dist/` for GitHub Pages or another static host.
-
-## Product direction
-
-The next version will make the game a polished soccer management experience first, then add shared league play through SharePoint. The simulation engine must remain independent of its host so the same rules can run in a local browser, an SPFx web part, or a future server-side resolver.
-
-Read the project plan and architecture documents before making substantial changes:
-
-- [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — product goals, modes, milestones, and non-goals
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — game layers, domain model, and persistence boundary
-- [`docs/SHAREPOINT_MULTIPLAYER.md`](docs/SHAREPOINT_MULTIPLAYER.md) — SPFx, SharePoint lists, scheduled matches, and multiplayer rules
-- [`docs/SHAREPOINT_PROVISIONING.md`](docs/SHAREPOINT_PROVISIONING.md) — pilot setup, roles, match-week runbook, and accessibility checks
-- [`docs/DESIGN_REVIEW.md`](docs/DESIGN_REVIEW.md) — initial visual, accessibility, game-feel, and administrative review
-- [`docs/GAMEPLAY_REVIEW.md`](docs/GAMEPLAY_REVIEW.md) — fun, accessibility, onboarding, and live-match direction
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow and definition of done
-
-## Development workflow
-
-Use an issue for a meaningful change, create a focused branch, and open a pull request into `main`. GitHub Actions validates the prototype on pushes and pull requests.
-
-The first implementation branch is `feature/domain-model`, which extracts the game state and simulation rules from the current static build.
-
-The validation loop is intentionally small and reproducible:
+From a command line with `godot` available:
 
 ```powershell
-node scripts/build.mjs
-node --test
-node --check dist/app.js
-node scripts/check-a11y.mjs
+godot --path game --editor
+godot --headless --path game --script res://tests/run_tests.gd
 ```
 
-The solo prototype saves through a versioned local-store adapter. That keeps browser persistence replaceable when the SharePoint-backed organization adapter is introduced.
+To create the web build after installing the Godot 4.7 export templates:
 
-The first SPFx integration seam is also present: `src/stores/spfx-client.js` accepts an injected `SPHttpClient` and translates scoped list queries plus ETag-protected updates into the host-neutral SharePoint store. It does not require an M365 tenant for local tests.
+```powershell
+godot --headless --path game --export-release Web ../build/web/index.html
+```
 
-The commissioner-facing data contract is `src/application/admin-summary.js`; it is ready for a React/SPFx shell without coupling the UI to SharePoint response objects.
+Godot web exports must be served over HTTP or HTTPS; opening the generated `index.html` directly with `file://` is not supported. GitHub Pages deployment is planned once the first exported build has passed browser validation.
 
-The initial React/SPFx source scaffold lives under [`spfx/`](spfx/). It is checked for structure in CI but requires a generated SPFx solution and Microsoft 365 toolchain before tenant deployment.
+## Architecture in one sentence
 
-For an immediately reviewable organization-admin prototype, open [`dist/commissioner.html`](dist/commissioner.html). It uses demo data, clearly labels that it does not write to a tenant, and exercises the same phase-aware summary shape the SPFx shell will consume.
+The deterministic simulation produces an immutable result and event log; Godot scenes present those events without changing the outcome.
 
-## Design principles
+```text
+Manager decisions → deterministic resolver → result + event log → short arena presentation
+```
 
-1. Fictional data first. The game should be enjoyable without requiring licensed real-world data.
-2. Deterministic simulation. Given the same locked game state and seed, every resolver produces the same result.
-3. Local-first development. Contributors should be able to run and test the core game without a Microsoft 365 tenant.
-4. SharePoint as collaboration infrastructure. SharePoint stores league state and user actions; it should not contain the core game rules.
-5. Accessible information density. The interface should feel like a modern sports operations dashboard, not a spreadsheet dump.
-6. Small, reviewable contributions. Domain rules, UI work, data work, and platform work should be separable.
+Python is reserved for offline tooling such as roster generation, content validation, and large balance simulations. It is not part of the browser runtime. A future Python service may coordinate scheduled organization leagues without becoming authoritative over solo saves.
 
-## License and asset policy
+## Project documentation
 
-Code and documentation are licensed under the [Apache License 2.0](LICENSE). The license permits commercial and non-commercial use, modification, and redistribution, subject to its notice and attribution requirements. See [NOTICE](NOTICE) for project attribution.
+- [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — vision, scope, and product boundaries
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — ordered delivery plan and milestone exit criteria
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Godot layers, determinism, persistence, and web constraints
+- [`docs/adr/0001-godot-pivot.md`](docs/adr/0001-godot-pivot.md) — recorded pivot decision and consequences
+- [`docs/REFERENCE_PROJECTS.md`](docs/REFERENCE_PROJECTS.md) — clean-room use of open-source inspiration
+- [`docs/GAMEPLAY_REVIEW.md`](docs/GAMEPLAY_REVIEW.md) — accessibility, game-feel, and management-loop principles
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — contribution workflow and definition of done
 
-Future assets should come from clearly licensed sources such as Kenney, Game-icons.net, or OpenMoji, with attribution retained where required. Do not commit copied club crests, player photos, commercial game data, or unverified web-scraped databases.
+The SharePoint and SPFx documents are retained as future organization-mode research. That work is paused while the solo game proves its core loop.
+
+## Validation
+
+The repository currently validates both generations of the project:
+
+```powershell
+node scripts/check-godot-scaffold.mjs
+node scripts/build.mjs
+node --test
+node scripts/check-a11y.mjs
+python -m unittest discover -s tools/tests
+```
+
+Once Godot is installed, also run the headless game tests shown above.
+
+## License and reference policy
+
+Original project code and documentation are licensed under the [Apache License 2.0](LICENSE). Third-party assets must retain their own attribution and compatible license notices.
+
+[99Managers Futsal Edition](https://codeberg.org/dulvui/99managers-futsal-edition) informs high-level architectural research. Its AGPL-licensed code, CC BY-SA assets, trademark, and implementation are not included or copied into this repository. Contributors must independently implement ideas and must not paste source or assets from that project.

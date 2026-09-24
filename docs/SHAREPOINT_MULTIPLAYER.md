@@ -1,5 +1,7 @@
 # SharePoint and multiplayer plan
 
+> Status: deferred research. The Godot solo game and serialized resolver contract are the active priorities. This document preserves lessons from the HTML prototype and will be reconsidered during roadmap milestone P6.
+
 ## Why SharePoint
 
 SharePoint provides a practical organization layer for a company edition:

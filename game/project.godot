@@ -1,0 +1,31 @@
+; Engine configuration file.
+; Edit through Godot where practical and keep Web compatibility as a release constraint.
+
+config_version=5
+
+[application]
+
+config/name="Dynasty Desk: Arena Prototype"
+config/description="A fictional deterministic arena management game."
+config/version="0.1.0-dev"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[gui]
+
+theme/default_font_multichannel_signed_distance_field=true

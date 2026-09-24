@@ -1,67 +1,59 @@
-# Contributing to Dynasty Desk
+# Contributing to Dynasty Desk: Arena
 
-Thank you for helping build the game. Contributions are welcome in four areas:
+Thank you for helping build the game. New gameplay work targets the Godot project under `game/`. The previous JavaScript and SPFx code remains supported as a legacy reference but should change only for a specifically scoped issue.
 
-- Game rules and simulation
-- Interface and accessibility
-- Synthetic data and balancing
-- SharePoint, SPFx, and Teams integration
-
-## Before starting
+## Start here
 
 Read:
 
 1. [`README.md`](README.md)
 2. [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md)
-3. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-4. [`docs/SHAREPOINT_MULTIPLAYER.md`](docs/SHAREPOINT_MULTIPLAYER.md)
+3. [`docs/ROADMAP.md`](docs/ROADMAP.md)
+4. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+5. [`docs/REFERENCE_PROJECTS.md`](docs/REFERENCE_PROJECTS.md)
 
-For a substantial feature, open an issue first. Explain the player problem, the proposed behavior, and which milestone it supports.
+For a substantial feature, open an issue describing the player problem, intended behavior, accessibility impact, and roadmap milestone.
 
-## Contribution rules
+## Development rules
 
-- Keep fictional clubs, players, and assets fictional unless a documented license permits otherwise.
-- Contributions are accepted under the Apache License 2.0 unless a separate written agreement says otherwise.
-- Keep domain rules independent of browser and SharePoint APIs.
-- Prefer small modules and focused pull requests.
-- Add or update tests for simulation rules and edge cases.
-- Do not commit secrets, tenant URLs, access tokens, or personal data.
-- Do not add dependencies without explaining why they are needed.
-- Preserve the offline solo experience while shared-play features are being developed.
+- Use Godot 4.7 and typed GDScript for runtime gameplay.
+- Keep simulation independent of scenes, animation, wall-clock time, physics, network calls, and global randomness.
+- Pass an explicit seed into every resolving operation and record the resolver version.
+- Treat result events as immutable presentation input.
+- Use Python only in `tools/` or in a separately documented future service.
+- Keep competitors, Houses, settings, and artwork fictional.
+- Do not copy code or assets from AGPL or otherwise incompatible reference projects.
+- Add dependencies only when the pull request explains their license, web-export impact, and maintenance value.
+- Never commit credentials, tokens, tenant URLs, or personal data.
 
-## Suggested issue areas
+## Validation
 
-### Simulation
+Run the repository-level checks:
 
-Match resolution, tactics, player development, injuries, morale, schedule generation, standings.
+```powershell
+node scripts/check-godot-scaffold.mjs
+node scripts/build.mjs
+node --test
+python -m unittest discover -s tools/tests
+```
 
-### UI
+When Godot is installed, run:
 
-Dashboard layout, squad cards, match center, responsive behavior, keyboard access, visual design.
+```powershell
+godot --headless --path game --script res://tests/run_tests.gd
+```
 
-### Data
-
-Synthetic roster generation, balance passes, fictional naming, test fixtures, save migration.
-
-### Platform
-
-SPFx web part, SharePoint list provisioning, Teams packaging, permissions, scheduled resolution.
+UI changes also require manual keyboard, focus, text-scale, narrow-window, and reduced-motion checks. Web-facing changes require an exported build served over HTTP.
 
 ## Definition of done
 
 A change is ready when:
 
-- The behavior is described in the issue or pull request.
-- The solo mode still loads and plays.
-- Relevant tests or manual verification steps are included.
-- No unrelated generated files or secrets are committed.
-- Documentation is updated when the data model, setup, or user behavior changes.
-
-## Pull request checklist
-
-- [ ] I kept the change focused.
-- [ ] I tested the affected flow.
-- [ ] I considered save compatibility.
-- [ ] I added or updated documentation where needed.
-- [ ] I checked keyboard and responsive behavior for UI changes.
-- [ ] I did not include unlicensed assets or real personal data.
+- Its player-facing behavior is documented.
+- The same inputs and seed reproduce the same simulation output.
+- Relevant headless tests pass.
+- Presentation changes do not mutate the resolved result.
+- Keyboard and accessibility alternatives were considered and tested.
+- Save compatibility was preserved or migrated explicitly.
+- No incompatible source, asset, trademark, or personal data was introduced.
+- The roadmap or architecture documentation changed when the project contract changed.

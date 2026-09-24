@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   validate:
-    name: Validate static prototype
+    name: Validate legacy prototype and Godot foundation
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +22,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.7.2
+          use-dotnet: false
+          include-templates: false
 
       - name: Build browser distribution
         run: node scripts/build.mjs
@@ -50,6 +62,18 @@ jobs:
       - name: Check SharePoint schema
         run: node scripts/check-sharepoint-schema.mjs
 
+      - name: Check Godot project foundation
+        run: node scripts/check-godot-scaffold.mjs
+
+      - name: Test Python content tooling
+        run: python -m unittest discover -s tools/tests
+
+      - name: Parse Godot main scene
+        run: godot --headless --path game --quit-after 3
+
+      - name: Run Godot simulation tests
+        run: godot --headless --path game --script res://tests/run_tests.gd
+
       - name: Check required prototype files
         shell: bash
         run: |
@@ -68,6 +92,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for file in docs/PRODUCT_PLAN.md docs/ARCHITECTURE.md docs/SHAREPOINT_MULTIPLAYER.md docs/SHAREPOINT_PROVISIONING.md docs/DESIGN_REVIEW.md docs/GAMEPLAY_REVIEW.md CONTRIBUTING.md; do
+          for file in docs/PRODUCT_PLAN.md docs/ROADMAP.md docs/ARCHITECTURE.md docs/REFERENCE_PROJECTS.md docs/adr/0001-godot-pivot.md docs/SHAREPOINT_MULTIPLAYER.md docs/SHAREPOINT_PROVISIONING.md docs/DESIGN_REVIEW.md docs/GAMEPLAY_REVIEW.md CONTRIBUTING.md; do
             test -f "$file"
           done
