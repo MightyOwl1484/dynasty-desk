@@ -89,6 +89,12 @@ The match briefing now identifies each opponent's strongest unit and likely tact
 
 The squad room compares starters with reserves in the same position using rating, fitness, morale, and form. It surfaces only the strongest meaningful swap and can apply it with one action. When no reserve offers a clear readiness gain, the interface says so instead of filling the screen with marginal advice.
 
+## Objectives and board confidence
+
+Each season now begins with an expectation scaled to the club's reputation: contend near the top, finish in the top half, or build a competitive foundation. The match desk shows a single board-confidence meter alongside the league position. Its value comes from the club's points pace and current position, so the status is explainable rather than random.
+
+The board does not fire the manager in this first version. Confidence adds stakes and narrative feedback without ending a developing career. The final season review records whether the position objective was met, preserves the verdict in career history, and creates a fresh objective after offseason progression.
+
 ## Offseason and career continuity
 
 The solo game now records an end-of-season review with the champions, league top scorer, club player of the season, final position, and each squad member's appearances, goals, rating, and seasonal rating change. The review is saved in career history rather than discarded when a new season begins.

@@ -26,5 +26,8 @@ if (!html.includes('id="captainSelect"') || !script.includes('Form steady')) {
 if (!script.includes('id="applyScoutTactic"') || !script.includes('id="applyRotation"')) {
   throw new Error('The generated game is missing scouting or rotation recommendations.');
 }
+if (!html.includes('id="boardConfidence"') || !script.includes('boardEvaluation()')) {
+  throw new Error('The generated game is missing season objectives or board confidence.');
+}
 
-console.log(`Browser build checks passed (${checks.length + 3} interface checks, self-contained script).`);
+console.log(`Browser build checks passed (${checks.length + 4} interface checks, self-contained script).`);
