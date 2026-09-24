@@ -16,13 +16,15 @@ Exit: the Godot project opens, a player can resolve a prototype bout, the same s
 
 ## P1 — Playable arena vertical slice
 
-Status: **next**
+Status: **in progress**
+
+Current progress: the result is resolved and locked before presentation; high-contrast markers now animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests.
 
 - Finalize the bout vocabulary and non-graphic fictional sport rules.
 - Expand to four Houses with generated rosters.
 - Add lineup selection and four strategies with visible tradeoffs.
-- Add a two-minute event-driven arena presentation with play, pause, speed, skip, and replay.
-- Add text-only and reduced-motion modes.
+- Expand the event-driven arena presentation toward a two-minute tactical watch while preserving play, pause, speed, skip, and replay.
+- Validate text-only and reduced-motion modes with assistive technology and browser builds.
 - Add a post-bout explanation identifying decisive competitors and choices.
 - Validate a single-threaded web export in target browsers.
 

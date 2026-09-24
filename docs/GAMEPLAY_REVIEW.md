@@ -2,6 +2,12 @@
 
 > Migration note: this review began with the HTML soccer prototype. The preparation-to-reaction loop, deterministic presentation boundary, accessibility requirements, and anti-spreadsheet principles carry into the fictional arena game. Soccer-specific examples are historical context until the arena equivalents replace them.
 
+## Current Godot arena presentation
+
+The first Godot presentation controller consumes a deep copy of the resolver's immutable event stream. It reveals one moment at a time and owns only pacing state: ready, playing, paused, or complete. Tests confirm that playback, skipping, replaying, and changing speed cannot mutate the stored result.
+
+The prototype arena uses six high-contrast markers and moves only the competitor associated with the current event. Commentary is always available beside the arena. Players can pause, use three speeds, skip to the result, replay the identical event order, suppress marker motion, or hide the arena graphic entirely. These are parallel ways to consume one result rather than separate simulation modes.
+
 ## Design goal
 
 Dynasty Desk should feel like a club story with meaningful decisions, not a spreadsheet with soccer labels. Numbers should explain the world and support decisions, but the player should remember moments, rivalries, breakthroughs, and consequences.

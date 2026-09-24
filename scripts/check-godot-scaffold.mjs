@@ -8,6 +8,8 @@ const requiredFiles = [
   'game/src/data/prototype_league.gd',
   'game/src/simulation/deterministic_rng.gd',
   'game/src/simulation/arena_match_resolver.gd',
+  'game/src/presentation/arena_presentation.gd',
+  'game/src/presentation/arena_view.gd',
   'game/tests/run_tests.gd'
 ];
 
