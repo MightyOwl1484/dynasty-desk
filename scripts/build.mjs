@@ -2,6 +2,7 @@ import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const browserModules = [
   'src/domain/models.js',
+  'src/domain/form.js',
   'src/domain/simulation.js',
   'src/domain/offseason.js',
   'src/domain/training.js',
@@ -19,6 +20,7 @@ await mkdir('dist/domain', { recursive: true });
 await mkdir('dist/application', { recursive: true });
 await mkdir('dist/stores', { recursive: true });
 await cp('src/domain/models.js', 'dist/domain/models.js');
+await cp('src/domain/form.js', 'dist/domain/form.js');
 await cp('src/domain/simulation.js', 'dist/domain/simulation.js');
 await cp('src/domain/permissions.js', 'dist/domain/permissions.js');
 await cp('src/domain/audit.js', 'dist/domain/audit.js');

@@ -34,6 +34,17 @@ test('morale and weekly preparation contribute to match readiness', () => {
   assert.ok(teamStrength(prepared) > teamStrength(baseline) + 1.7);
 });
 
+test('positive form and an active captain contribute to team strength', () => {
+  const baseline = makeClub('Northport');
+  const lifted = {
+    ...baseline,
+    captainId: baseline.players[0].id,
+    players: baseline.players.map((player) => ({ ...player, form: 1 }))
+  };
+
+  assert.ok(teamStrength(lifted) > teamStrength(baseline) + 0.8);
+});
+
 test('resolves the same fixture deterministically', () => {
   const fixture = createFixture({ id: 'fixture-1', homeClubId: 'home', awayClubId: 'away' });
   const homeClub = makeClub('home', 75);

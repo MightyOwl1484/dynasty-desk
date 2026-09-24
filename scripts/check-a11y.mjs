@@ -21,7 +21,9 @@ const required = [
   ['season statistics caption', /<caption>Player season statistics<\/caption>/],
   ['club picker label', /id="clubPicker"[^>]*aria-label="Available clubs"/],
   ['club preview status', /id="clubPreview"[^>]*aria-live="polite"/],
-  ['guided tour label', /<dialog id="tourDialog"[^>]*aria-labelledby="tourTitle"[^>]*aria-describedby="tourText"/]
+  ['guided tour label', /<dialog id="tourDialog"[^>]*aria-labelledby="tourTitle"[^>]*aria-describedby="tourText"/],
+  ['captain decision label', /class="squad-decision"[^>]*aria-labelledby="captainLabel"/],
+  ['captain status', /id="captainHelp"[^>]*role="status"[^>]*aria-live="polite"/]
 ];
 
 const adminRequired = [

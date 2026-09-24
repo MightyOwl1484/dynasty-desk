@@ -73,6 +73,7 @@ function playerProgression(player, seed) {
     rating: nextRating,
     fitness: Math.max(92, player.fitness ?? 92),
     morale: clamp((player.morale ?? 70) + 5, 40, 85),
+    form: 0,
     appearances: 0,
     apps: 0,
     goals: 0,

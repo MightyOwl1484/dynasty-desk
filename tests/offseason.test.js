@@ -6,7 +6,7 @@ const clubs = [
   {
     id: 'north', name: 'Northport', stats: { points: 28, goalsFor: 24, goalsAgainst: 12 },
     players: [
-      { id: 'n1', name: 'Young Star', position: 'FWD', age: 20, rating: 68, potential: 80, appearances: 14, goals: 9, seasonStartRating: 67, fitness: 76, morale: 72 },
+      { id: 'n1', name: 'Young Star', position: 'FWD', age: 20, rating: 68, potential: 80, appearances: 14, goals: 9, seasonStartRating: 67, fitness: 76, morale: 72, form: 3 },
       { id: 'n2', name: 'Veteran', position: 'DEF', age: 35, rating: 72, potential: 72, appearances: 4, goals: 0, seasonStartRating: 72, fitness: 70, morale: 66 }
     ]
   },
@@ -35,6 +35,7 @@ test('offseason progression is deterministic and resets seasonal statistics', ()
   assert.equal(young.rating > 68, true);
   assert.equal(young.appearances, 0);
   assert.equal(young.goals, 0);
+  assert.equal(young.form, 0);
   assert.equal(veteran.age, 36);
   assert.equal(veteran.rating, 70);
   assert.equal(first.clubs[0].stats.points, 0);

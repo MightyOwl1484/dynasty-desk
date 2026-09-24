@@ -1,3 +1,5 @@
+import { captaincyBonus } from './form.js';
+
 /**
  * Deterministic, host-independent match rules.
  *
@@ -82,8 +84,10 @@ export function teamStrength(club, tactic = 'balanced') {
   const active = lineup.length === 11 ? lineup : [...club.players].sort((a, b) => b.rating - a.rating).slice(0, 11);
   const average = active.reduce((total, player) => total + player.rating * (0.76 + player.fitness / 420), 0) / Math.max(active.length, 1);
   const averageMorale = active.reduce((total, player) => total + (player.morale ?? 70), 0) / Math.max(active.length, 1);
+  const averageForm = active.reduce((total, player) => total + (player.form ?? 0), 0) / Math.max(active.length, 1);
   const moraleModifier = (averageMorale - 70) / 14;
-  return average + moraleModifier + (club.preparationBonus ?? 0) + (TACTIC_MODIFIERS[tactic] ?? 0) + club.reputation * 0.04;
+  return average + moraleModifier + averageForm * 0.45 + captaincyBonus(club, active)
+    + (club.preparationBonus ?? 0) + (TACTIC_MODIFIERS[tactic] ?? 0) + club.reputation * 0.04;
 }
 
 export function resolveFixture({ fixture, homeClub, awayClub, homeTactic = 'balanced', awayTactic = 'balanced', seed = 1 }) {

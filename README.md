@@ -20,6 +20,7 @@ The current prototype is a static browser build in [`dist/`](dist/). It already 
 - Match simulation and commentary
 - Standings, player development, fitness, goals, and club news
 - Weekly training choices with visible fitness, morale, and match-readiness tradeoffs
+- Player form and a selectable captaincy role that affect match readiness
 - End-of-season awards, player statistics, deterministic progression, and multi-season careers
 - Local browser persistence
 

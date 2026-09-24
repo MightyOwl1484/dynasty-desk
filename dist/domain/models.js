@@ -21,6 +21,7 @@ export function createPlayer(input) {
     potential: input.potential ?? input.rating ?? 50,
     fitness: input.fitness ?? 100,
     morale: input.morale ?? 70,
+    form: input.form ?? 0,
     appearances: input.appearances ?? 0,
     goals: input.goals ?? 0
   };
@@ -35,6 +36,7 @@ export function createClub(input) {
     id: input.id,
     name: input.name,
     reputation: input.reputation ?? 60,
+    captainId: input.captainId ?? null,
     players: [...(input.players ?? [])],
     stats: {
       played: input.stats?.played ?? 0,

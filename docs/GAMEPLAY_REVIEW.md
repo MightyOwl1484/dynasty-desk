@@ -77,6 +77,12 @@ The match desk now offers one optional weekly training decision instead of a sep
 
 This choice is intentionally compact: its effect and risk appear beside the control, the squad view exposes current morale, and the match report records the selected preparation. AI clubs use the same rules and automatically choose recovery when their average fitness is low.
 
+## Form and leadership
+
+Player form now reacts to participation, results, and goals. Starters gain form after wins, lose it after defeats, and receive an additional lift when they score; unused players drift back toward neutral rather than remaining permanently hot or cold. Form is bounded, visible beside each player, and contributes modestly to match strength without replacing underlying ability.
+
+Managers can also appoint one captain from the existing squad screen. A captain with strong morale provides a small leadership bonus only while selected in the XI, creating a readable lineup tradeoff without adding another page or a large role-management system. Every new club receives a deterministic default captain, while imported careers receive one when the next week is prepared.
+
 ## Offseason and career continuity
 
 The solo game now records an end-of-season review with the champions, league top scorer, club player of the season, final position, and each squad member's appearances, goals, rating, and seasonal rating change. The review is saved in career history rather than discarded when a new season begins.
