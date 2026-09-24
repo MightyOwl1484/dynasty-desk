@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createClub, createFixture, createPlayer } from '../src/domain/models.js';
-import { applyResult, resolveFixture, teamStrength, validateLineup } from '../src/domain/simulation.js';
+import { applyResult, resolveFixture, tacticMatchup, teamStrength, validateLineup } from '../src/domain/simulation.js';
 
 function makeClub(id, rating = 70) {
   const positions = ['GK', 'DEF', 'DEF', 'DEF', 'MID', 'MID', 'MID', 'MID', 'FWD', 'FWD', 'FWD'];
@@ -43,6 +43,13 @@ test('positive form and an active captain contribute to team strength', () => {
   };
 
   assert.ok(teamStrength(lifted) > teamStrength(baseline) + 0.8);
+});
+
+test('tactical matchups form a readable press-control-counter cycle', () => {
+  assert.equal(tacticMatchup('press', 'control'), 0.7);
+  assert.equal(tacticMatchup('control', 'counter'), 0.7);
+  assert.equal(tacticMatchup('counter', 'press'), 0.7);
+  assert.equal(tacticMatchup('balanced', 'press'), 0);
 });
 
 test('resolves the same fixture deterministically', () => {

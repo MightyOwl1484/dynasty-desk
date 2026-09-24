@@ -14,6 +14,17 @@ const TACTIC_MODIFIERS = Object.freeze({
   control: 0.6
 });
 
+const TACTIC_MATCHUPS = Object.freeze({
+  press: Object.freeze({ control: 0.7, counter: -0.7 }),
+  control: Object.freeze({ counter: 0.7, press: -0.7 }),
+  counter: Object.freeze({ press: 0.7, control: -0.7 }),
+  balanced: Object.freeze({})
+});
+
+export function tacticMatchup(tactic, opponentTactic) {
+  return TACTIC_MATCHUPS[tactic]?.[opponentTactic] ?? 0;
+}
+
 function random(seed) {
   let value = (seed + 0x6d2b79f5) | 0;
   value = Math.imul(value ^ (value >>> 15), value | 1);
@@ -95,8 +106,8 @@ export function resolveFixture({ fixture, homeClub, awayClub, homeTactic = 'bala
     throw new Error(`Fixture ${fixture.id} has already been resolved.`);
   }
 
-  const homeStrength = teamStrength(homeClub, homeTactic);
-  const awayStrength = teamStrength(awayClub, awayTactic);
+  const homeStrength = teamStrength(homeClub, homeTactic) + tacticMatchup(homeTactic, awayTactic);
+  const awayStrength = teamStrength(awayClub, awayTactic) + tacticMatchup(awayTactic, homeTactic);
   const difference = (homeStrength - awayStrength) / 12;
   const homeExpected = Math.max(0.25, 1.28 + difference);
   const awayExpected = Math.max(0.2, 1.02 - difference);

@@ -23,5 +23,8 @@ if (!script.includes('id="trainingSelect"') || !script.includes('id="trainingHel
 if (!html.includes('id="captainSelect"') || !script.includes('Form steady')) {
   throw new Error('The generated game is missing captaincy or player-form controls.');
 }
+if (!script.includes('id="applyScoutTactic"') || !script.includes('id="applyRotation"')) {
+  throw new Error('The generated game is missing scouting or rotation recommendations.');
+}
 
-console.log(`Browser build checks passed (${checks.length + 2} interface checks, self-contained script).`);
+console.log(`Browser build checks passed (${checks.length + 3} interface checks, self-contained script).`);

@@ -124,6 +124,71 @@ function captaincyBonus(club, activePlayers = club?.players?.filter((player) => 
 }
 
 
+/* src/domain/scouting.js */
+/** Pure opponent scouting and squad-depth recommendations. */
+
+const position = (player) => player.position ?? player.pos;
+const average = (values) => values.length ? values.reduce((total, value) => total + value, 0) / values.length : 0;
+const title = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+
+function scoutClub(club) {
+  if (!club?.players?.length) throw new TypeError('Scouting requires a club with players.');
+  const units = {
+    defense: average(club.players.filter((player) => ['GK', 'DEF'].includes(position(player))).map((player) => player.rating ?? 50)),
+    midfield: average(club.players.filter((player) => position(player) === 'MID').map((player) => player.rating ?? 50)),
+    attack: average(club.players.filter((player) => position(player) === 'FWD').map((player) => player.rating ?? 50))
+  };
+  const strongestUnit = Object.entries(units).sort(([, left], [, right]) => right - left)[0][0];
+  const likelyTactic = strongestUnit === 'attack' ? 'counter' : strongestUnit === 'midfield' ? 'control' : 'press';
+  const recommendedTactic = { counter: 'control', control: 'press', press: 'counter' }[likelyTactic];
+  const descriptions = {
+    attack: 'Their forwards are the danger. Deny transition space and make them defend longer possessions.',
+    midfield: 'Their midfield sets the rhythm. Pressure their buildup before they can control the match.',
+    defense: 'Their back line is their platform. Draw them forward and attack the space they leave.'
+  };
+
+  return {
+    strongestUnit,
+    likelyTactic,
+    recommendedTactic,
+    summary: descriptions[strongestUnit],
+    evidence: `${title(strongestUnit)} ${Math.round(units[strongestUnit])} · likely ${likelyTactic}`,
+    units
+  };
+}
+
+const readiness = (player) => (player.rating ?? 50) + (player.form ?? 0) * 1.5
+  + ((player.fitness ?? 100) - 75) * 0.1 + ((player.morale ?? 70) - 70) * 0.04;
+
+function recommendRotation(club) {
+  if (!club?.players?.length) return null;
+  const starters = club.players.filter((player) => player.starting);
+  const bench = club.players.filter((player) => !player.starting);
+  const candidates = [];
+
+  for (const outgoing of starters) {
+    for (const incoming of bench.filter((player) => position(player) === position(outgoing))) {
+      const gain = readiness(incoming) - readiness(outgoing);
+      if (gain >= 1) candidates.push({ outgoing, incoming, gain });
+    }
+  }
+
+  const best = candidates.sort((left, right) => right.gain - left.gain)[0];
+  if (!best) return null;
+  const reason = (best.outgoing.fitness ?? 100) < 75
+    ? `${best.outgoing.name} is carrying fatigue.`
+    : `${best.incoming.name} has the stronger current readiness.`;
+  return {
+    outgoingId: best.outgoing.id,
+    incomingId: best.incoming.id,
+    outgoingName: best.outgoing.name,
+    incomingName: best.incoming.name,
+    position: position(best.outgoing),
+    reason
+  };
+}
+
+
 /* src/domain/simulation.js */
 
 /**
@@ -139,6 +204,17 @@ const TACTIC_MODIFIERS = Object.freeze({
   counter: 0.35,
   control: 0.6
 });
+
+const TACTIC_MATCHUPS = Object.freeze({
+  press: Object.freeze({ control: 0.7, counter: -0.7 }),
+  control: Object.freeze({ counter: 0.7, press: -0.7 }),
+  counter: Object.freeze({ press: 0.7, control: -0.7 }),
+  balanced: Object.freeze({})
+});
+
+function tacticMatchup(tactic, opponentTactic) {
+  return TACTIC_MATCHUPS[tactic]?.[opponentTactic] ?? 0;
+}
 
 function random(seed) {
   let value = (seed + 0x6d2b79f5) | 0;
@@ -221,8 +297,8 @@ function resolveFixture({ fixture, homeClub, awayClub, homeTactic = 'balanced', 
     throw new Error(`Fixture ${fixture.id} has already been resolved.`);
   }
 
-  const homeStrength = teamStrength(homeClub, homeTactic);
-  const awayStrength = teamStrength(awayClub, awayTactic);
+  const homeStrength = teamStrength(homeClub, homeTactic) + tacticMatchup(homeTactic, awayTactic);
+  const awayStrength = teamStrength(awayClub, awayTactic) + tacticMatchup(awayTactic, homeTactic);
   const difference = (homeStrength - awayStrength) / 12;
   const homeExpected = Math.max(0.25, 1.28 + difference);
   const awayExpected = Math.max(0.2, 1.02 - difference);
@@ -536,10 +612,10 @@ function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
     const mods={balanced:0,press:.8,counter:.35,control:.6};return fit+(mods[tactic]||0);
   }
   function simulate(f,tactic){
-    const home=club(f.home),away=club(f.away);const userHome=f.home===game.userClub;
+    const home=club(f.home),away=club(f.away),homeTactic=home.id===game.userClub?tactic:scoutClub(home).likelyTactic,awayTactic=away.id===game.userClub?tactic:scoutClub(away).likelyTactic;
     const fixture=createFixture({id:`${game.week}-${f.home}-${f.away}`,homeClubId:String(home.id),awayClubId:String(away.id),status:f.played?'played':'scheduled'});
-    const result=resolveFixture({fixture,homeClub:toDomainClub(home),awayClub:toDomainClub(away),homeTactic:userHome?tactic:'balanced',awayTactic:userHome?'balanced':tactic,seed:game.seed});
-    const hg=result.homeGoals,ag=result.awayGoals;f.played=true;f.score=[hg,ag];game.seed=(game.seed+97)>>>0;updateStats(home,away,hg,ag);const homeScorers=assignGoals(home,hg),awayScorers=assignGoals(away,ag);applyResultMorale(home,hg,ag);applyResultMorale(away,ag,hg);applyResultForm(home,hg,ag,homeScorers);applyResultForm(away,ag,hg,awayScorers);return{home,away,hg,ag,events:result.events};
+    const result=resolveFixture({fixture,homeClub:toDomainClub(home),awayClub:toDomainClub(away),homeTactic,awayTactic,seed:game.seed});
+    const hg=result.homeGoals,ag=result.awayGoals;f.played=true;f.score=[hg,ag];game.seed=(game.seed+97)>>>0;updateStats(home,away,hg,ag);const homeScorers=assignGoals(home,hg),awayScorers=assignGoals(away,ag);applyResultMorale(home,hg,ag);applyResultMorale(away,ag,hg);applyResultForm(home,hg,ag,homeScorers);applyResultForm(away,ag,hg,awayScorers);return{home,away,hg,ag,events:result.events,homeTactic,awayTactic};
   }
   function toDomainClub(team){return{id:String(team.id),name:team.name,reputation:team.reputation,captainId:team.captainId,preparationBonus:team.preparationBonus??0,players:team.players.map(p=>({id:p.id,name:p.name,position:p.pos,age:p.age,rating:p.rating,potential:p.potential,fitness:p.fitness,morale:p.morale??70,form:p.form??0,appearances:p.apps??0,goals:p.goals??0,seasonStartRating:p.seasonStartRating??p.rating,starting:p.starting})),stats:{played:team.stats.p,wins:team.stats.w,draws:team.stats.d,losses:team.stats.l,goalsFor:team.stats.gf,goalsAgainst:team.stats.ga,points:team.stats.pts}}}
   function syncPlayerReadiness(team,domainClub){const byPlayer=new Map(domainClub.players.map(player=>[String(player.id),player]));team.players.forEach(player=>{const next=byPlayer.get(String(player.id));player.fitness=next.fitness;player.morale=next.morale;player.form=next.form??player.form??0});team.preparationBonus=domainClub.preparationBonus??0;team.preparationFocus=domainClub.preparationFocus??team.preparationFocus}
@@ -566,7 +642,7 @@ function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
   }
   function showResult(r,us,them,opp,tone,tactic){
     const usHome=r.home.id===game.userClub;$('#resultScore').textContent=`${us} — ${them}`;$('#resultHeadline').textContent=`${tone} against ${opp.name}`;
-    const explanations={balanced:'Balanced kept the team adaptable across both phases.',press:'High press created more pressure, but the extra running will affect recovery.',counter:'Counter-attacking protected the shape and looked for space after turnovers.',control:'Control prioritized possession and reduced the match\'s volatility.'},preparation={recovery:'Recovery work protected fitness without adding a match bonus.',balanced:'Balanced training supported morale and match readiness.',intensity:'High-intensity training added readiness at the cost of fitness.'};$('#resultExplanation').textContent=`${explanations[tactic]||explanations.balanced} ${preparation[game.trainingFocus??'balanced']}`;
+    const explanations={balanced:'Balanced kept the team adaptable across both phases.',press:'High press created more pressure, but the extra running will affect recovery.',counter:'Counter-attacking protected the shape and looked for space after turnovers.',control:'Control prioritized possession and reduced the match\'s volatility.'},preparation={recovery:'Recovery work protected fitness without adding a match bonus.',balanced:'Balanced training supported morale and match readiness.',intensity:'High-intensity training added readiness at the cost of fitness.'},opponentTactic=usHome?r.awayTactic:r.homeTactic;$('#resultExplanation').textContent=`${explanations[tactic]||explanations.balanced} ${opp.name} used ${opponentTactic}. ${preparation[game.trainingFocus??'balanced']}`;
     const events=r.events.map(event=>[event.minute,String(event.teamId)===String(club().id)?club().short:String(event.teamId)===String(opp.id)?opp.short:'MATCH',event.text]);
     $('#commentary').innerHTML=events.map(e=>`<p><b>${e[0]}′ ${e[1]}</b> <span>${e[2]}</span></p>`).join('');
     replayState={events:r.events,index:0,timer:null,result:{home:r.home,away:r.away,score:`${us} — ${them}`},speed:1,durationMs:30000};$('#replaySpeed').value='1';$('#replayDuration').value='30000';
@@ -586,13 +662,14 @@ function createLocalGameStore(storage, key = 'dynasty-desk-save-v1') {
   function renderDesk(){const c=club(),f=fixtureFor(c.id),seasonComplete=!f;$('#tacticControls').hidden=seasonComplete;$('#playMatch').hidden=seasonComplete;$('#offseasonActions').hidden=!seasonComplete;if(!f){$('#homeTeam').textContent=`Season ${game.season}`;$('#awayTeam').textContent='Complete';$('#homeBadge').textContent='✓';$('#awayBadge').textContent=ordinal(table().findIndex(t=>t.id===c.id)+1);$('#fixtureVenue').textContent='Final table';$('#fixtureRound').textContent=`${game.fixtures.length}/${game.fixtures.length}`;$('#formGuide').textContent=`${c.stats.pts} PTS`;$('#startNextSeason').textContent=`Begin season ${game.season+1}`;}
     else{const h=club(f.home),a=club(f.away);$('#homeTeam').textContent=h.name;$('#awayTeam').textContent=a.name;setBadge($('#homeBadge'),h);setBadge($('#awayBadge'),a);$('#fixtureVenue').textContent=f.home===c.id?'Home':'Away';$('#fixtureRound').textContent=`Week ${game.week+1}`;$('#formGuide').textContent=`${h.stats.pts} PTS · ${a.stats.pts} PTS`;$('#playMatch').disabled=c.players.filter(p=>p.starting).length!==11}
     const pos=table().findIndex(t=>t.id===c.id)+1;$('#leaguePosition').textContent=ordinal(pos);$('#miniTable').innerHTML=table().slice(Math.max(0,pos-2),Math.min(8,pos+2)).map((t,i)=>`<div class="mini-row ${t.id===c.id?'you':''}"><span>${table().indexOf(t)+1}</span><span>${t.name}</span><b>${t.stats.pts}</b></div>`).join('');
-    renderPitch();const avg=Math.round(c.players.reduce((s,p)=>s+p.fitness,0)/c.players.length),morale=Math.round(c.players.reduce((s,p)=>s+(p.morale??70),0)/c.players.length),top=[...c.players].sort((a,b)=>b.rating-a.rating)[0];$('#briefingDate').textContent=`W${Math.min(game.week+1,game.fixtures.length)}`;const training=seasonComplete?'':`<div class="weekly-plan"><label for="trainingSelect">Weekly training</label><select id="trainingSelect"><option value="recovery">Recovery</option><option value="balanced">Balanced</option><option value="intensity">High intensity</option></select><span id="trainingHelp" role="status" aria-live="polite"></span></div>`;$('#briefing').innerHTML=`<h3>${avg<75?'Rotation advised':'Squad ready'}</h3><p>${avg<75?'Several starters are carrying fatigue. Fresh legs may protect performance.':'Fitness levels are healthy. Your chosen approach should be sustainable for the next fixture.'}</p><div class="brief-stat"><span>Fitness ${avg}%</span><span>Morale ${morale}</span><span>Top rated ${top.name} · ${top.rating}</span></div>${training}`;if(!seasonComplete){$('#trainingSelect').value=game.trainingFocus??'balanced';$('#trainingSelect').onchange=()=>{game.trainingFocus=$('#trainingSelect').value;save();updateTrainingHelp()};updateTrainingHelp()}
+    renderPitch();const avg=Math.round(c.players.reduce((s,p)=>s+p.fitness,0)/c.players.length),morale=Math.round(c.players.reduce((s,p)=>s+(p.morale??70),0)/c.players.length),top=[...c.players].sort((a,b)=>b.rating-a.rating)[0];$('#briefingDate').textContent=`W${Math.min(game.week+1,game.fixtures.length)}`;const opponent=f?club(f.home===c.id?f.away:f.home):null,report=opponent?scoutClub(opponent):null,scouting=report?`<div class="scout-report"><h4>${opponent.name} scout</h4><p>${report.summary}</p><div class="scout-actions"><span>${report.evidence}</span><button id="applyScoutTactic" class="secondary" type="button">Try ${report.recommendedTactic}</button></div></div>`:'',training=seasonComplete?'':`<div class="weekly-plan"><label for="trainingSelect">Weekly training</label><select id="trainingSelect"><option value="recovery">Recovery</option><option value="balanced">Balanced</option><option value="intensity">High intensity</option></select><span id="trainingHelp" role="status" aria-live="polite"></span></div>`;$('#briefing').innerHTML=`<h3>${avg<75?'Rotation advised':'Squad ready'}</h3><p>${avg<75?'Several starters are carrying fatigue. Fresh legs may protect performance.':'Fitness levels are healthy. Your chosen approach should be sustainable for the next fixture.'}</p><div class="brief-stat"><span>Fitness ${avg}%</span><span>Morale ${morale}</span><span>Top rated ${top.name} · ${top.rating}</span></div>${scouting}${training}`;if(!seasonComplete){$('#applyScoutTactic').onclick=()=>{$('#tacticSelect').value=report.recommendedTactic;updateTacticHelp();$('#tacticSelect').focus()};$('#trainingSelect').value=game.trainingFocus??'balanced';$('#trainingSelect').onchange=()=>{game.trainingFocus=$('#trainingSelect').value;save();updateTrainingHelp()};updateTrainingHelp()}
   }
   function renderPitch(){const xi=club().players.filter(p=>p.starting);const slots={GK:[[8,50]],DEF:[[28,18],[28,39],[28,61],[28,82]],MID:[[57,15],[57,38],[57,62],[57,85]],FWD:[[84,35],[84,65]]};const used={GK:0,DEF:0,MID:0,FWD:0};$('#miniPitch').innerHTML=xi.map(p=>{const s=slots[p.pos][used[p.pos]++]||[50,50];return `<span class="pitch-player" title="${p.name}" style="left:${s[0]}%;top:${s[1]}%">${initials(p.name)}</span>`}).join('')}
   function formLabel(value){return value>0?`Form ↑${value}`:value<0?`Form ↓${Math.abs(value)}`:'Form steady'}
   function playerRow(p){const form=p.form??0,captain=String(p.id)===String(club().captainId);return `<button class="player-row" data-player="${p.id}"><span class="player-pos">${p.pos}</span><span class="player-name"><strong>${p.name}${captain?'<em class="role-badge">Captain</em>':''}</strong><span>${p.age} yrs · ${p.apps} apps · ${p.goals} goals · morale ${p.morale??70} · <span class="${form>0?'form-up':form<0?'form-down':''}">${formLabel(form)}</span></span></span><b class="rating">${p.rating}</b><span class="fitness">${p.fitness}%<i style="width:${p.fitness}%"></i></span></button>`}
   function renderCaptainControl(team){if(!team.players.some(player=>String(player.id)===String(team.captainId)))team.captainId=chooseDefaultCaptain(team);const select=$('#captainSelect');select.innerHTML=[...team.players].sort(posSort).map(player=>`<option value="${player.id}">${player.name} · ${player.pos} · morale ${player.morale??70}</option>`).join('');select.value=team.captainId;const update=()=>{const captain=team.players.find(player=>String(player.id)===String(team.captainId));$('#captainHelp').textContent=captain?.starting?'Captain selected in the XI. Leadership bonus active.':'Captain is on the bench. No leadership bonus will apply.'};select.onchange=()=>{team.captainId=select.value;save();renderSquad()};update()}
-  function renderSquad(){const team=club(),players=team.players;renderCaptainControl(team);const xi=players.filter(p=>p.starting).sort(posSort),bench=players.filter(p=>!p.starting).sort(posSort);$('#xiCount').textContent=`${xi.length}/11`;$('#startingList').innerHTML=xi.map(playerRow).join('');$('#benchList').innerHTML=bench.map(playerRow).join('');$$('[data-player]').forEach(b=>b.onclick=()=>togglePlayer(b.dataset.player))}
+  function renderSquadAdvice(team){const advice=recommendRotation(toDomainClub(team)),root=$('#squadAdvice');if(!advice){root.innerHTML='<p><strong>No urgent rotation.</strong> Your current XI has the strongest readiness by position.</p>';return}root.innerHTML=`<p><strong>${advice.incomingName} for ${advice.outgoingName}?</strong> ${advice.reason}</p><button id="applyRotation" class="secondary" type="button">Apply ${advice.position} swap</button>`;$('#applyRotation').onclick=()=>{team.players.find(player=>String(player.id)===String(advice.outgoingId)).starting=false;team.players.find(player=>String(player.id)===String(advice.incomingId)).starting=true;save();render();requestAnimationFrame(()=>$('#squadAdvice').focus())}}
+  function renderSquad(){const team=club(),players=team.players;renderSquadAdvice(team);renderCaptainControl(team);const xi=players.filter(p=>p.starting).sort(posSort),bench=players.filter(p=>!p.starting).sort(posSort);$('#xiCount').textContent=`${xi.length}/11`;$('#startingList').innerHTML=xi.map(playerRow).join('');$('#benchList').innerHTML=bench.map(playerRow).join('');$$('[data-player]').forEach(b=>b.onclick=()=>togglePlayer(b.dataset.player))}
   function posSort(a,b){return ['GK','DEF','MID','FWD'].indexOf(a.pos)-['GK','DEF','MID','FWD'].indexOf(b.pos)||b.rating-a.rating}
   function togglePlayer(id){const p=club().players.find(x=>x.id===id),count=club().players.filter(x=>x.starting).length;if(!p.starting&&count>=11){flash('The starting XI is full. Remove a player first.');return}if(p.starting&&count<=1)return;p.starting=!p.starting;save();render();}
   function flash(msg){const old=$('.save-state span').textContent;$('.save-state span').textContent=msg;setTimeout(()=>$('.save-state span').textContent=old,1800)}

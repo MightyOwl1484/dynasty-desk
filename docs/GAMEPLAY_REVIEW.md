@@ -83,6 +83,12 @@ Player form now reacts to participation, results, and goals. Starters gain form 
 
 Managers can also appoint one captain from the existing squad screen. A captain with strong morale provides a small leadership bonus only while selected in the XI, creating a readable lineup tradeoff without adding another page or a large role-management system. Every new club receives a deterministic default captain, while imported careers receive one when the next week is prepared.
 
+## Scouting and squad depth
+
+The match briefing now identifies each opponent's strongest unit and likely tactical approach from the current synthetic roster. Press, control, and counter form a modest matchup cycle, so the suggested response has a real but non-deterministic effect on the simulation. The recommendation is a one-click starting point rather than a mandatory answer; balanced remains neutral and squad quality, fitness, morale, form, and captaincy still matter.
+
+The squad room compares starters with reserves in the same position using rating, fitness, morale, and form. It surfaces only the strongest meaningful swap and can apply it with one action. When no reserve offers a clear readiness gain, the interface says so instead of filling the screen with marginal advice.
+
 ## Offseason and career continuity
 
 The solo game now records an end-of-season review with the champions, league top scorer, club player of the season, final position, and each squad member's appearances, goals, rating, and seasonal rating change. The review is saved in career history rather than discarded when a new season begins.

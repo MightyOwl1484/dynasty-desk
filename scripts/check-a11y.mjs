@@ -23,7 +23,8 @@ const required = [
   ['club preview status', /id="clubPreview"[^>]*aria-live="polite"/],
   ['guided tour label', /<dialog id="tourDialog"[^>]*aria-labelledby="tourTitle"[^>]*aria-describedby="tourText"/],
   ['captain decision label', /class="squad-decision"[^>]*aria-labelledby="captainLabel"/],
-  ['captain status', /id="captainHelp"[^>]*role="status"[^>]*aria-live="polite"/]
+  ['captain status', /id="captainHelp"[^>]*role="status"[^>]*aria-live="polite"/],
+  ['rotation advice status', /id="squadAdvice"[^>]*role="status"[^>]*aria-live="polite"[^>]*tabindex="-1"/]
 ];
 
 const adminRequired = [
