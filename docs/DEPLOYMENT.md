@@ -1,6 +1,6 @@
 # Web deployment
 
-Dynasty Desk: Arena targets Godot 4.7.2's single-threaded Web Compatibility export. The browser build is static and can be hosted without a game server.
+Dynasty Desk: Arena targets Godot 4.7.2's single-threaded Web Compatibility export for desktop browsers. The browser build is static and can be hosted without a game server. Mobile texture compression remains disabled until a later mobile-browser validation pass enables the matching ETC2/ASTC imports.
 
 ## Continuous integration artifact
 
