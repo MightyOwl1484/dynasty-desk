@@ -1,11 +1,5 @@
 extends Control
 
-const PrototypeLeague = preload("res://src/data/prototype_league.gd")
-const ArenaMatchResolver = preload("res://src/simulation/arena_match_resolver.gd")
-const BoutAnalysis = preload("res://src/simulation/bout_analysis.gd")
-const ArenaPresentation = preload("res://src/presentation/arena_presentation.gd")
-const ArenaView = preload("res://src/presentation/arena_view.gd")
-
 const SPEEDS: Array[float] = [1.0, 2.0, 4.0]
 
 var _houses: Array[Dictionary] = []

@@ -1,10 +1,5 @@
 extends SceneTree
 
-const PrototypeLeague = preload("res://src/data/prototype_league.gd")
-const ArenaMatchResolver = preload("res://src/simulation/arena_match_resolver.gd")
-const ArenaPresentation = preload("res://src/presentation/arena_presentation.gd")
-const BoutAnalysis = preload("res://src/simulation/bout_analysis.gd")
-
 var _failures: int = 0
 
 

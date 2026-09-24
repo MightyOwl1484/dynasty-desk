@@ -79,12 +79,12 @@ func _draw_house(house: Dictionary, is_home: bool, color: Color) -> void:
 		var is_active: bool = str(competitor.get("id", "")) == _active_competitor_id
 		var direction := 1.0 if is_home else -1.0
 		var movement := sin(_event_progress * PI) * 54.0 * direction if is_active else 0.0
-		var position := Vector2(base_x + movement, y)
+		var marker_position := Vector2(base_x + movement, y)
 		var radius := 19.0 if is_active else 14.0
-		draw_circle(position, radius + 4.0, Color("f5f7fb") if is_active else Color("26374e"))
-		draw_circle(position, radius, color)
+		draw_circle(marker_position, radius + 4.0, Color("f5f7fb") if is_active else Color("26374e"))
+		draw_circle(marker_position, radius, color)
 		var initials := _initials(str(competitor.get("name", "?")))
-		draw_string(ThemeDB.fallback_font, position + Vector2(-10, 6), initials, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, TEXT_COLOR)
+		draw_string(ThemeDB.fallback_font, marker_position + Vector2(-10, 6), initials, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, TEXT_COLOR)
 
 
 func _arena_style() -> StyleBoxFlat:
@@ -96,8 +96,8 @@ func _arena_style() -> StyleBoxFlat:
 	return style
 
 
-func _initials(name: String) -> String:
-	var parts := name.split(" ", false)
+func _initials(competitor_name: String) -> String:
+	var parts := competitor_name.split(" ", false)
 	var initials := ""
 	for part in parts.slice(0, 2):
 		initials += part.left(1).to_upper()

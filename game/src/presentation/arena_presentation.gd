@@ -16,11 +16,11 @@ var _state: State = State.EMPTY
 var _speed: float = 1.0
 
 
-func load_result(result: Dictionary) -> void:
-	assert(result.has("events") and result["events"] is Array, "Presentation requires result events")
-	_result = result.duplicate(true)
+func load_result(resolved_bout: Dictionary) -> void:
+	assert(resolved_bout.has("events") and resolved_bout["events"] is Array, "Presentation requires result events")
+	_result = resolved_bout.duplicate(true)
 	_events.clear()
-	for event in result["events"]:
+	for event in resolved_bout["events"]:
 		_events.append(event.duplicate(true))
 	_next_event_index = 0
 	_state = State.READY

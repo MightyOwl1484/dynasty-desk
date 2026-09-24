@@ -1,7 +1,6 @@
 class_name ArenaMatchResolver
 extends RefCounted
 
-const DeterministicRng = preload("res://src/simulation/deterministic_rng.gd")
 const RESOLVER_VERSION: String = "arena-0.2.0"
 const STRATEGIES: Dictionary = {
 	"balanced": {"attack": 1.0, "defense": 1.0, "tempo": 0},
