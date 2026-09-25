@@ -168,6 +168,8 @@ The same event can feed the animated pitch, the accessible event log, the post-m
 
 ## Onboarding
 
+The Godot build now opens a three-step inline tour for a new career. It explains House choice and the recommended trio, the single-choice weekly progression, presentation alternatives, and automatic saving. The tour never blocks the controls, can be closed immediately, and can be reopened from **How to play**. A restored career does not force it open again. The one-screen layout scrolls vertically when the tour, larger text, or a shorter viewport needs more room.
+
 The first career should teach through action:
 
 1. Pick a club.

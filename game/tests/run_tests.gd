@@ -6,6 +6,7 @@ const ArenaPresentationScript = preload("res://src/presentation/arena_presentati
 const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
 const LineupSelectorScript = preload("res://src/application/lineup_selector.gd")
+const OnboardingGuideScript = preload("res://src/application/onboarding_guide.gd")
 const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
 const SeasonStateScript = preload("res://src/application/season_state.gd")
 const LocalSaveStoreScript = preload("res://src/persistence/local_save_store.gd")
@@ -27,13 +28,14 @@ func _run() -> void:
 	_test_bout_analysis_explains_locked_result()
 	_test_weekly_cycle_connects_management_decisions()
 	_test_lineup_recommendation_uses_readiness()
+	_test_onboarding_guide_sets_clear_expectations()
 	_test_round_robin_schedule_connects_three_weeks()
 	_test_season_standings_resolve_every_fixture()
 	_test_completed_season_review()
 	_test_versioned_local_save_envelope()
 
 	if _failures == 0:
-		print("PASS: 13 arena content, simulation, presentation, analysis, management, season, and persistence tests")
+		print("PASS: 14 arena content, simulation, presentation, onboarding, management, season, and persistence tests")
 	else:
 		push_error("FAIL: %d arena simulation assertions" % _failures)
 	quit(_failures)
@@ -176,6 +178,16 @@ func _test_lineup_recommendation_uses_readiness() -> void:
 			competitor["fatigue"] = 100
 	_expect(LineupSelectorScript.ids(source) != LineupSelectorScript.ids(original), "lineup recommendation responds to competitor condition")
 	_expect(houses[0] == original, "lineup recommendation does not mutate source content")
+
+
+func _test_onboarding_guide_sets_clear_expectations() -> void:
+	_expect(OnboardingGuideScript.count() == 3, "first-run tour stays short")
+	var steps: Array[Dictionary] = []
+	for step_index in range(OnboardingGuideScript.count()):
+		steps.append(OnboardingGuideScript.step(step_index))
+	_expect(steps.all(func(tour_step: Dictionary) -> bool: return not str(tour_step["title"]).is_empty() and not str(tour_step["body"]).is_empty()), "every tour step has a readable title and explanation")
+	_expect(steps[0]["body"].contains("recommended") and steps[-1]["body"].contains("saves automatically"), "tour explains helpful defaults and automatic persistence")
+	_expect(OnboardingGuideScript.progress_text(1) == "Getting started · 2 of 3", "tour exposes concise progress")
 
 
 func _test_season_standings_resolve_every_fixture() -> void:

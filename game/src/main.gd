@@ -7,6 +7,7 @@ const ArenaPresentationScript = preload("res://src/presentation/arena_presentati
 const ArenaViewScript = preload("res://src/presentation/arena_view.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
 const LineupSelectorScript = preload("res://src/application/lineup_selector.gd")
+const OnboardingGuideScript = preload("res://src/application/onboarding_guide.gd")
 const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
 const SeasonStateScript = preload("res://src/application/season_state.gd")
 const LocalSaveStoreScript = preload("res://src/persistence/local_save_store.gd")
@@ -48,6 +49,13 @@ var _skip_button: Button
 var _replay_button: Button
 var _advance_button: Button
 var _reset_button: Button
+var _tour_panel: PanelContainer
+var _tour_progress: Label
+var _tour_title: Label
+var _tour_body: Label
+var _tour_back_button: Button
+var _tour_next_button: Button
+var _tour_step_index: int = 0
 var _reduced_motion: CheckButton
 var _text_only: CheckButton
 var _presentation_timer: Timer
@@ -65,6 +73,8 @@ func _ready() -> void:
 	_restore_career()
 	_render_standings()
 	_sync_week_controls()
+	if _career_house.is_empty():
+		_open_tour()
 
 
 func _build_theme() -> void:
@@ -92,9 +102,14 @@ func _build_interface() -> void:
 	margin.add_theme_constant_override("margin_bottom", 28)
 	add_child(margin)
 
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	margin.add_child(scroll)
 	var page := VBoxContainer.new()
 	page.add_theme_constant_override("separation", 12)
-	margin.add_child(page)
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(page)
 
 	var eyebrow := Label.new()
 	eyebrow.text = "GODOT PIVOT · PLAYABLE ARENA PRESENTATION"
@@ -110,6 +125,7 @@ func _build_interface() -> void:
 	introduction.text = "Choose a House and strategy. The result locks first; the presentation only reveals its moments."
 	introduction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	page.add_child(introduction)
+	_build_guided_tour(page)
 
 	_standings_label = Label.new()
 	_standings_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -147,6 +163,11 @@ func _build_interface() -> void:
 	_reset_button.accessibility_name = "Erase the local career and start again"
 	_reset_button.pressed.connect(_reset_career)
 	week_actions.add_child(_reset_button)
+	var help_button := Button.new()
+	help_button.text = "How to play"
+	help_button.accessibility_name = "Open the getting started tour"
+	help_button.pressed.connect(_open_tour)
+	week_actions.add_child(help_button)
 
 	var match_area := HBoxContainer.new()
 	match_area.add_theme_constant_override("separation", 24)
@@ -159,6 +180,81 @@ func _build_interface() -> void:
 	_presentation_timer.one_shot = false
 	_presentation_timer.timeout.connect(_reveal_next_event)
 	add_child(_presentation_timer)
+
+
+func _build_guided_tour(parent: VBoxContainer) -> void:
+	_tour_panel = PanelContainer.new()
+	_tour_panel.visible = false
+	_tour_panel.accessibility_name = "Getting started guided tour"
+	parent.add_child(_tour_panel)
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 16)
+	margin.add_theme_constant_override("margin_right", 16)
+	margin.add_theme_constant_override("margin_top", 12)
+	margin.add_theme_constant_override("margin_bottom", 12)
+	_tour_panel.add_child(margin)
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 6)
+	margin.add_child(content)
+	_tour_progress = Label.new()
+	_tour_progress.add_theme_color_override("font_color", Color("69d3c5"))
+	content.add_child(_tour_progress)
+	_tour_title = Label.new()
+	_tour_title.add_theme_font_size_override("font_size", 22)
+	content.add_child(_tour_title)
+	_tour_body = Label.new()
+	_tour_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_tour_body.accessibility_live = AccessibilityServer.LIVE_POLITE
+	content.add_child(_tour_body)
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 8)
+	content.add_child(actions)
+	_tour_back_button = Button.new()
+	_tour_back_button.text = "Back"
+	_tour_back_button.pressed.connect(_tour_previous)
+	actions.add_child(_tour_back_button)
+	_tour_next_button = Button.new()
+	_tour_next_button.text = "Next"
+	_tour_next_button.pressed.connect(_tour_next)
+	actions.add_child(_tour_next_button)
+	var close_button := Button.new()
+	close_button.text = "Close tour"
+	close_button.pressed.connect(_close_tour)
+	actions.add_child(close_button)
+
+
+func _open_tour() -> void:
+	_tour_step_index = 0
+	_tour_panel.visible = true
+	_render_tour_step()
+	_tour_next_button.grab_focus()
+
+
+func _close_tour() -> void:
+	_tour_panel.visible = false
+	_house_picker.grab_focus()
+
+
+func _tour_previous() -> void:
+	_tour_step_index = maxi(0, _tour_step_index - 1)
+	_render_tour_step()
+
+
+func _tour_next() -> void:
+	if _tour_step_index >= OnboardingGuideScript.count() - 1:
+		_close_tour()
+		return
+	_tour_step_index += 1
+	_render_tour_step()
+
+
+func _render_tour_step() -> void:
+	var tour_step := OnboardingGuideScript.step(_tour_step_index)
+	_tour_progress.text = OnboardingGuideScript.progress_text(_tour_step_index)
+	_tour_title.text = tour_step["title"]
+	_tour_body.text = tour_step["body"]
+	_tour_back_button.disabled = _tour_step_index == 0
+	_tour_next_button.text = "Start choosing" if _tour_step_index == OnboardingGuideScript.count() - 1 else "Next"
 
 
 func _build_house_picker(parent: HBoxContainer) -> void:
@@ -543,6 +639,7 @@ func _restore_career() -> void:
 	if not loaded["ok"]:
 		return
 	var career: Dictionary = loaded["envelope"]["career"]
+	_tour_panel.visible = false
 	_career_house = career["house"].duplicate(true)
 	if _career_house.get("color") is String:
 		_career_house["color"] = Color(_career_house["color"])
@@ -594,6 +691,7 @@ func _reset_career() -> void:
 	_arena_view.reset_view()
 	_set_presentation_controls_enabled(false)
 	_sync_week_controls()
+	_open_tour()
 
 
 func _sync_week_controls() -> void:

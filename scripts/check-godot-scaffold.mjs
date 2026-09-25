@@ -12,6 +12,7 @@ const requiredFiles = [
   'game/src/simulation/bout_analysis.gd',
   'game/src/application/weekly_cycle.gd',
   'game/src/application/lineup_selector.gd',
+  'game/src/application/onboarding_guide.gd',
   'game/src/application/season_state.gd',
   'game/src/domain/season_schedule.gd',
   'game/src/persistence/local_save_store.gd',

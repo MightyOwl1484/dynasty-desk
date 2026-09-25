@@ -9,6 +9,7 @@ Dynasty Desk is pivoting into a Godot-first fictional arena management game. You
 The new implementation lives in [`game/`](game/) and targets Godot 4.7 with typed GDScript. The first vertical slice contains:
 
 - A playable House and tactic selection screen
+- A three-step first-run tour that can be reopened from the main screen
 - Four synthetic Arena Houses with six-person rosters and selectable active trios
 - A condition-aware recommended trio used as a helpful default and by legal AI preparation
 - Compact competitor stats and lineup advantages compared with the opponent

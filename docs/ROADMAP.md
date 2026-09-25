@@ -18,7 +18,7 @@ Exit: the Godot project opens, a player can resolve a prototype bout, the same s
 
 Status: **in progress**
 
-Current progress: four generated Houses now provide six-person rosters, selectable three-person lineups, opponent choice, compact competitor stats, opponent-relative lineup comparisons, and visible strategy tradeoffs. The result is resolved and locked before presentation; high-contrast markers animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests. A tested post-bout review identifies the winning side's leading contributor and summarizes strategy, score margin, and exchange shape without mutating the result.
+Current progress: four generated Houses now provide six-person rosters, selectable three-person lineups, opponent choice, compact competitor stats, opponent-relative lineup comparisons, and visible strategy tradeoffs. A three-step first-run tour explains House choice, the one-choice-at-a-time weekly flow, presentation options, and automatic saves; it remains available through a permanent **How to play** action. The result is resolved and locked before presentation; high-contrast markers animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests. A tested post-bout review identifies the winning side's leading contributor and summarizes strategy, score margin, and exchange shape without mutating the result.
 
 - Finalize the bout vocabulary and non-graphic fictional sport rules.
 - Expand the four-House prototype into the planned eight-House content set after the rules stabilize.
@@ -27,8 +27,9 @@ Current progress: four generated Houses now provide six-person rosters, selectab
 - Validate text-only and reduced-motion modes with assistive technology and browser builds.
 - Expand the implemented post-bout explanation only when new information helps the next manager decision.
 - Validate a single-threaded web export in target browsers.
+- Browser-test the first-run tour with keyboard and screen-reader navigation, then refine copy from observed confusion.
 
-Exit: a first-time player can choose a House, make one informed decision, watch or skip a bout, and understand the result in under five minutes.
+Exit: a first-time player can use or dismiss the guided tour, choose a House, make one informed decision, watch or skip a bout, and understand the result in under five minutes.
 
 ## P2 — Management loop
 
