@@ -1,6 +1,7 @@
 class_name ArenaMatchResolver
 extends RefCounted
 
+const DeterministicRngScript = preload("res://src/simulation/deterministic_rng.gd")
 const RESOLVER_VERSION: String = "arena-0.2.0"
 const STRATEGIES: Dictionary = {
 	"balanced": {"attack": 1.0, "defense": 1.0, "tempo": 0},
@@ -22,7 +23,7 @@ static func resolve_bout(
 	assert(STRATEGIES.has(home_strategy), "Unknown home strategy")
 	assert(STRATEGIES.has(away_strategy), "Unknown away strategy")
 
-	var rng := DeterministicRng.new(seed_value)
+	var rng := DeterministicRngScript.new(seed_value)
 	var home_score: int = 0
 	var away_score: int = 0
 	var events: Array[Dictionary] = []
@@ -93,7 +94,7 @@ static func _exchange_total(
 	competitor: Dictionary,
 	modifiers: Dictionary,
 	round_number: int,
-	rng: DeterministicRng
+	rng: DeterministicRngScript
 ) -> float:
 	var attack: float = (
 		float(competitor["power"]) * 0.35

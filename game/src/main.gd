@@ -1,9 +1,14 @@
 extends Control
 
+const PrototypeLeagueScript = preload("res://src/data/prototype_league.gd")
+const ArenaMatchResolverScript = preload("res://src/simulation/arena_match_resolver.gd")
+const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
+const ArenaPresentationScript = preload("res://src/presentation/arena_presentation.gd")
+const ArenaViewScript = preload("res://src/presentation/arena_view.gd")
 const SPEEDS: Array[float] = [1.0, 2.0, 4.0]
 
 var _houses: Array[Dictionary] = []
-var _presentation := ArenaPresentation.new()
+var _presentation := ArenaPresentationScript.new()
 var _last_result: Dictionary = {}
 var _revealed_events: Array[Dictionary] = []
 var _seed: int = 104729
@@ -22,7 +27,7 @@ var _score_label: Label
 var _explanation_label: RichTextLabel
 var _status_label: Label
 var _event_log: RichTextLabel
-var _arena_view: ArenaView
+var _arena_view: Control
 var _play_button: Button
 var _speed_button: Button
 var _skip_button: Button
@@ -33,7 +38,7 @@ var _presentation_timer: Timer
 
 
 func _ready() -> void:
-	_houses = PrototypeLeague.create_houses()
+	_houses = PrototypeLeagueScript.create_houses()
 	_build_theme()
 	_build_interface()
 	_update_house_summary(0)
@@ -196,7 +201,7 @@ func _build_arena_column(parent: HBoxContainer) -> void:
 	column.size_flags_stretch_ratio = 1.35
 	parent.add_child(column)
 
-	_arena_view = ArenaView.new()
+	_arena_view = ArenaViewScript.new()
 	_arena_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(_arena_view)
 
@@ -364,7 +369,7 @@ func _resolve_exhibition() -> void:
 	player_house["roster"] = selected_lineup
 	var opponent_house: Dictionary = _selected_opponent()
 	var strategy: String = _strategy_picker.get_item_text(_strategy_picker.selected).to_lower()
-	_last_result = ArenaMatchResolver.resolve_bout(player_house, opponent_house, _seed, strategy, "balanced")
+	_last_result = ArenaMatchResolverScript.resolve_bout(player_house, opponent_house, _seed, strategy, "balanced")
 	_presentation.load_result(_last_result)
 	_arena_view.configure(player_house, opponent_house)
 	_revealed_events.clear()
@@ -464,7 +469,7 @@ func _finish_presentation() -> void:
 	_play_button.disabled = true
 	_skip_button.disabled = true
 	_replay_button.disabled = false
-	var analysis := BoutAnalysis.summarize(_last_result, home_house, away_house)
+	var analysis := BoutAnalysisScript.summarize(_last_result, home_house, away_house)
 	_explanation_label.text = "[b]Why it happened[/b]\n%s\n[color=#92a1b7]%s[/color]" % [analysis["headline"], analysis["detail"]]
 	_event_log.grab_focus()
 
