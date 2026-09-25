@@ -2,6 +2,7 @@ class_name SeasonState
 extends RefCounted
 
 const ArenaMatchResolverScript = preload("res://src/simulation/arena_match_resolver.gd")
+const LineupSelectorScript = preload("res://src/application/lineup_selector.gd")
 
 
 static func start(houses: Array, schedule: Array[Dictionary], seed_value: int) -> Dictionary:
@@ -49,8 +50,8 @@ static func resolve_week(
 			continue
 		var home_house := _house_by_id(houses, fixture["home_house_id"])
 		var away_house := _house_by_id(houses, fixture["away_house_id"])
-		home_house["roster"] = home_house["roster"].slice(0, 3)
-		away_house["roster"] = away_house["roster"].slice(0, 3)
+		home_house["roster"] = LineupSelectorScript.select(home_house)
+		away_house["roster"] = LineupSelectorScript.select(away_house)
 		var fixture_seed: int = int(next_season["seed"]) + week_number * 1009 + fixture_index * 101
 		var result := ArenaMatchResolverScript.resolve_bout(home_house, away_house, fixture_seed)
 		next_season = _record_result(next_season, result, week_number, false)

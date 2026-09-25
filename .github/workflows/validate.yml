@@ -68,6 +68,9 @@ jobs:
       - name: Test Python content tooling
         run: python -m unittest discover -s tools/tests
 
+      - name: Check prototype arena balance thresholds
+        run: python tools/analyze_balance.py --samples 100 --strict
+
       - name: Parse Godot main scene
         run: godot --headless --path game --quit-after 3
 

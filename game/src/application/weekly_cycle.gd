@@ -3,6 +3,7 @@ extends RefCounted
 
 const ArenaMatchResolverScript = preload("res://src/simulation/arena_match_resolver.gd")
 const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
+const LineupSelectorScript = preload("res://src/application/lineup_selector.gd")
 
 const PHASES: Array[String] = ["briefing", "training", "lineup", "strategy", "bout", "recovery", "news", "complete"]
 const TRAINING_PLANS: Dictionary = {
@@ -115,7 +116,7 @@ static func resolve_bout(week_state: Dictionary) -> Dictionary:
 	var prepared_house := _prepared_house(next_state)
 	var opponent_house: Dictionary = next_state["opponent"].duplicate(true)
 	var opponent_lineup: Array[Dictionary] = []
-	for competitor in opponent_house["roster"].slice(0, 3):
+	for competitor in LineupSelectorScript.select(opponent_house):
 		opponent_lineup.append(_prepared_competitor(competitor, "balanced"))
 	opponent_house["roster"] = opponent_lineup
 	next_state["result"] = ArenaMatchResolverScript.resolve_bout(

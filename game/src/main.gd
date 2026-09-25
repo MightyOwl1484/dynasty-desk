@@ -6,6 +6,7 @@ const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
 const ArenaPresentationScript = preload("res://src/presentation/arena_presentation.gd")
 const ArenaViewScript = preload("res://src/presentation/arena_view.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
+const LineupSelectorScript = preload("res://src/application/lineup_selector.gd")
 const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
 const SeasonStateScript = preload("res://src/application/season_state.gd")
 const LocalSaveStoreScript = preload("res://src/persistence/local_save_store.gd")
@@ -361,6 +362,7 @@ func _populate_opponents(player_house_id: String) -> void:
 
 
 func _populate_lineup(house: Dictionary) -> void:
+	var recommended_ids := LineupSelectorScript.ids(house)
 	for slot in range(_lineup_pickers.size()):
 		var picker := _lineup_pickers[slot]
 		picker.clear()
@@ -371,7 +373,10 @@ func _populate_lineup(house: Dictionary) -> void:
 				competitor.get("fatigue", 12), competitor.get("morale", 60)
 			])
 			picker.set_item_metadata(picker.item_count - 1, competitor["id"])
-		picker.select(mini(slot, picker.item_count - 1))
+		for item_index in range(picker.item_count):
+			if picker.get_item_metadata(item_index) == recommended_ids[slot]:
+				picker.select(item_index)
+				break
 	_update_lineup_summary()
 
 
@@ -379,7 +384,7 @@ func _update_opponent_summary(_index: int = 0) -> void:
 	if not _house_summary or _opponent_picker.item_count == 0:
 		return
 	var opponent := _selected_opponent()
-	var profile := _lineup_profile(opponent["roster"].slice(0, 3))
+	var profile := _lineup_profile(LineupSelectorScript.select(opponent))
 	_opponent_summary.text = "%s · Active trio P%d G%d T%d" % [
 		opponent["identity"], profile["power"], profile["guard"], profile["technique"]
 	]
@@ -397,7 +402,7 @@ func _update_lineup_summary(_index: int = 0) -> void:
 	for competitor in selected:
 		names.append(competitor["name"])
 	var profile := _lineup_profile(selected)
-	var opponent_profile := _lineup_profile(_selected_opponent()["roster"].slice(0, 3))
+	var opponent_profile := _lineup_profile(LineupSelectorScript.select(_selected_opponent()))
 	var duplicate_warning := " · Choose three different competitors." if _lineup_has_duplicates(selected) else ""
 	_lineup_summary.text = "%s\nTeam profile vs opponent: POW %d (%+d) · GRD %d (%+d) · TEC %d (%+d)%s" % [
 		", ".join(names),
@@ -476,7 +481,7 @@ func _resolve_week_bout() -> void:
 	var player_house: Dictionary = _week_state["house"].duplicate(true)
 	player_house["roster"] = _selected_lineup(_week_state["house"])
 	var opponent_house: Dictionary = _week_state["opponent"].duplicate(true)
-	opponent_house["roster"] = opponent_house["roster"].slice(0, 3)
+	opponent_house["roster"] = LineupSelectorScript.select(opponent_house)
 	_presentation.load_result(_last_result)
 	_arena_view.configure(player_house, opponent_house)
 	_revealed_events.clear()

@@ -34,7 +34,7 @@ Exit: a first-time player can choose a House, make one informed decision, watch 
 
 Status: **in progress**
 
-Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. The existing one-screen interface guides the player through those phases, locks committed choices, applies recovery after presentation, and carries fatigue, morale, and form into the next week. A deterministic round robin supplies a different opponent in each week of the current three-week mini-season. The player's bout and non-player fixture update live standings together. Headless tests cover the complete week, schedule uniqueness, all six season fixtures, repeatable resolution, state immutability, and JSON-compatible state. A deliberate three-week playtest is next.
+Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. The existing one-screen interface guides the player through those phases, locks committed choices, applies recovery after presentation, and carries fatigue, morale, and form into the next week. A condition-aware recommendation preselects a strong legal trio for the player and gives AI Houses the same preparation rule instead of relying on roster order. A deterministic round robin supplies a different opponent in each week of the current three-week mini-season. The player's bout and non-player fixture update live standings together. Headless tests cover the complete week, recommendation purity, schedule uniqueness, all six season fixtures, repeatable resolution, state immutability, and JSON-compatible state. A deliberate three-week playtest is next.
 
 - Playtest and tune three connected weeks so fatigue and training choices remain legible and worthwhile.
 - Deepen the implemented fatigue, morale, and form consequences; add injuries and relationships only when their choices are readable.
@@ -60,11 +60,13 @@ Exit: a complete season can be played, closed, resumed, and finished without dev
 
 ## P4 — Offseason and long-term careers
 
+Tooling progress: a deterministic standard-library Python balance sweep now exercises every ordered House and strategy matchup, reports win-rate spreads, and shares a fixed parity fixture with the authoritative GDScript resolver. Its first 19,200-bout baseline exposed dominant strategy bonuses and roster-order AI; the tuned resolver and condition-aware lineup selection reduced strategy spread to 1.48% and House spread to 17.49%, both within documented warning thresholds.
+
 - Add progression, aging, recovery, retirement, and recruitment trials.
 - Add simple contracts and House reputation.
 - Add constrained roster moves without a spreadsheet-heavy transfer market.
 - Add rivalries, traits, and career history.
-- Use Python balance tooling to simulate thousands of seasons and publish balance summaries.
+- Extend the implemented Python bout sweep into complete-season simulation and publish balance summaries.
 
 Exit: finishing a season creates at least three meaningful choices before the next season and long careers remain statistically healthy.
 
@@ -91,7 +93,7 @@ Exit: a small invited group can complete a scheduled league week without manual 
 
 1. Playtest the complete three-week career, including reload after each completed week and the season-complete state.
 2. Add portable save export/import and representative migration fixtures before public saves stabilize.
-3. Add Python Monte Carlo balance reports against the committed generated content.
+3. Run and tune against the implemented Python balance report; extend it to complete-season simulation after the four-House loop is stable.
 4. Expand season review, objectives, and awards without obscuring the weekly loop.
 5. Browser-test the continuous-integration Web artifact and enable GitHub Pages when the branch reaches `main`.
 6. Decide the final product name after the vertical slice establishes its tone.

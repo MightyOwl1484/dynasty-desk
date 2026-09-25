@@ -2,12 +2,12 @@ class_name ArenaMatchResolver
 extends RefCounted
 
 const DeterministicRngScript = preload("res://src/simulation/deterministic_rng.gd")
-const RESOLVER_VERSION: String = "arena-0.2.0"
+const RESOLVER_VERSION: String = "arena-0.4.0"
 const STRATEGIES: Dictionary = {
 	"balanced": {"attack": 1.0, "defense": 1.0, "tempo": 0},
-	"aggressive": {"attack": 1.13, "defense": 0.90, "tempo": 3},
-	"guarded": {"attack": 0.91, "defense": 1.14, "tempo": -2},
-	"elusive": {"attack": 1.04, "defense": 1.04, "tempo": 2}
+	"aggressive": {"attack": 1.10, "defense": 0.87, "tempo": 0},
+	"guarded": {"attack": 0.90, "defense": 1.13, "tempo": 0},
+	"elusive": {"attack": 1.04, "defense": 0.95, "tempo": 0}
 }
 
 
@@ -108,7 +108,7 @@ static func _exchange_total(
 		+ float(competitor["resolve"]) * 0.30
 	) * float(modifiers["defense"])
 	var late_round_resolve: float = float(competitor["resolve"]) * float(round_number - 1) * 0.025
-	var controlled_variance: float = float(rng.range_int(-6, 6))
+	var controlled_variance: float = float(rng.range_int(-12, 12))
 	return attack * 0.57 + defense * 0.43 + late_round_resolve + controlled_variance + float(modifiers["tempo"])
 
 

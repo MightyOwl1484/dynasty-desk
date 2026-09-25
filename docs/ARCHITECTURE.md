@@ -60,7 +60,7 @@ A resolver accepts only serializable values:
   "away_house": { ...locked snapshot... },
   "home_strategy": "guarded",
   "away_strategy": "aggressive",
-  "resolver_version": "arena-0.2.0"
+  "resolver_version": "arena-0.4.0"
 }
 ```
 
@@ -73,7 +73,7 @@ It returns a serializable result:
   "away_score": 8,
   "events": [ ...chronological immutable events... ],
   "seed": 104729,
-  "resolver_version": "arena-0.2.0"
+  "resolver_version": "arena-0.4.0"
 }
 ```
 

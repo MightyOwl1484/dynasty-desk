@@ -10,6 +10,7 @@ The new implementation lives in [`game/`](game/) and targets Godot 4.7 with type
 
 - A playable House and tactic selection screen
 - Four synthetic Arena Houses with six-person rosters and selectable active trios
+- A condition-aware recommended trio used as a helpful default and by legal AI preparation
 - Compact competitor stats and lineup advantages compared with the opponent
 - A deterministic, seeded three-round bout resolver
 - An event-driven arena view with moving high-contrast markers
@@ -61,12 +62,21 @@ The committed prototype league is reproducible with:
 python tools/generate_rosters.py --seed 104729 --houses 4 --roster-size 6 --output game/data/prototype_league.json
 ```
 
+Run the deterministic offline balance sweep with:
+
+```powershell
+python tools/analyze_balance.py --samples 100 --output build/balance-report.json
+```
+
+The report exercises every ordered House and strategy matchup, surfaces win-rate spreads, and records the resolver version. A shared parity fixture in the Godot and Python tests prevents the analysis mirror from silently drifting from runtime rules.
+
 ## Project documentation
 
 - [`docs/PRODUCT_PLAN.md`](docs/PRODUCT_PLAN.md) — vision, scope, and product boundaries
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — ordered delivery plan and milestone exit criteria
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — Godot layers, determinism, persistence, and web constraints
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — CI artifacts, local web testing, and GitHub Pages setup
+- [`docs/BALANCE.md`](docs/BALANCE.md) — reproducible simulation baseline and tuning guardrails
 - [`docs/adr/0001-godot-pivot.md`](docs/adr/0001-godot-pivot.md) — recorded pivot decision and consequences
 - [`docs/REFERENCE_PROJECTS.md`](docs/REFERENCE_PROJECTS.md) — clean-room use of open-source inspiration
 - [`docs/GAMEPLAY_REVIEW.md`](docs/GAMEPLAY_REVIEW.md) — accessibility, game-feel, and management-loop principles

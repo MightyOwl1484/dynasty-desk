@@ -5,6 +5,7 @@ const ArenaMatchResolverScript = preload("res://src/simulation/arena_match_resol
 const ArenaPresentationScript = preload("res://src/presentation/arena_presentation.gd")
 const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
+const LineupSelectorScript = preload("res://src/application/lineup_selector.gd")
 const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
 const SeasonStateScript = preload("res://src/application/season_state.gd")
 const LocalSaveStoreScript = preload("res://src/persistence/local_save_store.gd")
@@ -25,13 +26,14 @@ func _run() -> void:
 	_test_presentation_pause_skip_and_replay()
 	_test_bout_analysis_explains_locked_result()
 	_test_weekly_cycle_connects_management_decisions()
+	_test_lineup_recommendation_uses_readiness()
 	_test_round_robin_schedule_connects_three_weeks()
 	_test_season_standings_resolve_every_fixture()
 	_test_completed_season_review()
 	_test_versioned_local_save_envelope()
 
 	if _failures == 0:
-		print("PASS: 12 arena content, simulation, presentation, analysis, management, season, and persistence tests")
+		print("PASS: 13 arena content, simulation, presentation, analysis, management, season, and persistence tests")
 	else:
 		push_error("FAIL: %d arena simulation assertions" % _failures)
 	quit(_failures)
@@ -49,6 +51,7 @@ func _test_same_seed_repeats_result() -> void:
 	var first := ArenaMatchResolverScript.resolve_bout(houses[0], houses[1], 104729, "guarded", "aggressive")
 	var second := ArenaMatchResolverScript.resolve_bout(houses[0], houses[1], 104729, "guarded", "aggressive")
 	_expect(first == second, "same inputs and seed reproduce the full result")
+	_expect(first["winner_id"] == "tidebreak-union" and first["home_score"] == 3 and first["away_score"] == 12, "resolver matches the offline balance parity fixture")
 
 
 func _test_different_seed_changes_event_stream() -> void:
@@ -64,7 +67,7 @@ func _test_result_has_one_winner_and_events() -> void:
 	_expect(result["home_score"] != result["away_score"], "tied bouts receive a deciding point")
 	_expect(result["winner_id"] in [houses[0]["id"], houses[1]["id"]], "winner belongs to the bout")
 	_expect(result["events"].size() >= 9, "every scheduled exchange produces an event")
-	_expect(result["resolver_version"] == "arena-0.2.0", "result records the resolver version")
+	_expect(result["resolver_version"] == "arena-0.4.0", "result records the resolver version")
 	_expect(result["events"].all(func(event: Dictionary) -> bool: return event.has("points") and event.has("margin") and event.has("competitor_name")), "events expose contributor, points, and margin for explanation")
 
 
@@ -159,6 +162,20 @@ func _test_round_robin_schedule_connects_three_weeks() -> void:
 	for week_number in range(1, 4):
 		opponents[SeasonScheduleScript.opponent_for(schedule, houses[0]["id"], week_number)] = true
 	_expect(opponents.size() == 3 and not opponents.has(""), "the player receives a different scheduled opponent each week")
+
+
+func _test_lineup_recommendation_uses_readiness() -> void:
+	var houses := PrototypeLeagueScript.create_houses()
+	var source: Dictionary = houses[0].duplicate(true)
+	var original := source.duplicate(true)
+	var selected := LineupSelectorScript.select(source)
+	_expect(selected.size() == 3 and selected.map(func(competitor: Dictionary) -> String: return competitor["id"]).duplicate().all(func(competitor_id: String) -> bool: return competitor_id in LineupSelectorScript.ids(source)), "lineup recommendation returns three legal competitors")
+	_expect(selected[0]["name"] == "Xara Gale" and selected[1]["name"] == "Yori Ash", "lineup recommendation surfaces the strongest ready competitors")
+	for competitor in source["roster"]:
+		if competitor["id"] == selected[0]["id"]:
+			competitor["fatigue"] = 100
+	_expect(LineupSelectorScript.ids(source) != LineupSelectorScript.ids(original), "lineup recommendation responds to competitor condition")
+	_expect(houses[0] == original, "lineup recommendation does not mutate source content")
 
 
 func _test_season_standings_resolve_every_fixture() -> void:
