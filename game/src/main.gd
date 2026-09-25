@@ -506,7 +506,7 @@ func _close_week() -> void:
 		_opponent_picker.clear()
 		_opponent_summary.text = "Three-week prototype schedule complete."
 		_house_summary.text = "[b]%s[/b] — Mini-season complete\nThree connected weeks carried fatigue, morale, and form forward." % _career_house["name"]
-		_status_label.text = "Prototype season complete. Standings and saves are the next season-layer slice."
+		_render_season_review()
 	else:
 		_populate_opponents(_career_house["id"])
 		_house_summary.text = "[b]%s[/b] — Week %d ready\nFatigue, morale, and form now carry into the next decision." % [
@@ -554,7 +554,8 @@ func _restore_career() -> void:
 		_opponent_picker.clear()
 		_opponent_summary.text = "Three-week prototype schedule complete."
 		_house_summary.text = "[b]%s[/b] — Mini-season restored\nThe completed local career is ready for review or reset." % _career_house["name"]
-		_status_label.text = "Completed local career restored."
+		_render_season_review()
+		_status_label.text += " Completed local career restored."
 	else:
 		_populate_opponents(_career_house["id"])
 		_house_summary.text = "[b]%s[/b] — Week %d restored\nFatigue, morale, form, results, and standings were loaded locally." % [
@@ -727,6 +728,22 @@ func _render_standings() -> void:
 		place += 1
 	_standings_label.text = "Standings · %s" % "  ·  ".join(entries)
 	_standings_label.accessibility_description = _standings_label.text
+
+
+func _render_season_review() -> void:
+	var review := SeasonStateScript.review(_season_state, _career_house)
+	_result_heading.text = "Season review · %s" % review["champion_name"]
+	_score_label.text = "%s finish %d of %d · %d wins, %d losses · %d points (%+d)" % [
+		_career_house["name"], review["player_position"], review["house_count"],
+		review["wins"], review["losses"], review["points"], review["score_difference"]
+	]
+	var objective_result := "achieved" if review["objective_achieved"] else "missed"
+	_explanation_label.text = "[b]%s[/b]\nObjective: %s — %s.\n[color=#92a1b7]Arena standout: %s with %d exchange points.[/color]" % [
+		review["headline"], review["objective"], objective_result,
+		review["standout_name"], review["standout_points"]
+	]
+	_event_log.text = "[b]Three-week chapter complete[/b]\nThe final table, objective verdict, and standout are stored with this local career. Reset when you are ready to begin a new House story."
+	_status_label.text = "Prototype season complete. Review the campaign or reset for another House."
 
 
 func _set_text_only(enabled: bool) -> void:

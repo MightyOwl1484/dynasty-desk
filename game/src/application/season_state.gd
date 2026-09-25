@@ -78,6 +78,56 @@ static func table(season: Dictionary) -> Array[Dictionary]:
 	return rows
 
 
+static func review(season: Dictionary, player_house: Dictionary) -> Dictionary:
+	var standings := table(season)
+	assert(not standings.is_empty(), "A season review needs standings")
+	assert(season["completed_weeks"].size() == _week_count(season["schedule"]), "A season review needs every week completed")
+	var player_row: Dictionary = {}
+	var player_position: int = 0
+	for row_index in range(standings.size()):
+		if standings[row_index]["house_id"] == player_house["id"]:
+			player_row = standings[row_index]
+			player_position = row_index + 1
+			break
+	assert(not player_row.is_empty(), "Player House must exist in standings")
+
+	var points_by_competitor: Dictionary = {}
+	for bout in season["results"]:
+		if not bool(bout.get("is_player_bout", false)):
+			continue
+		for event in bout["events"]:
+			if event["house_id"] != player_house["id"] or str(event["competitor_id"]).is_empty():
+				continue
+			var competitor_id: String = str(event["competitor_id"])
+			points_by_competitor[competitor_id] = int(points_by_competitor.get(competitor_id, 0)) + int(event["points"])
+
+	var standout_name: String = "No individual standout"
+	var standout_points: int = 0
+	for competitor in player_house["roster"]:
+		var event_points: int = int(points_by_competitor.get(competitor["id"], 0))
+		if event_points > standout_points:
+			standout_name = competitor["name"]
+			standout_points = event_points
+
+	var objective_target: int = ceili(float(standings.size()) / 2.0)
+	var objective_achieved: bool = player_position <= objective_target
+	return {
+		"champion_id": standings[0]["house_id"],
+		"champion_name": standings[0]["house_name"],
+		"player_position": player_position,
+		"house_count": standings.size(),
+		"wins": player_row["wins"],
+		"losses": player_row["losses"],
+		"points": player_row["points"],
+		"score_difference": player_row["score_difference"],
+		"objective": "Finish in the top half",
+		"objective_achieved": objective_achieved,
+		"standout_name": standout_name,
+		"standout_points": standout_points,
+		"headline": "%s are arena champions." % standings[0]["house_name"]
+	}
+
+
 static func _record_result(season: Dictionary, result: Dictionary, week_number: int, is_player_bout: bool) -> Dictionary:
 	var next_season := season.duplicate(true)
 	for standing in next_season["standings"]:
@@ -112,3 +162,10 @@ static func _pair_key(first_id: String, second_id: String) -> String:
 	var pair: Array[String] = [first_id, second_id]
 	pair.sort()
 	return "%s:%s" % pair
+
+
+static func _week_count(schedule: Array) -> int:
+	var weeks: Dictionary = {}
+	for fixture in schedule:
+		weeks[int(fixture["week"])] = true
+	return weeks.size()

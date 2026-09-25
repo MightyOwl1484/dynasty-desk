@@ -27,10 +27,11 @@ func _run() -> void:
 	_test_weekly_cycle_connects_management_decisions()
 	_test_round_robin_schedule_connects_three_weeks()
 	_test_season_standings_resolve_every_fixture()
+	_test_completed_season_review()
 	_test_versioned_local_save_envelope()
 
 	if _failures == 0:
-		print("PASS: 11 arena content, simulation, presentation, analysis, management, and persistence tests")
+		print("PASS: 12 arena content, simulation, presentation, analysis, management, season, and persistence tests")
 	else:
 		push_error("FAIL: %d arena simulation assertions" % _failures)
 	quit(_failures)
@@ -185,6 +186,22 @@ func _test_versioned_local_save_envelope() -> void:
 	var future_save := envelope.duplicate(true)
 	future_save["schema_version"] = 99
 	_expect(not LocalSaveStoreScript.decode(LocalSaveStoreScript.encode(future_save))["ok"], "unknown future save schemas are rejected")
+
+
+func _test_completed_season_review() -> void:
+	var houses := PrototypeLeagueScript.create_houses()
+	var schedule := SeasonScheduleScript.create(houses)
+	var season := SeasonStateScript.start(houses, schedule, 104729)
+	for week_number in range(1, 4):
+		var opponent_id := SeasonScheduleScript.opponent_for(schedule, houses[0]["id"], week_number)
+		var opponent: Dictionary = houses.filter(func(house: Dictionary) -> bool: return house["id"] == opponent_id)[0]
+		var player_result := ArenaMatchResolverScript.resolve_bout(houses[0], opponent, 104729 + week_number)
+		season = SeasonStateScript.resolve_week(season, houses, week_number, player_result)
+	var review := SeasonStateScript.review(season, houses[0])
+	_expect(review["player_position"] >= 1 and review["player_position"] <= 4, "season review records the player's final position")
+	_expect(review["wins"] + review["losses"] == 3, "season review records the complete player campaign")
+	_expect(not str(review["champion_name"]).is_empty() and not str(review["standout_name"]).is_empty(), "season review names a champion and player standout")
+	_expect(review["objective_achieved"] == (review["player_position"] <= 2), "top-half objective verdict follows the final table")
 
 
 func _expect(condition: bool, message: String) -> void:
