@@ -7,6 +7,7 @@ const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
 const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
 const SeasonStateScript = preload("res://src/application/season_state.gd")
+const LocalSaveStoreScript = preload("res://src/persistence/local_save_store.gd")
 
 var _failures: int = 0
 
@@ -26,9 +27,10 @@ func _run() -> void:
 	_test_weekly_cycle_connects_management_decisions()
 	_test_round_robin_schedule_connects_three_weeks()
 	_test_season_standings_resolve_every_fixture()
+	_test_versioned_local_save_envelope()
 
 	if _failures == 0:
-		print("PASS: 10 arena content, simulation, presentation, analysis, and management tests")
+		print("PASS: 11 arena content, simulation, presentation, analysis, management, and persistence tests")
 	else:
 		push_error("FAIL: %d arena simulation assertions" % _failures)
 	quit(_failures)
@@ -169,6 +171,20 @@ func _test_season_standings_resolve_every_fixture() -> void:
 	_expect(table.all(func(row: Dictionary) -> bool: return row["played"] == 3), "standings record three bouts for every House")
 	_expect(table.map(func(row: Dictionary) -> int: return row["wins"]).reduce(func(total: int, wins: int) -> int: return total + wins, 0) == 6, "every resolved bout contributes one standings win")
 	_expect(table[0]["points"] >= table[-1]["points"], "standings sort by points and score difference")
+
+
+func _test_versioned_local_save_envelope() -> void:
+	var houses := PrototypeLeagueScript.create_houses()
+	var schedule := SeasonScheduleScript.create(houses)
+	var season := SeasonStateScript.start(houses, schedule, 104729)
+	var envelope := LocalSaveStoreScript.create_envelope(houses[0], season, 2, 112648, false, "2026-09-25T00:00:00Z")
+	var decoded := LocalSaveStoreScript.decode(LocalSaveStoreScript.encode(envelope))
+	_expect(decoded["ok"] and decoded["envelope"]["career"]["next_week"] == 2 and decoded["envelope"]["career"]["season"]["standings"].size() == 4, "versioned career saves survive a JSON round trip")
+	_expect(decoded["envelope"]["career"]["house"]["color"] is String, "save envelopes normalize presentation colors for JSON")
+	_expect(not LocalSaveStoreScript.decode("{broken")["ok"], "corrupt save JSON fails safely")
+	var future_save := envelope.duplicate(true)
+	future_save["schema_version"] = 99
+	_expect(not LocalSaveStoreScript.decode(LocalSaveStoreScript.encode(future_save))["ok"], "unknown future save schemas are rejected")
 
 
 func _expect(condition: bool, message: String) -> void:

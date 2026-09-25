@@ -8,6 +8,7 @@ const ArenaViewScript = preload("res://src/presentation/arena_view.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
 const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
 const SeasonStateScript = preload("res://src/application/season_state.gd")
+const LocalSaveStoreScript = preload("res://src/persistence/local_save_store.gd")
 const SPEEDS: Array[float] = [1.0, 2.0, 4.0]
 
 var _houses: Array[Dictionary] = []
@@ -45,6 +46,7 @@ var _speed_button: Button
 var _skip_button: Button
 var _replay_button: Button
 var _advance_button: Button
+var _reset_button: Button
 var _reduced_motion: CheckButton
 var _text_only: CheckButton
 var _presentation_timer: Timer
@@ -59,6 +61,7 @@ func _ready() -> void:
 	_update_house_summary(0)
 	_update_strategy_summary(0)
 	_update_training_summary(0)
+	_restore_career()
 	_render_standings()
 	_sync_week_controls()
 
@@ -129,11 +132,20 @@ func _build_interface() -> void:
 	page.add_child(_house_summary)
 	_build_lineup_picker(page)
 
+	var week_actions := HBoxContainer.new()
+	week_actions.add_theme_constant_override("separation", 8)
+	page.add_child(week_actions)
 	_advance_button = Button.new()
 	_advance_button.text = "Start Week 1"
 	_advance_button.accessibility_name = "Advance the guided weekly management flow"
+	_advance_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_advance_button.pressed.connect(_advance_week)
-	page.add_child(_advance_button)
+	week_actions.add_child(_advance_button)
+	_reset_button = Button.new()
+	_reset_button.text = "Reset career"
+	_reset_button.accessibility_name = "Erase the local career and start again"
+	_reset_button.pressed.connect(_reset_career)
+	week_actions.add_child(_reset_button)
 
 	var match_area := HBoxContainer.new()
 	match_area.add_theme_constant_override("separation", 24)
@@ -501,7 +513,81 @@ func _close_week() -> void:
 			_career_house["name"], _week_number
 		]
 		_status_label.text = "Week complete. Start Week %d when ready." % _week_number
+	_persist_career()
 	_set_presentation_controls_enabled(false)
+
+
+func _persist_career() -> void:
+	var envelope := LocalSaveStoreScript.create_envelope(
+		_career_house,
+		_season_state,
+		_week_number,
+		_seed,
+		_season_complete,
+		Time.get_datetime_string_from_system(true)
+	)
+	var save_error := LocalSaveStoreScript.save(envelope)
+	if save_error == OK:
+		_status_label.text += " Career saved locally."
+	else:
+		_status_label.text += " Local save failed (error %d)." % save_error
+
+
+func _restore_career() -> void:
+	var loaded := LocalSaveStoreScript.load()
+	if not loaded["ok"]:
+		return
+	var career: Dictionary = loaded["envelope"]["career"]
+	_career_house = career["house"].duplicate(true)
+	if _career_house.get("color") is String:
+		_career_house["color"] = Color(_career_house["color"])
+	_season_state = career["season"].duplicate(true)
+	_week_number = int(career["next_week"])
+	_seed = int(career["next_seed"])
+	_season_complete = bool(career["season_complete"])
+	for house_index in range(_houses.size()):
+		if _houses[house_index]["id"] == _career_house["id"]:
+			_house_picker.select(house_index)
+			break
+	_populate_lineup(_career_house)
+	if _season_complete:
+		_opponent_picker.clear()
+		_opponent_summary.text = "Three-week prototype schedule complete."
+		_house_summary.text = "[b]%s[/b] — Mini-season restored\nThe completed local career is ready for review or reset." % _career_house["name"]
+		_status_label.text = "Completed local career restored."
+	else:
+		_populate_opponents(_career_house["id"])
+		_house_summary.text = "[b]%s[/b] — Week %d restored\nFatigue, morale, form, results, and standings were loaded locally." % [
+			_career_house["name"], _week_number
+		]
+		_status_label.text = "Local career restored. Start Week %d when ready." % _week_number
+
+
+func _reset_career() -> void:
+	var clear_error := LocalSaveStoreScript.clear()
+	if clear_error != OK:
+		_status_label.text = "Could not clear the local career (error %d)." % clear_error
+		return
+	_houses = PrototypeLeagueScript.create_houses()
+	_schedule = SeasonScheduleScript.create(_houses)
+	_season_state = SeasonStateScript.start(_houses, _schedule, 104729)
+	_week_number = 1
+	_seed = 104729
+	_week_state.clear()
+	_career_house.clear()
+	_last_result.clear()
+	_season_complete = false
+	_house_picker.select(0)
+	_update_house_summary(0)
+	_render_standings()
+	_result_heading.text = "The arena is waiting"
+	_score_label.text = "The same locked choices and seed always produce the same bout."
+	_explanation_label.text = "[color=#92a1b7]After the bout, a short review will explain the key contributor and tactical shape.[/color]"
+	_event_log.text = "[color=#92a1b7]Local career cleared. Choose a House to begin again.[/color]"
+	_status_label.text = "Local career reset."
+	_arena_view.reset_view()
+	_set_presentation_controls_enabled(false)
+	_sync_week_controls()
 
 
 func _sync_week_controls() -> void:

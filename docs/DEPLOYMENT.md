@@ -46,6 +46,7 @@ Before advertising a build:
 - Confirm the House, opponent, and lineup controls work with keyboard only.
 - Play, pause, speed up, skip, and replay one bout.
 - Check reduced-motion and text-only presentation.
-- Refresh the page and confirm the build restarts cleanly.
+- Complete a week, refresh the page, and confirm the next-week briefing, competitor condition, and standings resume correctly.
+- Reset the career and confirm a fresh House can be selected.
 - Test current Chrome, Edge, and Firefox releases at desktop width.
 - Record browser-specific failures in a GitHub issue before release.

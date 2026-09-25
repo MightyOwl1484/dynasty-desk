@@ -19,6 +19,7 @@ The new implementation lives in [`game/`](game/) and targets Godot 4.7 with type
 - A guided one-screen week connecting briefing, training, lineup, strategy, bout, recovery, and news
 - A deterministic three-week round-robin mini-season with a different scheduled opponent each week
 - Live standings updated from the player bout and a deterministic non-player fixture each week
+- Versioned local career saves after each completed week, automatic resume, and an explicit reset action
 - A browser export preset using the Compatibility renderer
 - A dependency-free headless test entry point
 

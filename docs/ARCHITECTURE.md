@@ -106,18 +106,20 @@ The weekly service has no scene or animation dependency. The one-screen interfac
 
 ## Persistence
 
-Solo saves will use `user://` and a versioned JSON envelope. Web persistence depends on browser IndexedDB and may be unavailable in private browsing, so export/import remains a planned recovery path.
+Solo saves use `user://dynasty-desk-arena-save.json` and a versioned JSON envelope. The game writes only at a completed-week boundary, so a restored career always resumes at a valid briefing rather than halfway through a locked decision or presentation. The save contains the selected House, competitor condition, deterministic seed, next week, completed results, and standings. A visible reset action clears the local career.
+
+The decoder validates the envelope before state enters the application. Empty, malformed, incomplete, and unknown future-schema data fail safely and leave the player at a new-career setup. Web persistence depends on browser IndexedDB and may be unavailable in private browsing, so file export/import remains a planned recovery path.
 
 ```json
 {
-  "schemaVersion": 1,
-  "gameVersion": "0.1.0",
-  "savedAt": "ISO-8601 timestamp",
+  "schema_version": 1,
+  "game_version": "0.1.0-dev",
+  "saved_at": "ISO-8601 timestamp",
   "career": {}
 }
 ```
 
-Migrations are explicit functions from one schema version to the next. Tests retain representative old save fixtures once public saves exist.
+Future migrations will be explicit functions from one schema version to the next. Tests will retain representative old save fixtures once public saves exist; the current tests cover JSON round trips, presentation-value normalization, malformed data, and future-schema rejection.
 
 ## Future organization mode
 

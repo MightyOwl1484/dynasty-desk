@@ -48,10 +48,10 @@ Exit: at least three consecutive weeks produce connected decisions and recogniza
 
 Status: **in progress**
 
-Current progress: the four-House prototype has a deterministic three-week round robin, immutable result history, AI resolution through the shared resolver, and sorted standings. The content set can expand to eight Houses after the weekly loop is tuned. Versioned local saves remain the next technical dependency.
+Current progress: the four-House prototype has a deterministic three-week round robin, immutable result history, AI resolution through the shared resolver, and sorted standings. A schema-versioned local JSON save now records each completed week, automatically resumes at the next briefing, rejects malformed or unsupported data safely, and provides an explicit career reset. The content set can expand to eight Houses after the weekly loop is tuned; portable save export/import remains the next persistence step.
 
 - Expand the proven four-House schedule and standings to eight Houses with the content milestone.
-- Add local versioned saves, reset, export, and import.
+- Add portable save export and import on top of the implemented local save, resume, validation, and reset path.
 - Add season objectives, patron confidence, records, awards, and playoffs.
 - Add deterministic AI preparation using the same legal actions as the player.
 - Test complete seasons and corrupted-save recovery.
@@ -89,9 +89,9 @@ Exit: a small invited group can complete a scheduled league week without manual 
 
 ## Current first-slice backlog
 
-1. Run the scaffold under an installed Godot 4.7 editor and fix any parser issues.
-2. Add actual animated marker playback driven exclusively by result events.
+1. Playtest the complete three-week career, including reload after each completed week and the season-complete state.
+2. Add portable save export/import and representative migration fixtures before public saves stabilize.
 3. Add Python Monte Carlo balance reports against the committed generated content.
-4. Start the first three-week management loop around the proven lineup and bout flow.
+4. Expand season review, objectives, and awards without obscuring the weekly loop.
 5. Browser-test the continuous-integration Web artifact and enable GitHub Pages when the branch reaches `main`.
 6. Decide the final product name after the vertical slice establishes its tone.

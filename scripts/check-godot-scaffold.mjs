@@ -13,6 +13,7 @@ const requiredFiles = [
   'game/src/application/weekly_cycle.gd',
   'game/src/application/season_state.gd',
   'game/src/domain/season_schedule.gd',
+  'game/src/persistence/local_save_store.gd',
   'game/src/presentation/arena_presentation.gd',
   'game/src/presentation/arena_view.gd',
   'game/tests/run_tests.gd'
