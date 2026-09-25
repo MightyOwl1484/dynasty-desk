@@ -731,7 +731,13 @@ func _render_standings() -> void:
 	for row in SeasonStateScript.table(_season_state):
 		entries.append("%d. %s %d pts (%+d)" % [place, row["house_name"], row["points"], row["score_difference"]])
 		place += 1
-	_standings_label.text = "Standings · %s" % "  ·  ".join(entries)
+	var standings_text := "Standings · %s" % "  ·  ".join(entries)
+	var objective_house_id: String = _career_house.get("id", _houses[_house_picker.selected]["id"])
+	var objective := SeasonStateScript.objective_status(_season_state, objective_house_id)
+	var objective_progress := "campaign not started" if objective["weeks_played"] == 0 else "currently %d of %d" % [objective["current_position"], _houses.size()]
+	_standings_label.text = "%s\nObjective · %s (top %d) · %s" % [
+		standings_text, objective["label"], objective["target_position"], objective_progress
+	]
 	_standings_label.accessibility_description = _standings_label.text
 
 

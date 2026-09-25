@@ -21,6 +21,11 @@ static func start(houses: Array, schedule: Array[Dictionary], seed_value: int) -
 	return {
 		"schema_version": 1,
 		"seed": seed_value,
+		"objective": {
+			"kind": "finish_position",
+			"target_position": ceili(float(houses.size()) / 2.0),
+			"label": "Finish in the top half"
+		},
 		"schedule": schedule.duplicate(true),
 		"standings": standings,
 		"results": [],
@@ -110,7 +115,8 @@ static func review(season: Dictionary, player_house: Dictionary) -> Dictionary:
 			standout_name = competitor["name"]
 			standout_points = event_points
 
-	var objective_target: int = ceili(float(standings.size()) / 2.0)
+	var objective: Dictionary = _objective(season, standings.size())
+	var objective_target: int = int(objective["target_position"])
 	var objective_achieved: bool = player_position <= objective_target
 	return {
 		"champion_id": standings[0]["house_id"],
@@ -121,11 +127,30 @@ static func review(season: Dictionary, player_house: Dictionary) -> Dictionary:
 		"losses": player_row["losses"],
 		"points": player_row["points"],
 		"score_difference": player_row["score_difference"],
-		"objective": "Finish in the top half",
+		"objective": objective["label"],
+		"objective_target": objective_target,
 		"objective_achieved": objective_achieved,
 		"standout_name": standout_name,
 		"standout_points": standout_points,
 		"headline": "%s are arena champions." % standings[0]["house_name"]
+	}
+
+
+static func objective_status(season: Dictionary, player_house_id: String) -> Dictionary:
+	var standings := table(season)
+	var objective := _objective(season, standings.size())
+	var current_position: int = 0
+	for row_index in range(standings.size()):
+		if standings[row_index]["house_id"] == player_house_id:
+			current_position = row_index + 1
+			break
+	assert(current_position > 0, "Objective House must exist in standings")
+	return {
+		"label": objective["label"],
+		"target_position": objective["target_position"],
+		"current_position": current_position,
+		"on_track": current_position <= int(objective["target_position"]),
+		"weeks_played": season["completed_weeks"].size()
 	}
 
 
@@ -170,3 +195,13 @@ static func _week_count(schedule: Array) -> int:
 	for fixture in schedule:
 		weeks[int(fixture["week"])] = true
 	return weeks.size()
+
+
+static func _objective(season: Dictionary, house_count: int) -> Dictionary:
+	if season.get("objective") is Dictionary:
+		return season["objective"].duplicate(true)
+	return {
+		"kind": "finish_position",
+		"target_position": ceili(float(house_count) / 2.0),
+		"label": "Finish in the top half"
+	}

@@ -12,6 +12,8 @@ The pre-bout prototype now offers four fictional Houses, direct opponent selecti
 
 The Godot interface now turns that setup into a guided week without adding pages. House and opponent establish the briefing; training, lineup, and strategy unlock in sequence and become read-only when committed; the bout retains watch, skip, reduced-motion, and text-only paths; recovery then carries fatigue, morale, and form into the next week and produces one result story. The player always sees the next useful action on the same screen.
 
+The campaign stakes are visible before the first bout: finish in the top half. The same objective rule reports current table position each week and produces the final verdict, avoiding a hidden or retroactive success condition.
+
 A completed week is also the recovery boundary for persistence. The career saves locally only after standings and competitor consequences are settled, then resumes at the next briefing. This avoids ambiguous half-committed choices while preserving the meaningful long-term fatigue, morale, form, result, and table state. Reset is explicit and visible rather than hidden in browser storage controls.
 
 ## Design goal

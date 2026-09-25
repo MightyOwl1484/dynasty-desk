@@ -48,7 +48,7 @@ Exit: at least three consecutive weeks produce connected decisions and recogniza
 
 Status: **in progress**
 
-Current progress: the four-House prototype has a deterministic three-week round robin, immutable result history, AI resolution through the shared resolver, sorted standings, and a final campaign review naming the champion, House record, top-half objective verdict, and player standout. A schema-versioned local JSON save records each completed week, automatically resumes at the next briefing or final review, rejects malformed or unsupported data safely, and provides an explicit career reset. The content set can expand to eight Houses after the weekly loop is tuned; portable save export/import remains the next persistence step.
+Current progress: the four-House prototype has a deterministic three-week round robin, immutable result history, AI resolution through the shared resolver, sorted standings, a top-half objective visible from the start, and a final campaign review naming the champion, House record, objective verdict, and player standout. A schema-versioned local JSON save records each completed week, automatically resumes at the next briefing or final review, rejects malformed or unsupported data safely, and provides an explicit career reset. The content set can expand to eight Houses after the weekly loop is tuned; portable save export/import remains the next persistence step.
 
 - Expand the proven four-House schedule and standings to eight Houses with the content milestone.
 - Add portable save export and import on top of the implemented local save, resume, validation, and reset path.

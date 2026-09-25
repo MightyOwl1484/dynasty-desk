@@ -182,6 +182,8 @@ func _test_season_standings_resolve_every_fixture() -> void:
 	var houses := PrototypeLeagueScript.create_houses()
 	var schedule := SeasonScheduleScript.create(houses)
 	var season := SeasonStateScript.start(houses, schedule, 104729)
+	var opening_objective := SeasonStateScript.objective_status(season, houses[0]["id"])
+	_expect(opening_objective["target_position"] == 2 and opening_objective["weeks_played"] == 0, "season objective is visible before the first week")
 	for week_number in range(1, 4):
 		season = SeasonStateScript.resolve_week(season, houses, week_number)
 	var table := SeasonStateScript.table(season)
@@ -219,6 +221,8 @@ func _test_completed_season_review() -> void:
 	_expect(review["wins"] + review["losses"] == 3, "season review records the complete player campaign")
 	_expect(not str(review["champion_name"]).is_empty() and not str(review["standout_name"]).is_empty(), "season review names a champion and player standout")
 	_expect(review["objective_achieved"] == (review["player_position"] <= 2), "top-half objective verdict follows the final table")
+	var final_objective := SeasonStateScript.objective_status(season, houses[0]["id"])
+	_expect(final_objective["current_position"] == review["player_position"] and final_objective["on_track"] == review["objective_achieved"], "objective progress and final verdict share one rule")
 
 
 func _expect(condition: bool, message: String) -> void:
