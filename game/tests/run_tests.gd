@@ -6,6 +6,7 @@ const ArenaPresentationScript = preload("res://src/presentation/arena_presentati
 const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
 const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
+const SeasonStateScript = preload("res://src/application/season_state.gd")
 
 var _failures: int = 0
 
@@ -24,9 +25,10 @@ func _run() -> void:
 	_test_bout_analysis_explains_locked_result()
 	_test_weekly_cycle_connects_management_decisions()
 	_test_round_robin_schedule_connects_three_weeks()
+	_test_season_standings_resolve_every_fixture()
 
 	if _failures == 0:
-		print("PASS: 9 arena content, simulation, presentation, analysis, and management tests")
+		print("PASS: 10 arena content, simulation, presentation, analysis, and management tests")
 	else:
 		push_error("FAIL: %d arena simulation assertions" % _failures)
 	quit(_failures)
@@ -154,6 +156,19 @@ func _test_round_robin_schedule_connects_three_weeks() -> void:
 	for week_number in range(1, 4):
 		opponents[SeasonScheduleScript.opponent_for(schedule, houses[0]["id"], week_number)] = true
 	_expect(opponents.size() == 3 and not opponents.has(""), "the player receives a different scheduled opponent each week")
+
+
+func _test_season_standings_resolve_every_fixture() -> void:
+	var houses := PrototypeLeagueScript.create_houses()
+	var schedule := SeasonScheduleScript.create(houses)
+	var season := SeasonStateScript.start(houses, schedule, 104729)
+	for week_number in range(1, 4):
+		season = SeasonStateScript.resolve_week(season, houses, week_number)
+	var table := SeasonStateScript.table(season)
+	_expect(season["results"].size() == 6 and season["completed_weeks"].size() == 3, "three weeks resolve all six league fixtures exactly once")
+	_expect(table.all(func(row: Dictionary) -> bool: return row["played"] == 3), "standings record three bouts for every House")
+	_expect(table.map(func(row: Dictionary) -> int: return row["wins"]).reduce(func(total: int, wins: int) -> int: return total + wins, 0) == 6, "every resolved bout contributes one standings win")
+	_expect(table[0]["points"] >= table[-1]["points"], "standings sort by points and score difference")
 
 
 func _expect(condition: bool, message: String) -> void:

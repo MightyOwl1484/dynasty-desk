@@ -11,6 +11,7 @@ const requiredFiles = [
   'game/src/simulation/arena_match_resolver.gd',
   'game/src/simulation/bout_analysis.gd',
   'game/src/application/weekly_cycle.gd',
+  'game/src/application/season_state.gd',
   'game/src/domain/season_schedule.gd',
   'game/src/presentation/arena_presentation.gd',
   'game/src/presentation/arena_view.gd',

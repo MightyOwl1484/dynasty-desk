@@ -7,6 +7,7 @@ const ArenaPresentationScript = preload("res://src/presentation/arena_presentati
 const ArenaViewScript = preload("res://src/presentation/arena_view.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
 const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
+const SeasonStateScript = preload("res://src/application/season_state.gd")
 const SPEEDS: Array[float] = [1.0, 2.0, 4.0]
 
 var _houses: Array[Dictionary] = []
@@ -19,6 +20,7 @@ var _week_number: int = 1
 var _week_state: Dictionary = {}
 var _career_house: Dictionary = {}
 var _schedule: Array[Dictionary] = []
+var _season_state: Dictionary = {}
 var _season_complete: bool = false
 
 var _house_picker: OptionButton
@@ -31,6 +33,7 @@ var _lineup_pickers: Array[OptionButton] = []
 var _strategy_summary: Label
 var _house_summary: RichTextLabel
 var _lineup_summary: Label
+var _standings_label: Label
 var _result_heading: Label
 var _score_label: Label
 var _explanation_label: RichTextLabel
@@ -50,11 +53,13 @@ var _presentation_timer: Timer
 func _ready() -> void:
 	_houses = PrototypeLeagueScript.create_houses()
 	_schedule = SeasonScheduleScript.create(_houses)
+	_season_state = SeasonStateScript.start(_houses, _schedule, 104729)
 	_build_theme()
 	_build_interface()
 	_update_house_summary(0)
 	_update_strategy_summary(0)
 	_update_training_summary(0)
+	_render_standings()
 	_sync_week_controls()
 
 
@@ -101,6 +106,12 @@ func _build_interface() -> void:
 	introduction.text = "Choose a House and strategy. The result locks first; the presentation only reveals its moments."
 	introduction.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	page.add_child(introduction)
+
+	_standings_label = Label.new()
+	_standings_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_standings_label.add_theme_color_override("font_color", Color("c8d2e1"))
+	_standings_label.accessibility_name = "Current mini-season standings"
+	page.add_child(_standings_label)
 
 	var setup := HBoxContainer.new()
 	setup.add_theme_constant_override("separation", 20)
@@ -604,6 +615,8 @@ func _finish_presentation() -> void:
 	_explanation_label.text = "[b]Why it happened[/b]\n%s\n[color=#92a1b7]%s[/color]" % [analysis["headline"], analysis["detail"]]
 	if not _week_state.is_empty() and _week_state["phase"] == "recovery":
 		_week_state = WeeklyCycleScript.apply_recovery(_week_state)
+		_season_state = SeasonStateScript.resolve_week(_season_state, _houses, _week_number, _last_result)
+		_render_standings()
 		var story: Dictionary = _week_state["news"][-1]
 		_explanation_label.text += "\n[b]Week consequence[/b]\n%s" % story["headline"]
 		_status_label.text = "Recovery applied. Review the result, then close the week."
@@ -618,6 +631,16 @@ func _render_revealed_events() -> void:
 			event["round"], event["home_score"], event["away_score"], event["text"]
 		])
 	_event_log.text = "\n".join(event_lines)
+
+
+func _render_standings() -> void:
+	var entries: Array[String] = []
+	var place: int = 1
+	for row in SeasonStateScript.table(_season_state):
+		entries.append("%d. %s %d pts (%+d)" % [place, row["house_name"], row["points"], row["score_difference"]])
+		place += 1
+	_standings_label.text = "Standings · %s" % "  ·  ".join(entries)
+	_standings_label.accessibility_description = _standings_label.text
 
 
 func _set_text_only(enabled: bool) -> void:

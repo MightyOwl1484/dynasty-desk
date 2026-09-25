@@ -34,9 +34,9 @@ Exit: a first-time player can choose a House, make one informed decision, watch 
 
 Status: **in progress**
 
-Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. The existing one-screen interface guides the player through those phases, locks committed choices, applies recovery after presentation, and carries fatigue, morale, and form into the next week. A deterministic round robin supplies a different opponent in each week of the current three-week mini-season. Headless tests cover the complete week, schedule uniqueness, repeatable resolution, state immutability, and JSON-compatible state. A deliberate three-week playtest and standings are next.
+Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. The existing one-screen interface guides the player through those phases, locks committed choices, applies recovery after presentation, and carries fatigue, morale, and form into the next week. A deterministic round robin supplies a different opponent in each week of the current three-week mini-season. The player's bout and non-player fixture update live standings together. Headless tests cover the complete week, schedule uniqueness, all six season fixtures, repeatable resolution, state immutability, and JSON-compatible state. A deliberate three-week playtest is next.
 
-- Add standings and resolve the non-player fixture alongside each player week.
+- Playtest and tune three connected weeks so fatigue and training choices remain legible and worthwhile.
 - Deepen the implemented fatigue, morale, and form consequences; add injuries and relationships only when their choices are readable.
 - Add competitor roles and concise comparison cards.
 - Add an inbox/story feed that surfaces only actionable events.
@@ -46,7 +46,11 @@ Exit: at least three consecutive weeks produce connected decisions and recogniza
 
 ## P3 — Season and persistence
 
-- Generate an eight-House schedule and standings.
+Status: **in progress**
+
+Current progress: the four-House prototype has a deterministic three-week round robin, immutable result history, AI resolution through the shared resolver, and sorted standings. The content set can expand to eight Houses after the weekly loop is tuned. Versioned local saves remain the next technical dependency.
+
+- Expand the proven four-House schedule and standings to eight Houses with the content milestone.
 - Add local versioned saves, reset, export, and import.
 - Add season objectives, patron confidence, records, awards, and playoffs.
 - Add deterministic AI preparation using the same legal actions as the player.

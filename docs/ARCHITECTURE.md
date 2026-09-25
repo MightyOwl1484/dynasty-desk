@@ -102,6 +102,8 @@ The weekly service has no scene or animation dependency. The one-screen interfac
 
 `SeasonSchedule` creates a deterministic single round robin from House identifiers. With the current four-House content set, every House receives one distinct opponent in each of three weeks and every pairing occurs exactly once. The UI reads this schedule instead of allowing manual opponent selection; standings can therefore be added without changing the weekly decision contract.
 
+`SeasonState` owns standings and immutable completed results. When the player's result is available, it records that bout and deterministically resolves the other scheduled fixture using the same resolver and legal balanced strategy. The resulting table sorts by points, score difference, score for, and House name. Presentation never writes standings directly.
+
 ## Persistence
 
 Solo saves will use `user://` and a versioned JSON envelope. Web persistence depends on browser IndexedDB and may be unavailable in private browsing, so export/import remains a planned recovery path.
