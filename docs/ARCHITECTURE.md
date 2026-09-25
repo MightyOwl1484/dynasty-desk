@@ -100,6 +100,8 @@ Accessibility variants are equal presentation clients:
 
 The weekly service has no scene or animation dependency. The one-screen interface adapts its existing controls to the current phase: choices unlock one at a time, become read-only when committed, and return to the same page for recovery and news. This keeps the flow guided without turning every phase into another menu.
 
+`SeasonSchedule` creates a deterministic single round robin from House identifiers. With the current four-House content set, every House receives one distinct opponent in each of three weeks and every pairing occurs exactly once. The UI reads this schedule instead of allowing manual opponent selection; standings can therefore be added without changing the weekly decision contract.
+
 ## Persistence
 
 Solo saves will use `user://` and a versioned JSON envelope. Web persistence depends on browser IndexedDB and may be unavailable in private browsing, so export/import remains a planned recovery path.

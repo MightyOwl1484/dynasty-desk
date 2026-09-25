@@ -17,6 +17,7 @@ The new implementation lives in [`game/`](game/) and targets Godot 4.7 with type
 - Reduced-motion and text-only presentation paths using the same event log
 - A post-bout review naming the leading competitor and explaining the tactical shape
 - A guided one-screen week connecting briefing, training, lineup, strategy, bout, recovery, and news
+- A deterministic three-week round-robin mini-season with a different scheduled opponent each week
 - A browser export preset using the Compatibility renderer
 - A dependency-free headless test entry point
 

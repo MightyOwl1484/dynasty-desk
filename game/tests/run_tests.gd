@@ -5,6 +5,7 @@ const ArenaMatchResolverScript = preload("res://src/simulation/arena_match_resol
 const ArenaPresentationScript = preload("res://src/presentation/arena_presentation.gd")
 const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
+const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
 
 var _failures: int = 0
 
@@ -22,9 +23,10 @@ func _run() -> void:
 	_test_presentation_pause_skip_and_replay()
 	_test_bout_analysis_explains_locked_result()
 	_test_weekly_cycle_connects_management_decisions()
+	_test_round_robin_schedule_connects_three_weeks()
 
 	if _failures == 0:
-		print("PASS: 8 arena content, simulation, presentation, analysis, and management tests")
+		print("PASS: 9 arena content, simulation, presentation, analysis, and management tests")
 	else:
 		push_error("FAIL: %d arena simulation assertions" % _failures)
 	quit(_failures)
@@ -133,6 +135,25 @@ func _test_weekly_cycle_connects_management_decisions() -> void:
 	_expect(week["house"]["roster"].all(func(competitor: Dictionary) -> bool: return competitor.has("fatigue") and competitor.has("morale") and competitor.has("form")), "weekly state carries fatigue, morale, and form")
 	week = WeeklyCycleScript.acknowledge_news(week)
 	_expect(week["phase"] == "complete", "briefing, training, lineup, strategy, bout, recovery, and news form a complete week")
+
+
+func _test_round_robin_schedule_connects_three_weeks() -> void:
+	var houses := PrototypeLeagueScript.create_houses()
+	var schedule := SeasonScheduleScript.create(houses)
+	var pair_keys: Dictionary = {}
+	var appearances: Dictionary = {}
+	for fixture in schedule:
+		var pair: Array[String] = [fixture["home_house_id"], fixture["away_house_id"]]
+		pair.sort()
+		pair_keys["%s:%s" % pair] = true
+		appearances[fixture["home_house_id"]] = int(appearances.get(fixture["home_house_id"], 0)) + 1
+		appearances[fixture["away_house_id"]] = int(appearances.get(fixture["away_house_id"], 0)) + 1
+	_expect(schedule.size() == 6 and pair_keys.size() == 6, "four Houses receive six unique round-robin fixtures")
+	_expect(appearances.values().all(func(count: int) -> bool: return count == 3), "every House plays once in each of three weeks")
+	var opponents: Dictionary = {}
+	for week_number in range(1, 4):
+		opponents[SeasonScheduleScript.opponent_for(schedule, houses[0]["id"], week_number)] = true
+	_expect(opponents.size() == 3 and not opponents.has(""), "the player receives a different scheduled opponent each week")
 
 
 func _expect(condition: bool, message: String) -> void:

@@ -6,6 +6,7 @@ const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
 const ArenaPresentationScript = preload("res://src/presentation/arena_presentation.gd")
 const ArenaViewScript = preload("res://src/presentation/arena_view.gd")
 const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
+const SeasonScheduleScript = preload("res://src/domain/season_schedule.gd")
 const SPEEDS: Array[float] = [1.0, 2.0, 4.0]
 
 var _houses: Array[Dictionary] = []
@@ -17,6 +18,8 @@ var _speed_index: int = 0
 var _week_number: int = 1
 var _week_state: Dictionary = {}
 var _career_house: Dictionary = {}
+var _schedule: Array[Dictionary] = []
+var _season_complete: bool = false
 
 var _house_picker: OptionButton
 var _opponent_picker: OptionButton
@@ -46,6 +49,7 @@ var _presentation_timer: Timer
 
 func _ready() -> void:
 	_houses = PrototypeLeagueScript.create_houses()
+	_schedule = SeasonScheduleScript.create(_houses)
 	_build_theme()
 	_build_interface()
 	_update_house_summary(0)
@@ -156,7 +160,7 @@ func _build_opponent_picker(parent: HBoxContainer) -> void:
 	label.text = "Opponent"
 	column.add_child(label)
 	_opponent_picker = OptionButton.new()
-	_opponent_picker.accessibility_name = "Choose an opposing Arena House"
+	_opponent_picker.accessibility_name = "Scheduled opposing Arena House"
 	_opponent_picker.item_selected.connect(_update_opponent_summary)
 	column.add_child(_opponent_picker)
 	_opponent_summary = Label.new()
@@ -320,8 +324,12 @@ func _update_house_summary(index: int) -> void:
 
 func _populate_opponents(player_house_id: String) -> void:
 	_opponent_picker.clear()
+	var opponent_id: String = SeasonScheduleScript.opponent_for(_schedule, player_house_id, _week_number)
+	if opponent_id.is_empty():
+		_opponent_summary.text = "The three-week prototype schedule is complete."
+		return
 	for house in _houses:
-		if house["id"] == player_house_id:
+		if house["id"] != opponent_id:
 			continue
 		_opponent_picker.add_item(house["name"])
 		_opponent_picker.set_item_metadata(_opponent_picker.item_count - 1, house["id"])
@@ -468,24 +476,32 @@ func _close_week() -> void:
 	_week_number += 1
 	_seed += 7919
 	_week_state.clear()
-	_populate_opponents(_career_house["id"])
 	_populate_lineup(_career_house)
-	_house_summary.text = "[b]%s[/b] — Week %d ready\nFatigue, morale, and form now carry into the next decision." % [
-		_career_house["name"], _week_number
-	]
-	_status_label.text = "Week complete. Start Week %d when ready." % _week_number
+	var next_opponent_id: String = SeasonScheduleScript.opponent_for(_schedule, _career_house["id"], _week_number)
+	if next_opponent_id.is_empty():
+		_season_complete = true
+		_opponent_picker.clear()
+		_opponent_summary.text = "Three-week prototype schedule complete."
+		_house_summary.text = "[b]%s[/b] — Mini-season complete\nThree connected weeks carried fatigue, morale, and form forward." % _career_house["name"]
+		_status_label.text = "Prototype season complete. Standings and saves are the next season-layer slice."
+	else:
+		_populate_opponents(_career_house["id"])
+		_house_summary.text = "[b]%s[/b] — Week %d ready\nFatigue, morale, and form now carry into the next decision." % [
+			_career_house["name"], _week_number
+		]
+		_status_label.text = "Week complete. Start Week %d when ready." % _week_number
 	_set_presentation_controls_enabled(false)
 
 
 func _sync_week_controls() -> void:
 	var phase: String = "setup" if _week_state.is_empty() else str(_week_state["phase"])
 	_house_picker.disabled = not _career_house.is_empty() or phase != "setup"
-	_opponent_picker.disabled = phase != "setup"
+	_opponent_picker.disabled = true
 	_training_picker.disabled = phase != "training"
 	_strategy_picker.disabled = phase != "strategy"
 	for picker in _lineup_pickers:
 		picker.disabled = phase != "lineup"
-	_advance_button.disabled = phase == "recovery"
+	_advance_button.disabled = phase == "recovery" or _season_complete
 	var labels := {
 		"setup": "Start Week %d" % _week_number,
 		"briefing": "Open training plan",
@@ -496,7 +512,7 @@ func _sync_week_controls() -> void:
 		"recovery": "Bout in progress",
 		"news": "Close Week %d" % _week_number
 	}
-	_advance_button.text = labels.get(phase, "Continue")
+	_advance_button.text = "Prototype season complete" if _season_complete else labels.get(phase, "Continue")
 
 
 func _toggle_playback() -> void:
