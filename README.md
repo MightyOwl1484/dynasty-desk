@@ -16,7 +16,7 @@ The new implementation lives in [`game/`](game/) and targets Godot 4.7 with type
 - Play, pause, 1×/2×/4× speed, skip, and replay controls
 - Reduced-motion and text-only presentation paths using the same event log
 - A post-bout review naming the leading competitor and explaining the tactical shape
-- A tested weekly domain loop connecting briefing, training, lineup, strategy, bout, recovery, and news
+- A guided one-screen week connecting briefing, training, lineup, strategy, bout, recovery, and news
 - A browser export preset using the Compatibility renderer
 - A dependency-free headless test entry point
 

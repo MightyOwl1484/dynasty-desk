@@ -98,7 +98,7 @@ Accessibility variants are equal presentation clients:
 
 `WeeklyCycle` is a pure application service over JSON-compatible dictionaries. It advances one copied state through briefing, training, lineup, strategy, bout, recovery, news, and completion. Training exposes a small, readable fatigue/morale/stat tradeoff; lineup and strategy lock before the service invokes the resolver; recovery applies consequences and creates one concise result story. Earlier states remain unchanged, making later undo, save migration, and audit behavior explicit rather than scene-dependent.
 
-The weekly service has no scene or animation dependency. The current interface still presents the vertical-slice setup directly; the next UI slice will adapt those controls to the tested weekly phases.
+The weekly service has no scene or animation dependency. The one-screen interface adapts its existing controls to the current phase: choices unlock one at a time, become read-only when committed, and return to the same page for recovery and news. This keeps the flow guided without turning every phase into another menu.
 
 ## Persistence
 

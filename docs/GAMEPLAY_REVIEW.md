@@ -10,6 +10,8 @@ The prototype arena uses six high-contrast markers and moves only the competitor
 
 The pre-bout prototype now offers four fictional Houses, direct opponent selection, and a six-person roster condensed into three lineup slots. Each slot exposes name, archetype, power, guard, and technique; the summary shows the active trio's average profile and signed advantages against the opponent. Duplicate competitors are explained and blocked before resolution. This creates a real preparation decision without introducing a roster spreadsheet. After the event stream completes, a compact review names the winning side's leading contributor and explains the strategy, score margin, and mix of decisive and narrow exchanges.
 
+The Godot interface now turns that setup into a guided week without adding pages. House and opponent establish the briefing; training, lineup, and strategy unlock in sequence and become read-only when committed; the bout retains watch, skip, reduced-motion, and text-only paths; recovery then carries fatigue, morale, and form into the next week and produces one result story. The player always sees the next useful action on the same screen.
+
 ## Design goal
 
 Dynasty Desk should feel like a club story with meaningful decisions, not a spreadsheet with soccer labels. Numbers should explain the world and support decisions, but the player should remember moments, rivalries, breakthroughs, and consequences.

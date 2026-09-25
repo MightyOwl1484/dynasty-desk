@@ -34,9 +34,9 @@ Exit: a first-time player can choose a House, make one informed decision, watch 
 
 Status: **in progress**
 
-Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. Headless tests cover a complete week, repeatable resolution, state immutability, and carried fatigue, morale, and form. UI integration and multi-week continuity are next.
+Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. The existing one-screen interface guides the player through those phases, locks committed choices, applies recovery after presentation, and carries fatigue, morale, and form into the next week. Headless tests cover a complete week, repeatable resolution, state immutability, and JSON-compatible state. Scheduled opponents and a deliberate three-week playtest are next.
 
-- Adapt the vertical-slice interface to the tested weekly phases without adding extra pages.
+- Add a small schedule so the guided interface can demonstrate three connected weeks without manual opponent choice.
 - Deepen the implemented fatigue, morale, and form consequences; add injuries and relationships only when their choices are readable.
 - Add competitor roles and concise comparison cards.
 - Add an inbox/story feed that surfaces only actionable events.

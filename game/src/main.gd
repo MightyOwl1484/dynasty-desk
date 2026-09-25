@@ -5,6 +5,7 @@ const ArenaMatchResolverScript = preload("res://src/simulation/arena_match_resol
 const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
 const ArenaPresentationScript = preload("res://src/presentation/arena_presentation.gd")
 const ArenaViewScript = preload("res://src/presentation/arena_view.gd")
+const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
 const SPEEDS: Array[float] = [1.0, 2.0, 4.0]
 
 var _houses: Array[Dictionary] = []
@@ -13,11 +14,16 @@ var _last_result: Dictionary = {}
 var _revealed_events: Array[Dictionary] = []
 var _seed: int = 104729
 var _speed_index: int = 0
+var _week_number: int = 1
+var _week_state: Dictionary = {}
+var _career_house: Dictionary = {}
 
 var _house_picker: OptionButton
 var _opponent_picker: OptionButton
 var _opponent_summary: Label
 var _strategy_picker: OptionButton
+var _training_picker: OptionButton
+var _training_summary: Label
 var _lineup_pickers: Array[OptionButton] = []
 var _strategy_summary: Label
 var _house_summary: RichTextLabel
@@ -32,6 +38,7 @@ var _play_button: Button
 var _speed_button: Button
 var _skip_button: Button
 var _replay_button: Button
+var _advance_button: Button
 var _reduced_motion: CheckButton
 var _text_only: CheckButton
 var _presentation_timer: Timer
@@ -43,6 +50,8 @@ func _ready() -> void:
 	_build_interface()
 	_update_house_summary(0)
 	_update_strategy_summary(0)
+	_update_training_summary(0)
+	_sync_week_controls()
 
 
 func _build_theme() -> void:
@@ -94,6 +103,7 @@ func _build_interface() -> void:
 	page.add_child(setup)
 	_build_house_picker(setup)
 	_build_opponent_picker(setup)
+	_build_training_picker(setup)
 	_build_strategy_picker(setup)
 
 	_house_summary = RichTextLabel.new()
@@ -104,11 +114,11 @@ func _build_interface() -> void:
 	page.add_child(_house_summary)
 	_build_lineup_picker(page)
 
-	var resolve_button := Button.new()
-	resolve_button.text = "Lock result and enter the arena"
-	resolve_button.accessibility_name = "Resolve the exhibition bout and prepare its presentation"
-	resolve_button.pressed.connect(_resolve_exhibition)
-	page.add_child(resolve_button)
+	_advance_button = Button.new()
+	_advance_button.text = "Start Week 1"
+	_advance_button.accessibility_name = "Advance the guided weekly management flow"
+	_advance_button.pressed.connect(_advance_week)
+	page.add_child(_advance_button)
 
 	var match_area := HBoxContainer.new()
 	match_area.add_theme_constant_override("separation", 24)
@@ -153,6 +163,26 @@ func _build_opponent_picker(parent: HBoxContainer) -> void:
 	_opponent_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_opponent_summary.add_theme_font_size_override("font_size", 15)
 	column.add_child(_opponent_summary)
+
+
+func _build_training_picker(parent: HBoxContainer) -> void:
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	parent.add_child(column)
+	var label := Label.new()
+	label.text = "Training"
+	column.add_child(label)
+	_training_picker = OptionButton.new()
+	_training_picker.accessibility_name = "Choose this week's training focus"
+	for option in WeeklyCycleScript.training_options():
+		_training_picker.add_item(option["label"])
+		_training_picker.set_item_metadata(_training_picker.item_count - 1, option["id"])
+	_training_picker.item_selected.connect(_update_training_summary)
+	column.add_child(_training_picker)
+	_training_summary = Label.new()
+	_training_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_training_summary.add_theme_font_size_override("font_size", 15)
+	column.add_child(_training_summary)
 
 
 func _build_strategy_picker(parent: HBoxContainer) -> void:
@@ -304,9 +334,10 @@ func _populate_lineup(house: Dictionary) -> void:
 		var picker := _lineup_pickers[slot]
 		picker.clear()
 		for competitor in house["roster"]:
-			picker.add_item("%s · %s · P%d G%d T%d" % [
+			picker.add_item("%s · %s · P%d G%d T%d · Fat %d Mor %d" % [
 				competitor["name"], str(competitor.get("archetype", "competitor")).capitalize(),
-				competitor["power"], competitor["guard"], competitor["technique"]
+				competitor["power"], competitor["guard"], competitor["technique"],
+				competitor.get("fatigue", 12), competitor.get("morale", 60)
 			])
 			picker.set_item_metadata(picker.item_count - 1, competitor["id"])
 		picker.select(mini(slot, picker.item_count - 1))
@@ -329,7 +360,7 @@ func _update_opponent_summary(_index: int = 0) -> void:
 func _update_lineup_summary(_index: int = 0) -> void:
 	if not _lineup_summary or _lineup_pickers.is_empty():
 		return
-	var house: Dictionary = _houses[_house_picker.selected]
+	var house: Dictionary = _active_house()
 	var selected: Array[Dictionary] = _selected_lineup(house)
 	var names: Array[String] = []
 	for competitor in selected:
@@ -357,19 +388,64 @@ func _update_strategy_summary(index: int) -> void:
 	_strategy_summary.text = descriptions[index]
 
 
-func _resolve_exhibition() -> void:
+func _update_training_summary(index: int) -> void:
+	var plan_id: String = str(_training_picker.get_item_metadata(index))
+	var plan: Dictionary = WeeklyCycleScript.TRAINING_PLANS[plan_id]
+	_training_summary.text = "%s Fatigue %+d · Morale %+d" % [
+		plan["description"], plan["fatigue"], plan["morale"]
+	]
+
+
+func _advance_week() -> void:
+	if _week_state.is_empty():
+		_start_week()
+	elif _week_state["phase"] == "briefing":
+		_week_state = WeeklyCycleScript.acknowledge_briefing(_week_state)
+		_status_label.text = "Choose one training tradeoff for this week."
+	elif _week_state["phase"] == "training":
+		var plan_id: String = str(_training_picker.get_item_metadata(_training_picker.selected))
+		_week_state = WeeklyCycleScript.choose_training(_week_state, plan_id)
+		_populate_lineup(_week_state["house"])
+		_status_label.text = "Training committed. Choose three different competitors."
+	elif _week_state["phase"] == "lineup":
+		var selected_lineup := _selected_lineup(_week_state["house"])
+		if _lineup_has_duplicates(selected_lineup):
+			_status_label.text = "Choose three different competitors before locking the lineup."
+			return
+		var lineup_ids: Array = selected_lineup.map(func(competitor: Dictionary) -> String: return competitor["id"])
+		_week_state = WeeklyCycleScript.choose_lineup(_week_state, lineup_ids)
+		_status_label.text = "Lineup locked. Choose the tactical approach."
+	elif _week_state["phase"] == "strategy":
+		var strategy: String = _strategy_picker.get_item_text(_strategy_picker.selected).to_lower()
+		_week_state = WeeklyCycleScript.choose_strategy(_week_state, strategy)
+		_status_label.text = "Choices locked. The deterministic result is ready to resolve."
+	elif _week_state["phase"] == "bout":
+		_resolve_week_bout()
+	elif _week_state["phase"] == "news":
+		_close_week()
+	_sync_week_controls()
+
+
+func _start_week() -> void:
+	var source_house: Dictionary = _career_house if not _career_house.is_empty() else _houses[_house_picker.selected]
+	_week_state = WeeklyCycleScript.start_week(source_house, _selected_opponent(), _week_number, _seed)
+	var briefing: Dictionary = _week_state["news"][0]
+	_status_label.text = "%s · %s" % [briefing["headline"], briefing["body"]]
+	_event_log.text = "[b]%s[/b]\n[color=#92a1b7]%s[/color]" % [briefing["headline"], briefing["body"]]
+	_result_heading.text = "Week %d briefing" % _week_number
+	_score_label.text = "Preparation decisions remain editable until each phase is locked."
+	_explanation_label.text = "[color=#92a1b7]One clear choice at a time: training, lineup, strategy, then the arena.[/color]"
+	_set_presentation_controls_enabled(false)
+
+
+func _resolve_week_bout() -> void:
 	_presentation_timer.stop()
-	var selected_index: int = _house_picker.selected
-	var source_house: Dictionary = _houses[selected_index]
-	var selected_lineup := _selected_lineup(source_house)
-	if _lineup_has_duplicates(selected_lineup):
-		_status_label.text = "Choose three different competitors before entering the arena."
-		return
-	var player_house: Dictionary = source_house.duplicate(true)
-	player_house["roster"] = selected_lineup
-	var opponent_house: Dictionary = _selected_opponent()
-	var strategy: String = _strategy_picker.get_item_text(_strategy_picker.selected).to_lower()
-	_last_result = ArenaMatchResolverScript.resolve_bout(player_house, opponent_house, _seed, strategy, "balanced")
+	_week_state = WeeklyCycleScript.resolve_bout(_week_state)
+	_last_result = _week_state["result"]
+	var player_house: Dictionary = _week_state["house"].duplicate(true)
+	player_house["roster"] = _selected_lineup(_week_state["house"])
+	var opponent_house: Dictionary = _week_state["opponent"].duplicate(true)
+	opponent_house["roster"] = opponent_house["roster"].slice(0, 3)
 	_presentation.load_result(_last_result)
 	_arena_view.configure(player_house, opponent_house)
 	_revealed_events.clear()
@@ -381,7 +457,46 @@ func _resolve_exhibition() -> void:
 	_play_button.text = "Play"
 	_set_presentation_controls_enabled(true)
 	_replay_button.disabled = true
+	_advance_button.disabled = true
+
+
+func _close_week() -> void:
+	_week_state = WeeklyCycleScript.acknowledge_news(_week_state)
+	_career_house = _week_state["house"].duplicate(true)
+	if _career_house.get("color") is String:
+		_career_house["color"] = Color(_career_house["color"])
+	_week_number += 1
 	_seed += 7919
+	_week_state.clear()
+	_populate_opponents(_career_house["id"])
+	_populate_lineup(_career_house)
+	_house_summary.text = "[b]%s[/b] — Week %d ready\nFatigue, morale, and form now carry into the next decision." % [
+		_career_house["name"], _week_number
+	]
+	_status_label.text = "Week complete. Start Week %d when ready." % _week_number
+	_set_presentation_controls_enabled(false)
+
+
+func _sync_week_controls() -> void:
+	var phase: String = "setup" if _week_state.is_empty() else str(_week_state["phase"])
+	_house_picker.disabled = not _career_house.is_empty() or phase != "setup"
+	_opponent_picker.disabled = phase != "setup"
+	_training_picker.disabled = phase != "training"
+	_strategy_picker.disabled = phase != "strategy"
+	for picker in _lineup_pickers:
+		picker.disabled = phase != "lineup"
+	_advance_button.disabled = phase == "recovery"
+	var labels := {
+		"setup": "Start Week %d" % _week_number,
+		"briefing": "Open training plan",
+		"training": "Commit training",
+		"lineup": "Lock active trio",
+		"strategy": "Lock strategy",
+		"bout": "Lock result and enter the arena",
+		"recovery": "Bout in progress",
+		"news": "Close Week %d" % _week_number
+	}
+	_advance_button.text = labels.get(phase, "Continue")
 
 
 func _toggle_playback() -> void:
@@ -471,6 +586,12 @@ func _finish_presentation() -> void:
 	_replay_button.disabled = false
 	var analysis := BoutAnalysisScript.summarize(_last_result, home_house, away_house)
 	_explanation_label.text = "[b]Why it happened[/b]\n%s\n[color=#92a1b7]%s[/color]" % [analysis["headline"], analysis["detail"]]
+	if not _week_state.is_empty() and _week_state["phase"] == "recovery":
+		_week_state = WeeklyCycleScript.apply_recovery(_week_state)
+		var story: Dictionary = _week_state["news"][-1]
+		_explanation_label.text += "\n[b]Week consequence[/b]\n%s" % story["headline"]
+		_status_label.text = "Recovery applied. Review the result, then close the week."
+		_sync_week_controls()
 	_event_log.grab_focus()
 
 
@@ -497,11 +618,21 @@ func _set_presentation_controls_enabled(enabled: bool) -> void:
 
 
 func _house_by_id(house_id: String) -> Dictionary:
+	if not _career_house.is_empty() and _career_house["id"] == house_id:
+		return _career_house
 	for house in _houses:
 		if house["id"] == house_id:
 			return house
 	assert(false, "Unknown House id")
 	return {}
+
+
+func _active_house() -> Dictionary:
+	if not _week_state.is_empty():
+		return _week_state["house"]
+	if not _career_house.is_empty():
+		return _career_house
+	return _houses[_house_picker.selected]
 
 
 func _selected_opponent() -> Dictionary:
