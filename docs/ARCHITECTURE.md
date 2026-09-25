@@ -94,6 +94,12 @@ Accessibility variants are equal presentation clients:
 - Text-only event log
 - Quick result
 
+## Weekly application flow
+
+`WeeklyCycle` is a pure application service over JSON-compatible dictionaries. It advances one copied state through briefing, training, lineup, strategy, bout, recovery, news, and completion. Training exposes a small, readable fatigue/morale/stat tradeoff; lineup and strategy lock before the service invokes the resolver; recovery applies consequences and creates one concise result story. Earlier states remain unchanged, making later undo, save migration, and audit behavior explicit rather than scene-dependent.
+
+The weekly service has no scene or animation dependency. The current interface still presents the vertical-slice setup directly; the next UI slice will adapt those controls to the tested weekly phases.
+
 ## Persistence
 
 Solo saves will use `user://` and a versioned JSON envelope. Web persistence depends on browser IndexedDB and may be unavailable in private browsing, so export/import remains a planned recovery path.

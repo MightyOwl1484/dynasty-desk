@@ -32,8 +32,12 @@ Exit: a first-time player can choose a House, make one informed decision, watch 
 
 ## P2 — Management loop
 
-- Build the weekly loop: briefing, training, lineup, strategy, bout, recovery, news.
-- Add fatigue, morale, form, injury, and relationship consequences.
+Status: **in progress**
+
+Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. Headless tests cover a complete week, repeatable resolution, state immutability, and carried fatigue, morale, and form. UI integration and multi-week continuity are next.
+
+- Adapt the vertical-slice interface to the tested weekly phases without adding extra pages.
+- Deepen the implemented fatigue, morale, and form consequences; add injuries and relationships only when their choices are readable.
 - Add competitor roles and concise comparison cards.
 - Add an inbox/story feed that surfaces only actionable events.
 - Keep recommendations available without making them mandatory.

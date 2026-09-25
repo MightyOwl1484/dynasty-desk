@@ -10,6 +10,7 @@ const requiredFiles = [
   'game/src/simulation/deterministic_rng.gd',
   'game/src/simulation/arena_match_resolver.gd',
   'game/src/simulation/bout_analysis.gd',
+  'game/src/application/weekly_cycle.gd',
   'game/src/presentation/arena_presentation.gd',
   'game/src/presentation/arena_view.gd',
   'game/tests/run_tests.gd'

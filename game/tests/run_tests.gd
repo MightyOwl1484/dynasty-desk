@@ -4,6 +4,7 @@ const PrototypeLeagueScript = preload("res://src/data/prototype_league.gd")
 const ArenaMatchResolverScript = preload("res://src/simulation/arena_match_resolver.gd")
 const ArenaPresentationScript = preload("res://src/presentation/arena_presentation.gd")
 const BoutAnalysisScript = preload("res://src/simulation/bout_analysis.gd")
+const WeeklyCycleScript = preload("res://src/application/weekly_cycle.gd")
 
 var _failures: int = 0
 
@@ -20,9 +21,10 @@ func _run() -> void:
 	_test_presentation_reveals_without_mutating_result()
 	_test_presentation_pause_skip_and_replay()
 	_test_bout_analysis_explains_locked_result()
+	_test_weekly_cycle_connects_management_decisions()
 
 	if _failures == 0:
-		print("PASS: 7 arena content, simulation, presentation, and analysis tests")
+		print("PASS: 8 arena content, simulation, presentation, analysis, and management tests")
 	else:
 		push_error("FAIL: %d arena simulation assertions" % _failures)
 	quit(_failures)
@@ -107,6 +109,30 @@ func _test_bout_analysis_explains_locked_result() -> void:
 		_expect(analysis["leader_id"] in selected_ids, "post-bout analysis respects a manager-selected lineup")
 	_expect(str(analysis["detail"]).contains("Final margin"), "post-bout analysis explains the tactical shape and margin")
 	_expect(result == original, "post-bout analysis does not mutate the locked result")
+
+
+func _test_weekly_cycle_connects_management_decisions() -> void:
+	var houses := PrototypeLeagueScript.create_houses()
+	var source_house: Dictionary = houses[0].duplicate(true)
+	var lineup_ids: Array = source_house["roster"].slice(0, 3).map(func(competitor: Dictionary) -> String: return competitor["id"])
+	var week := WeeklyCycleScript.start_week(source_house, houses[1], 1, 104729)
+	var original_week := week.duplicate(true)
+	_expect(week["house"]["color"] is String and not JSON.stringify(week).is_empty(), "weekly state is JSON-compatible for future saves")
+	week = WeeklyCycleScript.acknowledge_briefing(week)
+	week = WeeklyCycleScript.choose_training(week, "technique")
+	_expect(week["house"]["roster"][0]["fatigue"] == 17 and week["house"]["roster"][0]["morale"] == 61, "training creates a visible fatigue and morale tradeoff")
+	week = WeeklyCycleScript.choose_lineup(week, lineup_ids)
+	week = WeeklyCycleScript.choose_strategy(week, "guarded")
+	var ready_week := week.duplicate(true)
+	week = WeeklyCycleScript.resolve_bout(week)
+	var repeated := WeeklyCycleScript.resolve_bout(ready_week)
+	_expect(week["result"] == repeated["result"], "weekly bout resolution is deterministic from locked choices")
+	_expect(original_week["phase"] == "briefing" and original_week["training_plan"].is_empty(), "weekly transitions do not mutate earlier state")
+	week = WeeklyCycleScript.apply_recovery(week)
+	_expect(week["phase"] == "news" and week["news"].size() == 2, "recovery creates one concise result story")
+	_expect(week["house"]["roster"].all(func(competitor: Dictionary) -> bool: return competitor.has("fatigue") and competitor.has("morale") and competitor.has("form")), "weekly state carries fatigue, morale, and form")
+	week = WeeklyCycleScript.acknowledge_news(week)
+	_expect(week["phase"] == "complete", "briefing, training, lineup, strategy, bout, recovery, and news form a complete week")
 
 
 func _expect(condition: bool, message: String) -> void:
