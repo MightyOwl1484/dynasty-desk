@@ -209,6 +209,7 @@ func _test_versioned_local_save_envelope() -> void:
 	var houses := PrototypeLeagueScript.create_houses()
 	var schedule := SeasonScheduleScript.create(houses)
 	var season := SeasonStateScript.start(houses, schedule, 104729)
+	season = SeasonStateScript.resolve_week(season, houses, 1)
 	var envelope := LocalSaveStoreScript.create_envelope(houses[0], season, 2, 112648, false, "2026-09-25T00:00:00Z")
 	var decoded := LocalSaveStoreScript.decode(LocalSaveStoreScript.encode(envelope))
 	_expect(decoded["ok"] and decoded["envelope"]["career"]["next_week"] == 2 and decoded["envelope"]["career"]["season"]["standings"].size() == 4, "versioned career saves survive a JSON round trip")
@@ -217,6 +218,20 @@ func _test_versioned_local_save_envelope() -> void:
 	var future_save := envelope.duplicate(true)
 	future_save["schema_version"] = 99
 	_expect(not LocalSaveStoreScript.decode(LocalSaveStoreScript.encode(future_save))["ok"], "unknown future save schemas are rejected")
+	var incomplete_save := envelope.duplicate(true)
+	incomplete_save["career"]["season"].erase("standings")
+	_expect(not LocalSaveStoreScript.decode(LocalSaveStoreScript.encode(incomplete_save))["ok"], "incomplete season data is rejected before it reaches the UI")
+	var unknown_house := envelope.duplicate(true)
+	unknown_house["career"]["house"]["id"] = "unlisted-house"
+	_expect(not LocalSaveStoreScript.decode(LocalSaveStoreScript.encode(unknown_house))["ok"], "imports reject Houses outside the current league")
+	var mismatched_progress := envelope.duplicate(true)
+	mismatched_progress["career"]["next_week"] = 3
+	_expect(not LocalSaveStoreScript.decode(LocalSaveStoreScript.encode(mismatched_progress))["ok"], "imports reject mismatched week and result history")
+	var test_path := "res://portable-save-test.tmp"
+	_expect(LocalSaveStoreScript.import_text(LocalSaveStoreScript.encode(envelope), test_path)["ok"], "a valid portable save can be imported")
+	var original_file := LocalSaveStoreScript.load(test_path)
+	_expect(not LocalSaveStoreScript.import_text("{broken", test_path)["ok"] and LocalSaveStoreScript.load(test_path) == original_file, "an invalid import leaves the existing career untouched")
+	LocalSaveStoreScript.clear(test_path)
 
 
 func _test_completed_season_review() -> void:

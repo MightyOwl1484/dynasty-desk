@@ -49,10 +49,10 @@ Exit: at least three consecutive weeks produce connected decisions and recogniza
 
 Status: **in progress**
 
-Current progress: the four-House prototype has a deterministic three-week round robin, immutable result history, AI resolution through the shared resolver, sorted standings, a top-half objective visible from the start, and a final campaign review naming the champion, House record, objective verdict, and player standout. A schema-versioned local JSON save records each completed week, automatically resumes at the next briefing or final review, rejects malformed or unsupported data safely, and provides an explicit career reset. The content set can expand to eight Houses after the weekly loop is tuned; portable save export/import remains the next persistence step.
+Current progress: the four-House prototype has a deterministic three-week round robin, immutable result history, AI resolution through the shared resolver, sorted standings, a top-half objective visible from the start, and a final campaign review naming the champion, House record, objective verdict, and player standout. A schema-versioned local JSON save records each completed week, automatically resumes at the next briefing or final review, rejects malformed or unsupported data safely, and provides explicit reset plus portable export/import. Imports validate the full career before replacement and require confirmation. The content set can expand to eight Houses after the weekly loop is tuned.
 
 - Expand the proven four-House schedule and standings to eight Houses with the content milestone.
-- Add portable save export and import on top of the implemented local save, resume, validation, and reset path.
+- Browser-playtest portable save export/import across the supported desktop browser set and retain fixtures when the schema becomes public.
 - Build on the implemented top-half objective and season standout with patron confidence, richer records, awards, and playoffs.
 - Add deterministic AI preparation using the same legal actions as the player.
 - Test complete seasons and corrupted-save recovery.
@@ -93,7 +93,7 @@ Exit: a small invited group can complete a scheduled league week without manual 
 ## Current first-slice backlog
 
 1. Playtest the complete three-week career, including reload after each completed week and the season-complete state.
-2. Add portable save export/import and representative migration fixtures before public saves stabilize.
+2. Browser-test portable save export/import and add representative migration fixtures before public saves stabilize.
 3. Run and tune against the implemented Python balance report; extend it to complete-season simulation after the four-House loop is stable.
 4. Expand season review, objectives, and awards without obscuring the weekly loop.
 5. Browser-test the continuous-integration Web artifact and enable GitHub Pages when the branch reaches `main`.

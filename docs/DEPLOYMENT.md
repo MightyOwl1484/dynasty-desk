@@ -47,6 +47,8 @@ Before advertising a build:
 - Play, pause, speed up, skip, and replay one bout.
 - Check reduced-motion and text-only presentation.
 - Complete a week, refresh the page, and confirm the next-week briefing, competitor condition, and standings resume correctly.
+- Export the boundary save, reset the career, import the file, confirm replacement, and verify the same week, condition, results, objective, and standings return.
+- Try a malformed JSON file and confirm the existing local career remains unchanged.
 - Reset the career and confirm a fresh House can be selected.
 - Test current Chrome, Edge, and Firefox releases at desktop width.
 - Record browser-specific failures in a GitHub issue before release.

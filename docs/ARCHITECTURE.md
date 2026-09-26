@@ -106,9 +106,9 @@ The weekly service has no scene or animation dependency. The one-screen interfac
 
 ## Persistence
 
-Solo saves use `user://dynasty-desk-arena-save.json` and a versioned JSON envelope. The game writes only at a completed-week boundary, so a restored career always resumes at a valid briefing rather than halfway through a locked decision or presentation. The save contains the selected House, competitor condition, deterministic seed, next week, completed results, and standings. A visible reset action clears the local career.
+Solo saves use `user://dynasty-desk-arena-save.json` and a versioned JSON envelope. The game writes only at a completed-week boundary, so a restored career always resumes at a valid briefing rather than halfway through a locked decision or presentation. The save contains the selected House, competitor condition, deterministic seed, next week, completed results, and standings. Visible reset, export, and import actions support recovery without exposing internal storage.
 
-The decoder validates the envelope before state enters the application. Empty, malformed, incomplete, and unknown future-schema data fail safely and leave the player at a new-career setup. Web persistence depends on browser IndexedDB and may be unavailable in private browsing, so file export/import remains a planned recovery path.
+The decoder validates the complete envelope before state enters the application. Empty, malformed, incomplete, internally inconsistent, unknown-House, and unknown future-schema data fail safely without replacing the existing career. Import is limited to two megabytes, requires explicit replacement confirmation, and uses the same decoder as local loading. On Web, export uses a browser download and import uses a local file picker; the file contents remain client-side. This recovery path matters because browser IndexedDB may be unavailable or cleared.
 
 ```json
 {
@@ -119,7 +119,7 @@ The decoder validates the envelope before state enters the application. Empty, m
 }
 ```
 
-Future migrations will be explicit functions from one schema version to the next. Tests will retain representative old save fixtures once public saves exist; the current tests cover JSON round trips, presentation-value normalization, malformed data, and future-schema rejection.
+Future migrations will be explicit functions from one schema version to the next. Tests will retain representative old save fixtures once public saves exist; the current tests cover JSON round trips, presentation-value normalization, malformed and inconsistent data, future-schema rejection, valid portable import, and preservation of the existing save after a rejected import.
 
 ## Future organization mode
 

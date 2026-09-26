@@ -24,6 +24,7 @@ The new implementation lives in [`game/`](game/) and targets Godot 4.7 with type
 - A visible top-half campaign objective tracked from the opening briefing through the final verdict
 - A compact final campaign review with champion, record, objective verdict, and House standout
 - Versioned local career saves after each completed week, automatic resume, and an explicit reset action
+- Portable JSON save export/import with validation, replacement confirmation, and browser download/upload support
 - A browser export preset using the Compatibility renderer
 - A dependency-free headless test entry point
 

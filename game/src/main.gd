@@ -34,12 +34,12 @@ var _training_picker: OptionButton
 var _training_summary: Label
 var _lineup_pickers: Array[OptionButton] = []
 var _strategy_summary: Label
-var _house_summary: RichTextLabel
+var _house_summary: Label
 var _lineup_summary: Label
 var _standings_label: Label
 var _result_heading: Label
 var _score_label: Label
-var _explanation_label: RichTextLabel
+var _explanation_label: Label
 var _status_label: Label
 var _event_log: RichTextLabel
 var _arena_view: Control
@@ -49,6 +49,18 @@ var _skip_button: Button
 var _replay_button: Button
 var _advance_button: Button
 var _reset_button: Button
+var _export_button: Button
+var _import_button: Button
+var _import_confirmation: ConfirmationDialog
+var _native_import_dialog: FileDialog
+var _native_export_dialog: FileDialog
+var _pending_import_text: String = ""
+var _pending_export_text: String = ""
+var _browser_import_input: JavaScriptObject
+var _browser_import_reader: JavaScriptObject
+var _browser_change_callback: JavaScriptObject
+var _browser_read_callback: JavaScriptObject
+var _browser_error_callback: JavaScriptObject
 var _tour_panel: PanelContainer
 var _tour_progress: Label
 var _tour_title: Label
@@ -133,7 +145,8 @@ func _build_interface() -> void:
 	_standings_label.accessibility_name = "Current mini-season standings"
 	page.add_child(_standings_label)
 
-	var setup := HBoxContainer.new()
+	var setup := GridContainer.new()
+	setup.columns = 2
 	setup.add_theme_constant_override("separation", 20)
 	page.add_child(setup)
 	_build_house_picker(setup)
@@ -141,15 +154,13 @@ func _build_interface() -> void:
 	_build_training_picker(setup)
 	_build_strategy_picker(setup)
 
-	_house_summary = RichTextLabel.new()
-	_house_summary.fit_content = true
-	_house_summary.custom_minimum_size = Vector2(0, 76)
-	_house_summary.bbcode_enabled = true
+	_house_summary = Label.new()
+	_house_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_house_summary.accessibility_name = "Selected House summary"
 	page.add_child(_house_summary)
 	_build_lineup_picker(page)
 
-	var week_actions := HBoxContainer.new()
+	var week_actions := VBoxContainer.new()
 	week_actions.add_theme_constant_override("separation", 8)
 	page.add_child(week_actions)
 	_advance_button = Button.new()
@@ -158,28 +169,62 @@ func _build_interface() -> void:
 	_advance_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_advance_button.pressed.connect(_advance_week)
 	week_actions.add_child(_advance_button)
+	var secondary_actions := HBoxContainer.new()
+	secondary_actions.add_theme_constant_override("separation", 8)
+	week_actions.add_child(secondary_actions)
 	_reset_button = Button.new()
 	_reset_button.text = "Reset career"
 	_reset_button.accessibility_name = "Erase the local career and start again"
 	_reset_button.pressed.connect(_reset_career)
-	week_actions.add_child(_reset_button)
+	secondary_actions.add_child(_reset_button)
 	var help_button := Button.new()
 	help_button.text = "How to play"
 	help_button.accessibility_name = "Open the getting started tour"
 	help_button.pressed.connect(_open_tour)
-	week_actions.add_child(help_button)
+	secondary_actions.add_child(help_button)
+	_export_button = Button.new()
+	_export_button.text = "Export save"
+	_export_button.accessibility_name = "Download a portable career save"
+	_export_button.pressed.connect(_export_career)
+	secondary_actions.add_child(_export_button)
+	_import_button = Button.new()
+	_import_button.text = "Import save"
+	_import_button.accessibility_name = "Choose a portable career save to import"
+	_import_button.pressed.connect(_choose_import)
+	secondary_actions.add_child(_import_button)
 
-	var match_area := HBoxContainer.new()
+	var match_area := VBoxContainer.new()
 	match_area.add_theme_constant_override("separation", 24)
 	match_area.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	page.add_child(match_area)
 	_build_arena_column(match_area)
 	_build_commentary_column(match_area)
+	_build_save_dialogs()
 
 	_presentation_timer = Timer.new()
 	_presentation_timer.one_shot = false
 	_presentation_timer.timeout.connect(_reveal_next_event)
 	add_child(_presentation_timer)
+
+
+func _build_save_dialogs() -> void:
+	_import_confirmation = ConfirmationDialog.new()
+	_import_confirmation.title = "Replace local career?"
+	_import_confirmation.confirmed.connect(_confirm_import)
+	add_child(_import_confirmation)
+	_native_import_dialog = FileDialog.new()
+	_native_import_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	_native_import_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	_native_import_dialog.filters = PackedStringArray(["*.json ; JSON career save"])
+	_native_import_dialog.file_selected.connect(_on_native_import_file)
+	add_child(_native_import_dialog)
+	_native_export_dialog = FileDialog.new()
+	_native_export_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+	_native_export_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	_native_export_dialog.filters = PackedStringArray(["*.json ; JSON career save"])
+	_native_export_dialog.current_file = "dynasty-desk-arena-career.json"
+	_native_export_dialog.file_selected.connect(_on_native_export_file)
+	add_child(_native_export_dialog)
 
 
 func _build_guided_tour(parent: VBoxContainer) -> void:
@@ -257,7 +302,7 @@ func _render_tour_step() -> void:
 	_tour_next_button.text = "Start choosing" if _tour_step_index == OnboardingGuideScript.count() - 1 else "Next"
 
 
-func _build_house_picker(parent: HBoxContainer) -> void:
+func _build_house_picker(parent: Container) -> void:
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(column)
@@ -265,6 +310,8 @@ func _build_house_picker(parent: HBoxContainer) -> void:
 	label.text = "Your House"
 	column.add_child(label)
 	_house_picker = OptionButton.new()
+	_house_picker.fit_to_longest_item = false
+	_house_picker.clip_text = true
 	_house_picker.accessibility_name = "Choose your Arena House"
 	for house in _houses:
 		_house_picker.add_item(house["name"])
@@ -272,7 +319,7 @@ func _build_house_picker(parent: HBoxContainer) -> void:
 	column.add_child(_house_picker)
 
 
-func _build_opponent_picker(parent: HBoxContainer) -> void:
+func _build_opponent_picker(parent: Container) -> void:
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(column)
@@ -280,6 +327,8 @@ func _build_opponent_picker(parent: HBoxContainer) -> void:
 	label.text = "Opponent"
 	column.add_child(label)
 	_opponent_picker = OptionButton.new()
+	_opponent_picker.fit_to_longest_item = false
+	_opponent_picker.clip_text = true
 	_opponent_picker.accessibility_name = "Scheduled opposing Arena House"
 	_opponent_picker.item_selected.connect(_update_opponent_summary)
 	column.add_child(_opponent_picker)
@@ -289,7 +338,7 @@ func _build_opponent_picker(parent: HBoxContainer) -> void:
 	column.add_child(_opponent_summary)
 
 
-func _build_training_picker(parent: HBoxContainer) -> void:
+func _build_training_picker(parent: Container) -> void:
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(column)
@@ -297,6 +346,8 @@ func _build_training_picker(parent: HBoxContainer) -> void:
 	label.text = "Training"
 	column.add_child(label)
 	_training_picker = OptionButton.new()
+	_training_picker.fit_to_longest_item = false
+	_training_picker.clip_text = true
 	_training_picker.accessibility_name = "Choose this week's training focus"
 	for option in WeeklyCycleScript.training_options():
 		_training_picker.add_item(option["label"])
@@ -309,7 +360,7 @@ func _build_training_picker(parent: HBoxContainer) -> void:
 	column.add_child(_training_summary)
 
 
-func _build_strategy_picker(parent: HBoxContainer) -> void:
+func _build_strategy_picker(parent: Container) -> void:
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(column)
@@ -317,6 +368,8 @@ func _build_strategy_picker(parent: HBoxContainer) -> void:
 	label.text = "Bout strategy"
 	column.add_child(label)
 	_strategy_picker = OptionButton.new()
+	_strategy_picker.fit_to_longest_item = false
+	_strategy_picker.clip_text = true
 	_strategy_picker.accessibility_name = "Choose a bout strategy"
 	for strategy in ["Balanced", "Aggressive", "Guarded", "Elusive"]:
 		_strategy_picker.add_item(strategy)
@@ -338,6 +391,8 @@ func _build_lineup_picker(parent: VBoxContainer) -> void:
 	lineup_row.add_child(label)
 	for slot in range(3):
 		var picker := OptionButton.new()
+		picker.fit_to_longest_item = false
+		picker.clip_text = true
 		picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		picker.accessibility_name = "Choose competitor for lineup slot %d" % (slot + 1)
 		picker.item_selected.connect(_update_lineup_summary)
@@ -349,7 +404,7 @@ func _build_lineup_picker(parent: VBoxContainer) -> void:
 	parent.add_child(_lineup_summary)
 
 
-func _build_arena_column(parent: HBoxContainer) -> void:
+func _build_arena_column(parent: Container) -> void:
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.size_flags_stretch_ratio = 1.35
@@ -391,7 +446,7 @@ func _build_arena_column(parent: HBoxContainer) -> void:
 	_set_presentation_controls_enabled(false)
 
 
-func _build_commentary_column(parent: HBoxContainer) -> void:
+func _build_commentary_column(parent: Container) -> void:
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.size_flags_stretch_ratio = 1.0
@@ -407,21 +462,19 @@ func _build_commentary_column(parent: HBoxContainer) -> void:
 	_score_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_score_label)
 
-	_explanation_label = RichTextLabel.new()
-	_explanation_label.bbcode_enabled = true
-	_explanation_label.fit_content = true
-	_explanation_label.custom_minimum_size = Vector2(320, 72)
+	_explanation_label = Label.new()
+	_explanation_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_explanation_label.accessibility_name = "Post-bout explanation"
-	_explanation_label.text = "[color=#92a1b7]After the bout, a short review will explain the key contributor and tactical shape.[/color]"
+	_explanation_label.text = "After the bout, a short review will explain the key contributor and tactical shape."
 	column.add_child(_explanation_label)
 
 	_event_log = RichTextLabel.new()
-	_event_log.bbcode_enabled = true
+	_event_log.bbcode_enabled = false
 	_event_log.custom_minimum_size = Vector2(320, 240)
 	_event_log.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_event_log.focus_mode = Control.FOCUS_ALL
 	_event_log.accessibility_name = "Bout event commentary"
-	_event_log.text = "[color=#92a1b7]Every visual moment also appears here as text.[/color]"
+	_event_log.text = "Every visual moment also appears here as text."
 	column.add_child(_event_log)
 
 
@@ -437,7 +490,7 @@ func _update_house_summary(index: int) -> void:
 	var house: Dictionary = _houses[index]
 	_populate_opponents(house["id"])
 	_populate_lineup(house)
-	_house_summary.text = "[b]%s[/b] — %s\n%d competitors available. Choose the three who enter the arena." % [
+	_house_summary.text = "%s — %s\n%d competitors available. Choose the three who enter the arena." % [
 		house["name"], house["identity"], house["roster"].size()
 	]
 
@@ -563,10 +616,10 @@ func _start_week() -> void:
 	_week_state = WeeklyCycleScript.start_week(source_house, _selected_opponent(), _week_number, _seed)
 	var briefing: Dictionary = _week_state["news"][0]
 	_status_label.text = "%s · %s" % [briefing["headline"], briefing["body"]]
-	_event_log.text = "[b]%s[/b]\n[color=#92a1b7]%s[/color]" % [briefing["headline"], briefing["body"]]
+	_event_log.text = "%s\n%s" % [briefing["headline"], briefing["body"]]
 	_result_heading.text = "Week %d briefing" % _week_number
 	_score_label.text = "Preparation decisions remain editable until each phase is locked."
-	_explanation_label.text = "[color=#92a1b7]One clear choice at a time: training, lineup, strategy, then the arena.[/color]"
+	_explanation_label.text = "One clear choice at a time: training, lineup, strategy, then the arena."
 	_set_presentation_controls_enabled(false)
 
 
@@ -581,8 +634,8 @@ func _resolve_week_bout() -> void:
 	_presentation.load_result(_last_result)
 	_arena_view.configure(player_house, opponent_house)
 	_revealed_events.clear()
-	_event_log.text = "[color=#92a1b7]Result locked. Press Play, choose Skip, or use Text only.[/color]"
-	_explanation_label.text = "[color=#92a1b7]The post-bout review appears when the presentation completes.[/color]"
+	_event_log.text = "Result locked. Press Play, choose Skip, or use Text only."
+	_explanation_label.text = "The post-bout review appears when the presentation completes."
 	_result_heading.text = "Bout ready"
 	_score_label.text = "%s 0 — 0 %s · Seed %d" % [player_house["name"], opponent_house["name"], _last_result["seed"]]
 	_status_label.text = "Ready · %s" % _presentation.progress_text()
@@ -606,11 +659,11 @@ func _close_week() -> void:
 		_season_complete = true
 		_opponent_picker.clear()
 		_opponent_summary.text = "Three-week prototype schedule complete."
-		_house_summary.text = "[b]%s[/b] — Mini-season complete\nThree connected weeks carried fatigue, morale, and form forward." % _career_house["name"]
+		_house_summary.text = "%s — Mini-season complete\nThree connected weeks carried fatigue, morale, and form forward." % _career_house["name"]
 		_render_season_review()
 	else:
 		_populate_opponents(_career_house["id"])
-		_house_summary.text = "[b]%s[/b] — Week %d ready\nFatigue, morale, and form now carry into the next decision." % [
+		_house_summary.text = "%s — Week %d ready\nFatigue, morale, and form now carry into the next decision." % [
 			_career_house["name"], _week_number
 		]
 		_status_label.text = "Week complete. Start Week %d when ready." % _week_number
@@ -634,6 +687,119 @@ func _persist_career() -> void:
 		_status_label.text += " Local save failed (error %d)." % save_error
 
 
+func _export_career() -> void:
+	var loaded := LocalSaveStoreScript.load()
+	if not loaded["ok"]:
+		_status_label.text = "Export failed: %s" % loaded["error"]
+		return
+	var contents: String = LocalSaveStoreScript.encode(loaded["envelope"])
+	if OS.has_feature("web"):
+		JavaScriptBridge.download_buffer(contents.to_utf8_buffer(), "dynasty-desk-arena-career.json", "application/json")
+		_status_label.text = "Portable career save download requested."
+	else:
+		_pending_export_text = contents
+		_native_export_dialog.popup_centered_ratio()
+
+
+func _on_native_export_file(path: String) -> void:
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		_status_label.text = "Export failed: could not write the selected file."
+		return
+	file.store_string(_pending_export_text)
+	file.close()
+	_pending_export_text = ""
+	_status_label.text = "Portable career save exported."
+
+
+func _choose_import() -> void:
+	if OS.has_feature("web"):
+		if _browser_import_input == null:
+			var document: JavaScriptObject = JavaScriptBridge.get_interface("document")
+			_browser_import_input = document.createElement("input")
+			_browser_import_input.type = "file"
+			_browser_import_input.accept = ".json,application/json"
+			_browser_import_input.style.display = "none"
+			_browser_change_callback = JavaScriptBridge.create_callback(_on_browser_file_chosen)
+			_browser_import_input.onchange = _browser_change_callback
+			document.body.appendChild(_browser_import_input)
+		_browser_import_input.value = ""
+		_browser_import_input.click()
+	else:
+		_native_import_dialog.popup_centered_ratio()
+
+
+func _on_browser_file_chosen(_args: Array) -> void:
+	if int(_browser_import_input.files.length) == 0:
+		return
+	var selected_file: JavaScriptObject = _browser_import_input.files[0]
+	if int(selected_file.size) > 2_000_000:
+		_status_label.text = "Import failed: save file is too large."
+		return
+	_browser_import_reader = JavaScriptBridge.create_object("FileReader")
+	_browser_read_callback = JavaScriptBridge.create_callback(_on_browser_file_read)
+	_browser_error_callback = JavaScriptBridge.create_callback(_on_browser_file_error)
+	_browser_import_reader.onload = _browser_read_callback
+	_browser_import_reader.onerror = _browser_error_callback
+	_browser_import_reader.readAsText(selected_file)
+
+
+func _on_browser_file_read(_args: Array) -> void:
+	_receive_import_text(str(_browser_import_reader.result))
+
+
+func _on_browser_file_error(_args: Array) -> void:
+	_status_label.text = "Import failed: the selected file could not be read."
+
+
+func _on_native_import_file(path: String) -> void:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		_status_label.text = "Import failed: the selected file could not be opened."
+		return
+	if file.get_length() > 2_000_000:
+		file.close()
+		_status_label.text = "Import failed: save file is too large."
+		return
+	var contents := file.get_as_text()
+	file.close()
+	_receive_import_text(contents)
+
+
+func _receive_import_text(contents: String) -> void:
+	var decoded := LocalSaveStoreScript.decode(contents)
+	if not decoded["ok"]:
+		_status_label.text = "Import failed: %s Existing career unchanged." % decoded["error"]
+		return
+	_pending_import_text = contents
+	var career: Dictionary = decoded["envelope"]["career"]
+	var progress := "completed season" if career["season_complete"] else "Week %d" % career["next_week"]
+	_import_confirmation.dialog_text = "Import %s at %s? This replaces the local career." % [career["house"]["name"], progress]
+	_import_confirmation.popup_centered()
+
+
+func _confirm_import() -> void:
+	var imported := LocalSaveStoreScript.import_text(_pending_import_text)
+	_pending_import_text = ""
+	if not imported["ok"]:
+		_status_label.text = "Import failed: %s Existing career unchanged." % imported["error"]
+		return
+	_presentation_timer.stop()
+	_week_state.clear()
+	_last_result.clear()
+	_revealed_events.clear()
+	_arena_view.reset_view()
+	_set_presentation_controls_enabled(false)
+	_result_heading.text = "The arena is waiting"
+	_score_label.text = "The same locked choices and seed always produce the same bout."
+	_explanation_label.text = "After the bout, a short review will explain the key contributor and tactical shape."
+	_event_log.text = "Portable career imported. Continue from the saved week."
+	_restore_career()
+	_render_standings()
+	_sync_week_controls()
+	_status_label.text = "Portable career imported. %s" % _status_label.text
+
+
 func _restore_career() -> void:
 	var loaded := LocalSaveStoreScript.load()
 	if not loaded["ok"]:
@@ -655,12 +821,12 @@ func _restore_career() -> void:
 	if _season_complete:
 		_opponent_picker.clear()
 		_opponent_summary.text = "Three-week prototype schedule complete."
-		_house_summary.text = "[b]%s[/b] — Mini-season restored\nThe completed local career is ready for review or reset." % _career_house["name"]
+		_house_summary.text = "%s — Mini-season restored\nThe completed local career is ready for review or reset." % _career_house["name"]
 		_render_season_review()
 		_status_label.text += " Completed local career restored."
 	else:
 		_populate_opponents(_career_house["id"])
-		_house_summary.text = "[b]%s[/b] — Week %d restored\nFatigue, morale, form, results, and standings were loaded locally." % [
+		_house_summary.text = "%s — Week %d restored\nFatigue, morale, form, results, and standings were loaded locally." % [
 			_career_house["name"], _week_number
 		]
 		_status_label.text = "Local career restored. Start Week %d when ready." % _week_number
@@ -685,8 +851,8 @@ func _reset_career() -> void:
 	_render_standings()
 	_result_heading.text = "The arena is waiting"
 	_score_label.text = "The same locked choices and seed always produce the same bout."
-	_explanation_label.text = "[color=#92a1b7]After the bout, a short review will explain the key contributor and tactical shape.[/color]"
-	_event_log.text = "[color=#92a1b7]Local career cleared. Choose a House to begin again.[/color]"
+	_explanation_label.text = "After the bout, a short review will explain the key contributor and tactical shape."
+	_event_log.text = "Local career cleared. Choose a House to begin again."
 	_status_label.text = "Local career reset."
 	_arena_view.reset_view()
 	_set_presentation_controls_enabled(false)
@@ -703,6 +869,8 @@ func _sync_week_controls() -> void:
 	for picker in _lineup_pickers:
 		picker.disabled = phase != "lineup"
 	_advance_button.disabled = phase == "recovery" or _season_complete
+	_export_button.disabled = not _week_state.is_empty() or _career_house.is_empty()
+	_import_button.disabled = not _week_state.is_empty()
 	var labels := {
 		"setup": "Start Week %d" % _week_number,
 		"briefing": "Open training plan",
@@ -774,8 +942,8 @@ func _replay_presentation() -> void:
 	_presentation.replay()
 	_revealed_events.clear()
 	_arena_view.reset_view()
-	_event_log.text = "[color=#92a1b7]Replay ready. The locked result and event order are unchanged.[/color]"
-	_explanation_label.text = "[color=#92a1b7]The post-bout review will return at the end of this replay.[/color]"
+	_event_log.text = "Replay ready. The locked result and event order are unchanged."
+	_explanation_label.text = "The post-bout review will return at the end of this replay."
 	_result_heading.text = "Replay ready"
 	var home_house := _house_by_id(_last_result["home_house_id"])
 	var away_house := _house_by_id(_last_result["away_house_id"])
@@ -802,13 +970,13 @@ func _finish_presentation() -> void:
 	_skip_button.disabled = true
 	_replay_button.disabled = false
 	var analysis := BoutAnalysisScript.summarize(_last_result, home_house, away_house)
-	_explanation_label.text = "[b]Why it happened[/b]\n%s\n[color=#92a1b7]%s[/color]" % [analysis["headline"], analysis["detail"]]
+	_explanation_label.text = "Why it happened\n%s\n%s" % [analysis["headline"], analysis["detail"]]
 	if not _week_state.is_empty() and _week_state["phase"] == "recovery":
 		_week_state = WeeklyCycleScript.apply_recovery(_week_state)
 		_season_state = SeasonStateScript.resolve_week(_season_state, _houses, _week_number, _last_result)
 		_render_standings()
 		var story: Dictionary = _week_state["news"][-1]
-		_explanation_label.text += "\n[b]Week consequence[/b]\n%s" % story["headline"]
+		_explanation_label.text += "\nWeek consequence\n%s" % story["headline"]
 		_status_label.text = "Recovery applied. Review the result, then close the week."
 		_sync_week_controls()
 	_event_log.grab_focus()
@@ -817,7 +985,7 @@ func _finish_presentation() -> void:
 func _render_revealed_events() -> void:
 	var event_lines: Array[String] = []
 	for event in _revealed_events:
-		event_lines.append("[color=#69d3c5]Round %d · %d–%d[/color]  %s" % [
+		event_lines.append("Round %d · %d–%d  %s" % [
 			event["round"], event["home_score"], event["away_score"], event["text"]
 		])
 	_event_log.text = "\n".join(event_lines)
@@ -847,11 +1015,11 @@ func _render_season_review() -> void:
 		review["wins"], review["losses"], review["points"], review["score_difference"]
 	]
 	var objective_result := "achieved" if review["objective_achieved"] else "missed"
-	_explanation_label.text = "[b]%s[/b]\nObjective: %s — %s.\n[color=#92a1b7]Arena standout: %s with %d exchange points.[/color]" % [
+	_explanation_label.text = "%s\nObjective: %s — %s.\nArena standout: %s with %d exchange points." % [
 		review["headline"], review["objective"], objective_result,
 		review["standout_name"], review["standout_points"]
 	]
-	_event_log.text = "[b]Three-week chapter complete[/b]\nThe final table, objective verdict, and standout are stored with this local career. Reset when you are ready to begin a new House story."
+	_event_log.text = "Three-week chapter complete\nThe final table, objective verdict, and standout are stored with this local career. Reset when you are ready to begin a new House story."
 	_status_label.text = "Prototype season complete. Review the campaign or reset for another House."
 
 

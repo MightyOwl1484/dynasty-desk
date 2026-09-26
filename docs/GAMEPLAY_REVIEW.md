@@ -16,6 +16,8 @@ The campaign stakes are visible before the first bout: finish in the top half. T
 
 A completed week is also the recovery boundary for persistence. The career saves locally only after standings and competitor consequences are settled, then resumes at the next briefing. This avoids ambiguous half-committed choices while preserving the meaningful long-term fatigue, morale, form, result, and table state. Reset is explicit and visible rather than hidden in browser storage controls.
 
+The same safe boundary is portable. Export is available only when a settled career exists, while import is disabled during an active week. A candidate file is fully validated before a replacement confirmation appears; invalid files leave the current career untouched. This makes recovery understandable without turning save management into another game system.
+
 ## Design goal
 
 Dynasty Desk should feel like a club story with meaningful decisions, not a spreadsheet with soccer labels. Numbers should explain the world and support decisions, but the player should remember moments, rivalries, breakthroughs, and consequences.
