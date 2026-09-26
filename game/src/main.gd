@@ -657,7 +657,7 @@ func _resolve_week_bout() -> void:
 
 
 func _focus_match_controls() -> void:
-	_page_scroll.ensure_control_visible(_status_label)
+	_page_scroll.ensure_control_visible(_play_button)
 	_play_button.grab_focus()
 
 
@@ -685,6 +685,13 @@ func _close_week() -> void:
 		_status_label.text = "Week complete. Start Week %d when ready." % _week_number
 	_persist_career()
 	_set_presentation_controls_enabled(false)
+	if not _season_complete:
+		call_deferred("_focus_management_controls")
+
+
+func _focus_management_controls() -> void:
+	_page_scroll.ensure_control_visible(_advance_button)
+	_advance_button.grab_focus()
 
 
 func _persist_career() -> void:
@@ -888,7 +895,11 @@ func _sync_week_controls() -> void:
 	_export_button.disabled = not _week_state.is_empty() or _career_house.is_empty()
 	_import_button.disabled = not _week_state.is_empty()
 	_post_bout_continue_button.visible = phase == "news" and not _season_complete
-	_post_bout_continue_button.text = "Close Week %d and return to management" % _week_number
+	_post_bout_continue_button.text = (
+		"Finish season and review campaign"
+		if _week_number >= _houses.size() - 1
+		else "Close Week %d and return to management" % _week_number
+	)
 	var labels := {
 		"setup": "Start Week %d" % _week_number,
 		"briefing": "Open training plan",

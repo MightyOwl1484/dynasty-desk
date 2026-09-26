@@ -43,7 +43,8 @@ const expectations = [
   [resolver.includes('RESOLVER_VERSION'), 'Resolver records a version'],
   [resolver.includes('DeterministicRng'), 'Resolver uses the project-owned deterministic RNG'],
   [resolver.includes('"events"'), 'Resolver emits presentation events'],
-  [main.includes('_page_scroll.ensure_control_visible(_status_label)'), 'Resolved bouts bring the arena controls into view'],
+  [main.includes('_page_scroll.ensure_control_visible(_play_button)'), 'Resolved bouts bring the arena controls into view'],
+  [main.includes('_page_scroll.ensure_control_visible(_advance_button)'), 'Closed weeks return players to management'],
   [main.includes('Close Week %d and return to management'), 'Completed bouts expose an in-context return to management']
 ];
 
