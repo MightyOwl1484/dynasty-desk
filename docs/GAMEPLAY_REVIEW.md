@@ -131,6 +131,10 @@ The resolver should determine the result first. The live match view then present
 
 ## Verified browser playtest
 
+The Godot Web artifact has now been played through all three connected weeks in the in-app browser. The first-run tour, sequential management phases, deterministic bout lock, skip path, text-only equivalent, standings and objective updates, week-boundary reload, final season review, and completed-career reload all behaved as designed. The browser export produced a portable Week 2 JSON save, and the import flow validated it before presenting the replacement confirmation. No browser warnings or errors were recorded during the run.
+
+The playthrough also exposed a navigation problem that automated tests could not show: locking a result left the arena below the fold, and completing a bout left the only **Close Week** action above it. The current interface now scrolls and focuses the arena controls when a bout locks and places a second, context-specific **Close Week** action beside the post-bout review. The duplicate action invokes the same weekly transition; it does not add a second state path.
+
 The current HTML build was exercised in the in-app browser on the match desk. Selecting a club and starting a career exposes the next fixture, tactical choice, squad briefing, and starting-XI pitch. `Play match` opens a focused full-time result dialog with score, explanation, and commentary. `Watch short replay` opens a focused replay dialog; Play updates the live replay status and event log, while the speed and skip controls remain available. Starting a career now moves keyboard focus into the active match desk instead of leaving focus on the hidden setup control.
 
 The replay now offers a quick 30-second recap or a two-minute tactical watch. The score remains resolved before either presentation starts; duration changes pacing only. The next design questions are intentionally still open: whether the two-minute presentation should show more tactical context during play, how much replay detail is useful on narrow screens, and whether a team-building league needs a shared “watch party” view in addition to the commissioner workflow.

@@ -48,6 +48,7 @@ var _speed_button: Button
 var _skip_button: Button
 var _replay_button: Button
 var _advance_button: Button
+var _post_bout_continue_button: Button
 var _reset_button: Button
 var _export_button: Button
 var _import_button: Button
@@ -71,6 +72,7 @@ var _tour_step_index: int = 0
 var _reduced_motion: CheckButton
 var _text_only: CheckButton
 var _presentation_timer: Timer
+var _page_scroll: ScrollContainer
 
 
 func _ready() -> void:
@@ -114,14 +116,14 @@ func _build_interface() -> void:
 	margin.add_theme_constant_override("margin_bottom", 28)
 	add_child(margin)
 
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	margin.add_child(scroll)
+	_page_scroll = ScrollContainer.new()
+	_page_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_page_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	margin.add_child(_page_scroll)
 	var page := VBoxContainer.new()
 	page.add_theme_constant_override("separation", 12)
 	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(page)
+	_page_scroll.add_child(page)
 
 	var eyebrow := Label.new()
 	eyebrow.text = "GODOT PIVOT · PLAYABLE ARENA PRESENTATION"
@@ -468,6 +470,14 @@ func _build_commentary_column(parent: Container) -> void:
 	_explanation_label.text = "After the bout, a short review will explain the key contributor and tactical shape."
 	column.add_child(_explanation_label)
 
+	_post_bout_continue_button = Button.new()
+	_post_bout_continue_button.text = "Close Week 1 and return to management"
+	_post_bout_continue_button.accessibility_name = "Close the completed week and return to management"
+	_post_bout_continue_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_post_bout_continue_button.visible = false
+	_post_bout_continue_button.pressed.connect(_advance_week)
+	column.add_child(_post_bout_continue_button)
+
 	_event_log = RichTextLabel.new()
 	_event_log.bbcode_enabled = false
 	_event_log.custom_minimum_size = Vector2(320, 240)
@@ -643,6 +653,12 @@ func _resolve_week_bout() -> void:
 	_set_presentation_controls_enabled(true)
 	_replay_button.disabled = true
 	_advance_button.disabled = true
+	call_deferred("_focus_match_controls")
+
+
+func _focus_match_controls() -> void:
+	_page_scroll.ensure_control_visible(_status_label)
+	_play_button.grab_focus()
 
 
 func _close_week() -> void:
@@ -871,6 +887,8 @@ func _sync_week_controls() -> void:
 	_advance_button.disabled = phase == "recovery" or _season_complete
 	_export_button.disabled = not _week_state.is_empty() or _career_house.is_empty()
 	_import_button.disabled = not _week_state.is_empty()
+	_post_bout_continue_button.visible = phase == "news" and not _season_complete
+	_post_bout_continue_button.text = "Close Week %d and return to management" % _week_number
 	var labels := {
 		"setup": "Start Week %d" % _week_number,
 		"briefing": "Open training plan",

@@ -29,6 +29,7 @@ if (missing.length) {
 const project = readFileSync('game/project.godot', 'utf8');
 const exportPreset = readFileSync('game/export_presets.cfg', 'utf8');
 const resolver = readFileSync('game/src/simulation/arena_match_resolver.gd', 'utf8');
+const main = readFileSync('game/src/main.gd', 'utf8');
 
 const expectations = [
   [project.includes('run/main_scene="res://main.tscn"'), 'Godot main scene is configured'],
@@ -41,7 +42,9 @@ const expectations = [
   [exportPreset.includes('variant/extensions_support=false'), 'Initial Web export avoids native extensions'],
   [resolver.includes('RESOLVER_VERSION'), 'Resolver records a version'],
   [resolver.includes('DeterministicRng'), 'Resolver uses the project-owned deterministic RNG'],
-  [resolver.includes('"events"'), 'Resolver emits presentation events']
+  [resolver.includes('"events"'), 'Resolver emits presentation events'],
+  [main.includes('_page_scroll.ensure_control_visible(_status_label)'), 'Resolved bouts bring the arena controls into view'],
+  [main.includes('Close Week %d and return to management'), 'Completed bouts expose an in-context return to management']
 ];
 
 const failures = expectations.filter(([passed]) => !passed).map(([, message]) => message);

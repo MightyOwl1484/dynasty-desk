@@ -18,7 +18,7 @@ Exit: the Godot project opens, a player can resolve a prototype bout, the same s
 
 Status: **in progress**
 
-Current progress: four generated Houses now provide six-person rosters, selectable three-person lineups, opponent choice, compact competitor stats, opponent-relative lineup comparisons, and visible strategy tradeoffs. A three-step first-run tour explains House choice, the one-choice-at-a-time weekly flow, presentation options, and automatic saves; it remains available through a permanent **How to play** action. The result is resolved and locked before presentation; high-contrast markers animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests. A tested post-bout review identifies the winning side's leading contributor and summarizes strategy, score margin, and exchange shape without mutating the result.
+Current progress: four generated Houses now provide six-person rosters, selectable three-person lineups, opponent choice, compact competitor stats, opponent-relative lineup comparisons, and visible strategy tradeoffs. A three-step first-run tour explains House choice, the one-choice-at-a-time weekly flow, presentation options, and automatic saves; it remains available through a permanent **How to play** action. The result is resolved and locked before presentation; high-contrast markers animate from its event stream; play, pause, speed, skip, replay, reduced-motion, and text-only controls are implemented and covered by headless controller tests. A tested post-bout review identifies the winning side's leading contributor and summarizes strategy, score margin, and exchange shape without mutating the result. Browser playtesting now moves focus and scroll position directly to the arena when a result locks and exposes an in-context **Close Week** action beside the review, removing two implicit scroll steps from the first session.
 
 - Finalize the bout vocabulary and non-graphic fictional sport rules.
 - Expand the four-House prototype into the planned eight-House content set after the rules stabilize.
@@ -35,7 +35,7 @@ Exit: a first-time player can use or dismiss the guided tour, choose a House, ma
 
 Status: **in progress**
 
-Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. The existing one-screen interface guides the player through those phases, locks committed choices, applies recovery after presentation, and carries fatigue, morale, and form into the next week. A condition-aware recommendation preselects a strong legal trio for the player and gives AI Houses the same preparation rule instead of relying on roster order. A deterministic round robin supplies a different opponent in each week of the current three-week mini-season. The player's bout and non-player fixture update live standings together. Headless tests cover the complete week, recommendation purity, schedule uniqueness, all six season fixtures, repeatable resolution, state immutability, and JSON-compatible state. A deliberate three-week playtest is next.
+Current progress: a deterministic, immutable `WeeklyCycle` application service now connects briefing, four training tradeoffs, lineup, strategy, bout resolution, recovery consequences, and a concise result story. The existing one-screen interface guides the player through those phases, locks committed choices, applies recovery after presentation, and carries fatigue, morale, and form into the next week. A condition-aware recommendation preselects a strong legal trio for the player and gives AI Houses the same preparation rule instead of relying on roster order. A deterministic round robin supplies a different opponent in each week of the current three-week mini-season. The player's bout and non-player fixture update live standings together. Headless tests cover the complete week, recommendation purity, schedule uniqueness, all six season fixtures, repeatable resolution, state immutability, and JSON-compatible state. A complete three-week browser playthrough has now verified the connected loop, standings updates, objective tracking, final review, and boundary-save reloads.
 
 - Playtest and tune three connected weeks so fatigue and training choices remain legible and worthwhile.
 - Deepen the implemented fatigue, morale, and form consequences; add injuries and relationships only when their choices are readable.
@@ -92,8 +92,8 @@ Exit: a small invited group can complete a scheduled league week without manual 
 
 ## Current first-slice backlog
 
-1. Playtest the complete three-week career, including reload after each completed week and the season-complete state.
-2. Browser-test portable save export/import and add representative migration fixtures before public saves stabilize.
+1. Finish cross-browser and assistive-technology validation of the guided tour, arena handoff, and in-context week close.
+2. Complete portable-save import replacement validation and add representative migration fixtures before public saves stabilize.
 3. Run and tune against the implemented Python balance report; extend it to complete-season simulation after the four-House loop is stable.
 4. Expand season review, objectives, and awards without obscuring the weekly loop.
 5. Browser-test the continuous-integration Web artifact and enable GitHub Pages when the branch reaches `main`.
